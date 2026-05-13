@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI時代の開発手法 ── Karpathyの地図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">AI時代の開発手法 ── <em>Karpathyの地図</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── ゴーストを召喚する時代に</a></li>
+    <li><a href="#ch1">第1章 ── Software 1.0 → 2.0 → 3.0</a></li>
+    <li><a href="#ch2">第2章 ── ゴーストの心理学</a></li>
+    <li><a href="#ch3">第3章 ── コンテキスト・エンジニアリング</a></li>
+    <li><a href="#ch4">第4章 ── オートノミー・スライダー</a></li>
+    <li><a href="#ch5">第5章 ── ヴァイブ・コーディング</a></li>
+    <li><a href="#ch6">第6章 ── データ・エンジンと評価</a></li>
+    <li><a href="#ch7">第7章 ── ナインの行進とエージェントの十年</a></li>
+    <li><a href="#ch8">第8章 ── スクラッチから作る</a></li>
+    <li><a href="#epilogue">エピローグ ── 地図を持って歩く</a></li>
+    <li><a href="#bibliography">参 ── 出典一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A FIELD GUIDE FOR THE LLM ERA</div>
+  <h1 class="hero__title">AI時代の開発手法<em>Karpathyの地図</em></h1>
+  <p class="hero__subtitle">Software 3.0、ヴァイブ・コーディング、そしてエージェントの十年</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">32 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">8 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">LLM USERS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">ゴーストを召喚する時代に</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">なぜ Andrej Karpathy の地図を読むのか</p>
+    </header>
+
+    <div class="prose">
+      <p>AI を使った開発の話をしようとすると、語彙がまだ足りていない、と感じることが多い。コードを生成する、エージェントに任せる、プロンプトを書く ── どれも輪郭がぼやけている。何が新しくて、何が昔と同じなのか、自分の言葉では切り分けにくい。</p>
+
+      <p>そういうとき、Andrej Karpathy という人物がいる。Stanford で深層学習の入門講座 CS231n を作り、OpenAI の創業メンバーになり、Tesla の AI ディレクターとして自動運転の実戦を率い、いま Eureka Labs という教育会社で LLM を一から教える講座を作っている。研究、量産、教育のすべてを内側から見てきた、希少な経歴の人だ。</p>
+
+      <p>彼の重要な仕事はもうひとつある。<strong>用語を提供すること</strong>だ。「Software 2.0」「データ・エンジン」「コンテキスト・エンジニアリング」「ヴァイブ・コーディング」「ゴースト、動物ではなく」「エージェントの十年」── これらの言葉はいずれも、彼の講演や X、ブログから業界に広まっていった。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この本の前提</span>
+        <p class="key-concept__text">この本は Karpathy の <strong>地図</strong>を借りて、AI 時代の開発を整理し直すための小冊子だ。彼の言葉が便利なのは、答えを与えてくれるからではない。<strong>輪郭を引いてくれる</strong>からだ。輪郭が引かれて初めて、自分のプロダクトで何を試すべきかが見えてくる。</p>
+      </div>
+
+      <p>各章は二段構えにしてある。前半 (<em>思想</em>) で Karpathy がそこをどう見ているかを読み、後半 (<em>実務</em>) で「では月曜の朝から何を変えるか」を具体的な行動に落とす。サイドノートには英語原文と出典 URL を添えた。彼の語感そのものを残したかったからだ。</p>
+
+      <p>通読には30分弱かかる。コーヒーを淹れて、はじめよう。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 Software 1.0 → 2.0 → 3.0</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章 Software 1.0 → 2.0 → 3.0
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">Software 1.0 → 2.0 → 3.0<br>── 三つの書き方が重なる</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">置換ではなく、重畳。コードベースには三層が同居する</p>
+    </header>
+
+    <div class="prose">
+      <p>Karpathy の地図の出発点は、「ソフトウェアの書き方には三つの世代がある」という整理だ。最初の整理は 2017 年のエッセイ <em>Software 2.0</em> で示され、2025 年の AI Startup School の講演 <em>Software Is Changing (Again)</em> で 3.0 が加わって完成形になった。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>三つの世代</h3>
+
+      <p><strong>Software 1.0</strong> は、私たちが当たり前にやってきた書き方だ。人間が <code>if</code> や <code>for</code> を Python や Java や Rust で書き下す。コードがそのままプログラムになる。仕様は人間の頭の中にあり、それを言語に翻訳する作業がプログラミングだった。</p>
+
+      <p><strong>Software 2.0</strong> は、ニューラルネットの登場で生まれた。ここではコードを書く代わりに、データを集め、損失関数を決め、最適化器に重みを書かせる。プログラムの実体は、もはやソースコードではなく <em>重みの数列</em>だ。Tesla の自動運転のように、かつて C++ で何万行も書かれていた知覚ロジックが、ニューラルネットに「食われて」消えていく現象を Karpathy はその目で見てきた。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2017</span>
+        <span class="sidenote__original">"Neural networks are not just another classifier, they represent the beginning of a fundamental shift in how we write software. They are Software 2.0."</span>
+        <span class="sidenote__attr">— <a href="https://karpathy.medium.com/software-2-0-a64152b37c35" target="_blank" rel="noopener">Software 2.0, Medium</a></span>
+      </div>
+
+      <p><strong>Software 3.0</strong> は LLM の登場で開けた第三層だ。プロンプトがプログラムになり、LLM がそのインタプリタとして振る舞う。私たちは <em>英語でプログラミングしている</em>。コードベースの一部 (たとえば文章要約、分類、検索クエリの正規化) は、もう Python の関数として書かれていない。プロンプトとして書かれ、LLM 呼び出しで動く。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025</span>
+        <span class="sidenote__original">"We are now writing in English."</span>
+        <span class="sidenote__attr">— <a href="https://www.latent.space/p/s3" target="_blank" rel="noopener">Software Is Changing (Again), AI Startup School</a></span>
+      </div>
+
+      <p>重要なのは、これらが <strong>置換ではなく重畳</strong>だという点だ。2.0 が出たとき、1.0 のコードがすべて消えたわけではない。3.0 が出たいまも、1.0 と 2.0 は健在だ。今日のプロダクトは、ほとんどの場合この三層が同居している。だからこそ、自分が今書いているコードが何層目なのかを意識する必要が出てきた。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>自分のリポジトリに地図を引く</h3>
+
+      <p>では月曜から何ができるか。手っ取り早い演習は、いま触っているリポジトリのファイルを、頭の中で三色に塗り分けてみることだ。</p>
+
+      <ul>
+        <li><strong>1.0 (青):</strong> 通常のビジネスロジック、ルーティング、DB 操作、API クライアント、UI コンポーネント</li>
+        <li><strong>2.0 (緑):</strong> 学習済みモデル、ベクトル埋め込み、推論サービス、レコメンドの重み</li>
+        <li><strong>3.0 (赤):</strong> プロンプトテンプレート、LLM 呼び出し、エージェントのループ、ツール定義</li>
+      </ul>
+
+      <p>塗り分けが終わると、いくつかの気づきが出てくる。たとえば「赤い領域が一箇所に集中せず、コードベースの至るところに散らばっている」「赤を呼び出す関数のテスト戦略が、青と同じになっている」「緑と赤が直接話していなくて、間に毎回 1.0 のグルーコードが挟まっている」── こうした観察が、次に投資すべき設計判断を教えてくれる。</p>
+
+      <p>もうひとつ大事なのは、<strong>新しい機能を作るとき、まず三層のどれで書くかを意識的に選ぶ</strong>習慣だ。同じ「メール本文を生成する」という要件でも、テンプレート (1.0) で書くのか、LLM (3.0) で書くのか、ベクトル類似度で過去のメールから引っ張る (2.0) のか。選択肢が三層あるという前提を持つだけで、設計の解像度が上がる。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>1.0 (コード) / 2.0 (重み) / 3.0 (プロンプト) の三層は重畳する</li>
+          <li><b>思想</b>3.0 のプログラミング言語は英語、インタプリタは LLM</li>
+          <li><b>実務</b>自分のリポジトリを三色で塗り分けてみる</li>
+          <li><b>実務</b>新機能を書くとき、三層のどれで書くかを意識的に選ぶ</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 ゴーストの心理学</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章 ゴーストの心理学
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">ゴーストの心理学<br>── LLM という新しい OS</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">人間でも動物でもない、召喚された奇妙な知性に向き合う</p>
+    </header>
+
+    <div class="prose">
+      <p>LLM をうまく使えるかどうかは、技術力よりも「相手をどう捉えているか」で決まる。Karpathy が一貫して強調してきたのは、<em>LLM を人間のメタファーで考えてはいけない</em>ということだ。彼は二つの強力なアナロジーを用意している。OS としての LLM、そしてゴーストとしての LLM。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>LLM は新しい OS である</h3>
+
+      <p>Karpathy が AI Startup School で繰り返したアナロジーはこうだ。LLM は <strong>CPU</strong> に相当する。<strong>コンテキストウィンドウは RAM</strong>。ツール呼び出し (検索、コード実行、ファイルシステム) は <strong>周辺機器</strong>。そして OS の中核として、入力のスケジューリング、メモリの割り当て、I/O の調停をしているのが LLM 本体だ。</p>
+
+      <p>このアナロジーが効くのは、いまの LLM の置かれた状況が、1960 年代の中央集権コンピューティングに似ているからだ。計算資源は高価で、限られたデータセンターに集約され、利用者は遠隔の端末から「タイムシェアリング」で使う。Karpathy はこの状況を「<em>fabbed by labs, distributed like utilities</em>」と表現する ── 半導体工場のように少数の研究所が作り、電力や水道のように配給される。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025</span>
+        <span class="sidenote__original">"LLMs have properties of utilities, of fabs, and of operating systems."</span>
+        <span class="sidenote__attr">— <a href="https://www.latent.space/p/s3" target="_blank" rel="noopener">Software Is Changing (Again)</a></span>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>動物ではなくゴーストを召喚している</h3>
+
+      <p>もう一つのアナロジーは、もっと不穏なものだ。Karpathy は LLM を「<strong>進化する動物</strong>」ではなく「<strong>召喚されたゴースト</strong>」だと言う。人間の脳は数億年の進化と肉体を通して育ってきた。LLM はインターネットのテキストから蒸留され、肉体も連続した記憶もない。だから、人間ぽい応答をしても、その内側で起きていることはまったく違う。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025</span>
+        <span class="sidenote__original">"We're summoning ghosts, not building animals."</span>
+        <span class="sidenote__attr">— <a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener">AGI is still a decade away, Dwarkesh Podcast</a></span>
+      </div>
+
+      <p>このゴーストには、Karpathy が「<em>jagged intelligence</em> (尖った知性)」と呼ぶ性質がある。微積分やプログラミング競技は驚くほど解く一方で、「strawberry に r はいくつ?」のような幼児的な問いに転ぶ。賢さの形が人間とずれている。同じモデルが、ある領域では博士で、別の領域では混乱した小学生になる。</p>
+
+      <p>そして、もうひとつの重要な性質が <strong>逆向性健忘 (anterograde amnesia)</strong>。LLM はセッションを越えて記憶を持たない。昨日の会話を覚えていないし、今日学んだことを来週には忘れている。長期記憶も、自己認識も、まだ持っていない。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>境界を引き、モデルを選ぶ</h3>
+
+      <p>この心理学を理解すると、設計判断が変わる。第一に、<strong>ハルシネーション (幻覚) は欠陥ではなくデフォルトの挙動</strong>として扱う。LLM は「自信がないので答えません」という機能を持って生まれてきたわけではない。だから、外側にガードレールを置くのは呼び出し側の責任だ。検証可能な領域 (数値、SQL、コード、URL) は機械的に検証する。検証できない領域 (要約、翻訳、意見) は人間の眼を残すか、別モデルで二重評価する。</p>
+
+      <p>第二に、<strong>記憶の不在を前提に状態を設計する</strong>。会話履歴、ユーザーの好み、ドメイン辞書、過去の決定 ── これらはアプリ側で永続化し、呼び出し時に必要なぶんだけ context に注ぐ。LLM 自身が覚えていることに依存してはいけない。</p>
+
+      <p>第三に、<strong>タスク単位でモデルを選ぶ</strong>。Karpathy 自身も 2025 年の振り返りで、用途に応じて Cursor / Claude Code / GPT-5 Pro を使い分けていることを語っている。コスト・速度・精度の三角形のどこに今のタスクが位置するかを見て、毎回「どのモデルをブートするか」を選ぶ。これは Software 1.0 では発生しなかった、新しい意思決定の種類だ。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>LLM = CPU、コンテキスト = RAM、ツール = 周辺機器</li>
+          <li><b>思想</b>動物ではなくゴースト。Jagged intelligence と逆向性健忘を持つ</li>
+          <li><b>実務</b>ハルシネーションをデフォルトと前提し、外側にガードを置く</li>
+          <li><b>実務</b>記憶はアプリ側で持つ。タスクごとに最適モデルを選ぶ</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 Software 1.0 → 2.0 → 3.0</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 コンテキスト・エンジニアリング</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章 コンテキスト・エンジニアリング
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">コンテキスト・エンジニアリング<br>── 文脈を満たす技法</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">プロンプトの一文ではなく、窓の中身を設計する</p>
+    </header>
+
+    <div class="prose">
+      <p>「プロンプト・エンジニアリング」という言葉が出てきた頃、それは魔法の一文を考える芸のように受け取られていた。Karpathy は 2025 年の半ば、X 上で短い投稿をした。<em>+1 for "context engineering" over "prompt engineering"</em> ── 言葉を変えるべきだ、と。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>窓に何を入れるか</h3>
+
+      <p>プロンプト・エンジニアリングが「日常的に LLM に渡す短い指示」を連想させるのに対して、業務レベルの LLM アプリで本当に必要なのは、もっと広い問いだ。<strong>次の一歩のために、いまコンテキストウィンドウに何を入れるべきか</strong>。これを Karpathy は「繊細な技芸」と呼んだ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025</span>
+        <span class="sidenote__original">"Context engineering is the delicate art and science of filling the context window with just the right information for the next step."</span>
+        <span class="sidenote__attr">— <a href="https://x.com/karpathy/status/1937902205765607626" target="_blank" rel="noopener">on X, 2025-06</a></span>
+      </div>
+
+      <p>第2章の OS アナロジーに戻れば、これは「OS としての自分が、限られた RAM に何をロードし、何をエビクトするか」という決定だ。プロンプトが一文ならローカル変数の話だが、コンテキスト・エンジニアリングは <em>メモリ管理</em>の話になる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>プロンプト</strong>は「魔法の呪文」を考える行為。<br><strong>コンテキスト・エンジニアリング</strong>は「映画の全脚本」を書く行為。LLM が次のシーンを演じるために必要な背景、登場人物、過去の出来事、舞台装置を、限られた窓に過不足なく並べる。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>窓に注ぐ順序と捨て方</h3>
+
+      <p>実装に落とすと、コンテキスト・エンジニアリングはいくつかのレイヤーに分かれる。</p>
+
+      <p><strong>1. システムプロンプト ── 役割と原則。</strong>変わらない指示はここに置く。エージェントの性格、出力フォーマット、絶対に守るべき制約。長すぎると後段の指示を押しのけるので、削れる文は削る。</p>
+
+      <p><strong>2. RAG (検索拡張) ── 知識の注入。</strong>ドキュメント、過去ログ、社内ナレッジを必要なぶんだけ引いてくる。引きすぎはノイズになり、引かなさすぎはハルシネーションを誘う。embedding の精度よりも、ランキングと <em>カットオフ</em>のチューニングがふだん効く。</p>
+
+      <p><strong>3. ツール定義 ── 行動の選択肢。</strong>LLM に使わせる関数のシグネチャと、いつ使うべきかの記述。これも「全部のツールを毎回見せる」と判断が鈍る。タスク種別ごとに見せるツールを絞ると、エージェントの精度が目に見えて上がる。</p>
+
+      <p><strong>4. スクラッチパッド ── 中間状態。</strong>長い推論を一発で出させるのではなく、思考メモを書きながら進ませる。Chain-of-thought の本質はこれで、書く場所を context の中に確保しておくのが設計判断になる。</p>
+
+      <p>そして、忘れがちなのが <strong>エビクション戦略</strong>だ。会話が長くなると、初期のシステムプロンプトと最後のユーザー発話だけが効き、中盤が忘れられる ("lost in the middle" 現象)。タスクが切り替わったら古いコンテキストをサマリーに圧縮する、長期記憶は外部 DB に逃がす、重要な制約は会話の終端に再度差し込む ── こうした泥臭い工夫が、結局のところ品質を決める。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── 「厚いソフトウェア層」</span>
+        Karpathy は context engineering を「LLM 呼び出しを束ねる、台頭しつつある<em>厚い非自明なソフトウェア層</em>のごく一部にすぎない」と書いている。RAG、エージェント、評価、ルーティング、キャッシュ ── これらすべての設計判断が、context engineering と地続きで連なっている。
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>プロンプトではなく、窓に何を入れるか (context engineering)</li>
+          <li><b>思想</b>魔法の一文ではなく、映画の脚本を書く行為</li>
+          <li><b>実務</b>system prompt / RAG / ツール / スクラッチパッドの四層</li>
+          <li><b>実務</b>エビクション戦略 ── 長い会話で「中盤の忘却」に備える</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 ゴーストの心理学</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 オートノミー・スライダー</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章 オートノミー・スライダー
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">オートノミー・スライダー<br>── 部分自律性という設計思想</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Iron Man スーツは、Iron Man ロボットではない</p>
+    </header>
+
+    <div class="prose">
+      <p>2025 年の春以降、業界は「フル自動エージェント」のデモに溢れた。Karpathy はそれに静かに反論する。今のエージェントが目指すべきなのは、ロボットの自律ではなく、<strong>スーツの拡張</strong>だ、と。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Iron Man スーツと Iron Man ロボット</h3>
+
+      <p>Iron Man スーツは Tony Stark の身体を増幅する。スタークは依然としてループの中にいて、判断し、操縦する。一方の Iron Man ロボットは自走する。判断も操縦も AI が握る。技術的に困難な順序は明らかで、まずスーツが先に来る ── 自律は後から、徐々にスライダーが右へ動いていく。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025</span>
+        <span class="sidenote__original">"Build Iron Man suits, not Iron Man robots. Keep humans in the loop as you gradually unlock more autonomy."</span>
+        <span class="sidenote__attr">— <a href="https://www.latent.space/p/s3" target="_blank" rel="noopener">Software Is Changing (Again)</a></span>
+      </div>
+
+      <p>この発想は Karpathy が Tesla で学んだものだ。自動運転は Level 1 (運転支援) から Level 5 (完全自動) までスライダー上に並んでいる。一気に Level 5 を狙うのではなく、低い段で安全に動かしながら、運転手がどこまで手を放せるかを少しずつ広げていく。これが <strong>部分自律性 (partial autonomy)</strong> の思想だ。</p>
+
+      <p>Cursor も Perplexity も同じ構造を持っている。Cursor の「タブで補完」は最も低い自律度、「Composer に丸投げ」は最も高い自律度。ユーザーは状況に応じて、その日のタスクに応じて、自分でスライダーを動かす。AI に与える権限は、固定値ではなく <strong>可変パラメータ</strong>だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>生成と検証のループを短くする</h3>
+
+      <p>では月曜から何ができるか。Karpathy が繰り返し強調するのは、「<strong>生成 (generation) と検証 (verification) のループを高速に</strong>」という原則だ。AI が何かを提案する。人間が一目で判断できる。承認すれば適用、却下すれば次の案。このサイクルが速ければ速いほど、部分自律性は実用になる。</p>
+
+      <p>具体的な設計パターンとしては:</p>
+
+      <ul>
+        <li><strong>Diff レビュー UI を真ん中に置く。</strong>AI の編集はいきなり反映せず、git のような diff として見せる。受け入れ・拒否を一行単位で選べると、ループが短くなる</li>
+        <li><strong>Proposal と Apply を分ける。</strong>「これをやります」と「これをやりました」のあいだに、必ずユーザーの一呼吸を挟む。チャットの一往復ぶんでいい</li>
+        <li><strong>取り消しを常設する。</strong>AI が壊しても、Ctrl-Z で戻れる ── これだけで自律度を一段上げられる</li>
+        <li><strong>スコープを可視化する。</strong>AI がどのファイルを触り、どのコマンドを実行するかを事前に提示する。範囲を見せれば信頼の幅が広がる</li>
+      </ul>
+
+      <p>もうひとつ大切なのは、<strong>スライダーの両端を作る</strong>こと。最も保守的なモード (たとえば「読み取り専用、提案のみ」) と最も積極的なモード (「自動で適用、自動でテスト、失敗時のみ通知」) の両端を用意し、その間に何段かのプリセットを置く。ユーザーは自分のタスクに合わせて選ぶ。「フル自動」ではなく、「いまはここの目盛り」という選択がデフォルトになる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">AI 機能の UI 設計は、<strong>権限の固定</strong>ではなく <strong>スライダーの提供</strong>。ユーザーが信頼度に応じて自律度を動かせるとき、プロダクトは「フル自動の到来を待つ」必要がなくなる。今すぐ出荷しながら、徐々に右へ動かしていける。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>Iron Man スーツが先、Iron Man ロボットは後</li>
+          <li><b>思想</b>自律度は固定値ではなく可変パラメータ (Tesla Autopilot の発想)</li>
+          <li><b>実務</b>生成と検証のループを短くする (diff UI、proposal/apply 分離、undo)</li>
+          <li><b>実務</b>スライダーの両端を作り、中間のプリセットを並べる</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 コンテキスト・エンジニアリング</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 ヴァイブ・コーディング</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章 ヴァイブ・コーディング
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">ヴァイブ・コーディング<br>── 使い捨てとアンビエント</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">コードが ephemeral になった世界での開発リズム</p>
+    </header>
+
+    <div class="prose">
+      <p>2025 年 2 月、Karpathy は X に短い投稿をした。それが思いがけず時代の言葉になった。<em>"vibe coding"</em> ── ヴァイブに身を委ね、指数関数を受け入れ、コードが存在していることすら忘れる。冗談半分の言葉だったが、Collins 英語辞典の 2025 年の言葉に選ばれるほど、業界に広まった。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>"fully give in to the vibes"</h3>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025-02</span>
+        <span class="sidenote__original">"There's a new kind of coding I call 'vibe coding', where you fully give in to the vibes, embrace exponentials, and forget that the code even exists."</span>
+        <span class="sidenote__attr">— <a href="https://x.com/karpathy/status/1886192184808149383" target="_blank" rel="noopener">on X, 2025-02</a></span>
+      </div>
+
+      <p>ヴァイブ・コーディングの本質は、「コードを読まないで進む」ことではない (それは誤解だ)。本質は、<strong>コードが ephemeral (一時的・使い捨て) になった</strong>という認識だ。Karpathy は 2025 年の年末振り返りでこう書いている ── 「コードは突然、自由で、移ろいやすく、しなやかで、捨てられるものになった」。</p>
+
+      <p>これまでの開発文化は、コードが <em>耐久財</em>であるという前提に立っていた。長く維持する、ドキュメントを書く、変更コストを最小化する、保守性を最大化する。それが「いいコード」だった。ところがヴァイブ・コーディングの世界では、「<strong>明日もう書き直すかもしれないコード</strong>」が大量に作られる。今晩のアイデア検証、週末の習作、社内ツール、調査用の使い捨てスクリプト ── これらは保守性ではなく、<em>到達速度</em>で評価される。</p>
+
+      <p>もうひとつの新しい言葉が <strong>ambient programming (アンビエント・プログラミング)</strong>だ。Karpathy は Claude Code のような道具を「ローカルマシンに住む小さなゴースト」と呼ぶ。コンテナの中で動くサービスではなく、自分の開発環境にずっと居て、隣で一緒に作業してくれる。音声入力 (SuperWhisper) と組み合わせれば、もはやコーディングは「机に向かって書く」行為から、「歩きながら声で指示する」行為に変質しはじめる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ヴァイブが効く領域・効かない領域</h3>
+
+      <p>ヴァイブ・コーディングは万能ではない。Karpathy 自身、本番の Tesla 自動運転コードをヴァイブで書いたりはしない。判断軸は明快で、<strong>そのコードがどれくらい長生きするか</strong>、そして <strong>失敗の代償がどれくらい大きいか</strong>だ。</p>
+
+      <table>
+        <thead><tr><th>領域</th><th>ヴァイブ適性</th><th>理由</th></tr></thead>
+        <tbody>
+          <tr><td>プロトタイプ・PoC</td><td>◎</td><td>使い捨て前提。到達速度が最重要</td></tr>
+          <tr><td>個人ツール・スクリプト</td><td>◎</td><td>失敗してもやり直せる</td></tr>
+          <tr><td>社内ダッシュボード</td><td>○</td><td>影響範囲が限定的</td></tr>
+          <tr><td>本番アプリの新機能</td><td>△</td><td>下書きはヴァイブ、レビューと検証は厳密に</td></tr>
+          <tr><td>セキュリティ・課金</td><td>×</td><td>失敗の代償が大きい。明示的に書く</td></tr>
+          <tr><td>長寿命の基盤コード</td><td>×</td><td>保守性 &gt; 到達速度</td></tr>
+        </tbody>
+      </table>
+
+      <p>Karpathy 自身が公開している、三層のツール使い分けも参考になる:</p>
+
+      <ul>
+        <li><strong>Cursor のタブ補完</strong> ── 順調なとき、つまり自分の頭の中の構造が明確で、AI に細部を埋めてもらえばいいとき</li>
+        <li><strong>Claude Code (などのコーディング・エージェント)</strong> ── 中規模の機能ブロック、ファイル横断のリファクタ、プロトタイプの一気組み</li>
+        <li><strong>最強モデル (GPT-5 Pro クラス)</strong> ── どうしても解けないバグ、複雑な抽象、設計判断のサウンディングボード</li>
+      </ul>
+
+      <p>そして、ヴァイブ・コーディングが快適に回るための前提条件として、Karpathy が暗に示しているのが <strong>速いフィードバックループ</strong>だ。型チェック、テスト、ローカル実行、preview デプロイ ── これらが秒単位で返ってくる環境がないと、ヴァイブは事故に変わる。「コードを読まないで進む」が成立するのは、機械が即座に「動かない」と教えてくれる場合だけだ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">追補</span>ヴァイブから agentic engineering へ ── 2026 の地殻変動</h3>
+
+      <p>ここまでの議論は 2025 年の地図だ。2026 年 5 月の Sequoia AI Ascent で、Karpathy は自身のヴァイブ論を <strong>自己更新</strong>した。タイトルがそのままズバリ ── <em>"From Vibe Coding to Agentic Engineering"</em>。</p>
+
+      <p>新しい整理はこうだ。ヴァイブ・コーディングと <strong>agentic engineering (アジェンティック・エンジニアリング)</strong> は別物で、目的が違う。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2026-05</span>
+        <span class="sidenote__original">"Vibe coding raises the floor. Agentic engineering is about extrapolating the ceiling."</span>
+        <span class="sidenote__attr">— <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">Sequoia Ascent 2026 summary</a></span>
+      </div>
+
+      <table>
+        <thead><tr><th></th><th>ヴァイブ・コーディング</th><th>Agentic Engineering</th></tr></thead>
+        <tbody>
+          <tr><td><strong>目的</strong></td><td>床を上げる ── 誰でも作れる</td><td>天井を伸ばす ── プロの品質を保つ</td></tr>
+          <tr><td><strong>適性</strong></td><td>プロトタイプ・個人ツール</td><td>本番・チーム開発</td></tr>
+          <tr><td><strong>姿勢</strong></td><td>生成を受け入れて進む</td><td>仕様を書き、計画を監督する</td></tr>
+        </tbody>
+      </table>
+
+      <p>Karpathy が <em>agentic engineer</em> の責務として挙げるのは次のとおりだ ── 仕様を書く / 計画を監督する / diff を一行ずつ精査する / テストを書く / eval ループを作る / 権限を管理する / worktree を分離する / 品質基準を守る。エージェントは「鋭利だが当てにならない強力な存在 (spiky, fallible, stochastic)」であり、彼らを<strong>調整して速く動かしつつ、品質バーを犠牲にしない</strong>のがエンジニアリング規律になる。</p>
+
+      <p>もう一つの強い 2026 のフレーズが、コーディング・ワークフローの転換点に関するものだ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2026 X</span>
+        <span class="sidenote__original">"It is hard to communicate how much programming has changed due to AI in the last 2 months… coding agents basically didn't work before December."</span>
+        <span class="sidenote__attr">— <a href="https://x.com/karpathy/status/2026731645169185220" target="_blank" rel="noopener">on X, 2026</a></span>
+      </div>
+
+      <p>Karpathy 自身、2025 年 11 月までは手書き 80% / AI 20% だったコーディング比率が、12 月以降にほぼ反転したと書いている。<strong>December 2025 inflection point</strong> ── エージェントが「使えるツール」から「主役」に変わった点 ── は、いまや業界共通の認識になりつつある。</p>
+
+      <p>実務的な含意は明快だ。本章で論じたヴァイブ・コーディングは「これで全部済ませる手法」ではなく、<em>agentic engineering の中に組み込まれる一つのモード</em>になった。プロトタイプはヴァイブで一気に作る。本番化のときは agentic engineering の規律に切り替える。スライダーは autonomy 軸だけでなく、<strong>品質バー軸</strong>にもあると考えるとよい。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>コードが ephemeral になった世界 ── 保守性より到達速度</li>
+          <li><b>思想</b>ambient programming ── ローカルに住む「小さなゴースト」</li>
+          <li><b>思想</b>2026 ── ヴァイブは「床を上げる」、agentic engineering は「天井を伸ばす」</li>
+          <li><b>実務</b>長寿命/高リスク領域はヴァイブで書かない</li>
+          <li><b>実務</b>Cursor / Claude Code / 最強モデルの三層を使い分ける</li>
+          <li><b>実務</b>Agentic engineer の規律: specs / 計画監督 / diff レビュー / tests / evals / 権限 / worktree</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 オートノミー・スライダー</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 データ・エンジンと評価</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章 データ・エンジンと評価
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">データ・エンジンと評価<br>── Tesla の教訓</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">競争優位は「データ」ではなく「データ・エンジン」が握る</p>
+    </header>
+
+    <div class="prose">
+      <p>Karpathy の地図には、評価について二段階の言葉がある。一段目は 2026 年 5 月に Sequoia AI Ascent で打ち出された、強い <em>公理</em>だ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2026-05</span>
+        <span class="sidenote__original">"Traditional computers automate what you can specify in code. This latest round of LLMs can automate what you can verify."</span>
+        <span class="sidenote__attr">— <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">Sequoia Ascent 2026 summary</a></span>
+      </div>
+
+      <p>自動化できる領域の境界線が、「コードで仕様を書き下せるか」から「<strong>機械的に検証できるか</strong>」へと移った、という宣言だ。検証可能な領域 ── 数学、コード、SQL、URL の到達性、構造化された出力 ── では LLM は驚くほど強い。検証できない領域 ── 文体、ユーモア、戦略判断、人間関係の機微 ── では、いまだに不安定なままだ。</p>
+
+      <p>この一文は、第2章の <em>jagged intelligence</em> の現象論を、戦略原則として書き直したものだ。能力が尖って見える理由は、検証関数を作れる領域に研究所が RL の計算を集中投下してきたからだ。だから「うちのプロダクトに AI を入れるか」の判断は、「<strong>うちの仕事の中で、検証関数を書ける部分はどこか</strong>」を探す作業に置き換わる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT ── VERIFIABILITY AXIOM</span>
+        <p class="key-concept__text"><strong>検証できることだけが、自動化される。</strong>逆に言えば、検証関数を書ける領域を見つけることが、AI 機能の最初の設計判断になる。eval は QA 工程の末端ではなく、製品仕様の <em>上流</em>にある。</p>
+      </div>
+
+      <p>二段目が、もっと古くからある言葉 ── データ・エンジン。Karpathy が Tesla で 5 年間率いていたのは、世界最大級の Software 2.0 プロジェクトだ。何百万台ものクルマからストリームされるカメラ映像を、ニューラルネットの訓練データに変え、再訓練し、配信し、その挙動をテレメトリで観測し、また新しい失敗例を集める ── このループを回し続けることが、すなわち自動運転の開発だった。彼はそこから得た一文を、後にこう書いた。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>データ・エンジンという競争優位</h3>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2022</span>
+        <span class="sidenote__original">"Competitive advantage in AI goes not so much to those with data but those with a data engine: iterated data acquisition, re-training, evaluation, deployment, telemetry."</span>
+        <span class="sidenote__attr">— <a href="https://x.com/karpathy/status/1599852921541128194" target="_blank" rel="noopener">on X, 2022-12</a></span>
+      </div>
+
+      <p>含意は強い。「データを持っている」は静的な資産だが、「データ・エンジン」は動的な仕組みだ。エンジンを早く回せる組織が、データを持っているだけの組織を追い抜いていく。</p>
+
+      <p>Tesla のデータ・エンジンの中核には <strong>アクティブ・ラーニング</strong>がある。モデルが苦手な事例 (難しいカーブ、特殊な天候、希少な看板) を本番フリートから探し出し、人間にラベリングさせ、訓練データに加え、再訓練する。「上手にできない例を集めて、そこを集中的に学ばせる」── これを延々と回す。</p>
+
+      <p>2025 年、この発想は LLM の世界にも本格的に流れ込んだ。それが <strong>RLVR (Reinforcement Learning from Verifiable Rewards)</strong> だ。数学やコードのように「正解が機械的に判定できる」領域で、モデルに大量に試行錯誤させ、報酬関数で学習を駆動する。RLVR で訓練されたモデルは、推論ステップを自発的に伸ばすようになる。これは事前学習や教師あり微調整に並ぶ「新しい第三の訓練ステージ」だと Karpathy は 2025 年の年末振り返りで書いた。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Evals は新しい単体テスト</h3>
+
+      <p>RLVR が成立するためには、報酬を判定する <strong>評価関数 (eval)</strong> が要る。そして eval が訓練の上流にきた以上、<em>評価設計はもはや QA の仕事ではなく、訓練の一部</em>だ。これは LLM を組み込むプロダクト開発でも同じ構図になる。</p>
+
+      <p>Karpathy はベンチマークについて懐疑的だ。ベンチマークは公開された瞬間から RLVR の対象になり、すぐに飽和する (Goodhart の法則)。だから「公開ベンチで強い」ことよりも、「<strong>自分のドメインで効くか</strong>」を測る社内 eval の方がはるかに重要になる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>最小データ・エンジンを組む</h3>
+
+      <p>LLM 機能をプロダクトに入れるとき、いきなり Tesla 規模を目指す必要はない。最小構成は次の 5 ステップだ。</p>
+
+      <ol>
+        <li><strong>取得 ──</strong> 本番の入出力をログに残す (PII に注意して匿名化)</li>
+        <li><strong>ラベル ──</strong> 失敗事例を見つけ、正解を人間が書き起こす (まず週 10 件でいい)</li>
+        <li><strong>評価 ──</strong> 集めた正解セットを eval として固定し、毎リリース前に走らせる</li>
+        <li><strong>改修 ──</strong> 失敗パターンに応じて、プロンプト / RAG / モデル / Fine-tuning のどれを変えるか判断する</li>
+        <li><strong>テレメトリ ──</strong> 本番でのユーザー反応 (再質問、修正、削除) を計測し、次の取得ステップに戻す</li>
+      </ol>
+
+      <p>そして、Karpathy が再三言うのが「<strong>"vibe check" を eval に昇格させよ</strong>」という話だ。LLM 機能を作っているとき、最初は手元で何度か試して「いい感じ」を確かめる。その「いい感じ」の判定基準を、できる限り早く <em>自動評価</em>に書き出す。最初は粗くていい。「出力に必ずこのキーが含まれる」「URL が valid である」「文字数が範囲内」── そういう機械チェックでいい。そこから徐々に、LLM-as-a-judge や人間の二択比較 (A/B 評価) を足していく。</p>
+
+      <p>もう一つ重要なのは、<strong>失敗事例こそが資産</strong>だという感覚だ。エンジニアは成功例を眺めて満足しがちだが、エンジンが回るかどうかは、いかに「うまくいかなかった事例」を貯められるかで決まる。失敗事例の収集を、ユーザーからのフィードバック UI と紐付けて、自動的に集まる仕組みにする。これが回り始めると、プロダクトは時間とともに賢くなる。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>データではなく <em>データ・エンジン</em>が競争優位</li>
+          <li><b>思想</b>RLVR の登場で、eval は訓練の上流にきた</li>
+          <li><b>実務</b>取得 → ラベル → 評価 → 改修 → テレメトリ の 5 ステップを最小構成で回す</li>
+          <li><b>実務</b>"vibe check" は eval に昇格させる。失敗事例こそが資産</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 ヴァイブ・コーディング</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 ナインの行進</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章 ナインの行進とエージェントの十年
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">ナインの行進と<br>エージェントの十年</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">デモから本番までの距離は、9 の数で測られる</p>
+    </header>
+
+    <div class="prose">
+      <p>2024 年から 2025 年にかけて、「<em>year of agents</em>」というフレーズが業界を駆け抜けた。Karpathy はそれに静かに反論した。<strong>年ではなく、十年だ</strong>、と。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>March of Nines</h3>
+
+      <p>その根拠を、彼は Tesla で学んだ「<strong>march of nines (ナインの行進)</strong>」という言葉で説明する。デモが 90% の確率でうまくいく状態を作るのは、最初の 9 を取ることだ。次に 99%、99.9%、99.99% と、9 を一つずつ伸ばしていく。そして、<strong>9 を一つ進めるのは、それまでと同じくらいの仕事量がかかる</strong>。指数関数的に減るのは失敗確率であって、開発コストではない。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2025-10</span>
+        <span class="sidenote__original">"Every single nine is a constant amount of work. When you get a demo that works 90% of the time, that's just the first nine. Then you need the second nine, a third nine, a fourth nine, a fifth nine."</span>
+        <span class="sidenote__attr">— <a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener">Dwarkesh Podcast, 2025-10</a></span>
+      </div>
+
+      <p>自動運転がこの法則の最も鮮明な例だ。Waymo は 2014 年に完璧なデモ走行を公開していた。それから 10 年以上が経った 2026 年でも、自動運転は限定的な地域でしか動いていない。デモから本番までの距離は、デモを見ただけでは測れない。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>エージェントに足りていない四つ</h3>
+
+      <p>Karpathy が「エージェントは <em>動かない</em>」と言うとき、彼は具体的に四つの不足を挙げる。</p>
+
+      <ul>
+        <li><strong>十分な知性 (intelligence)</strong> ── 推論の深さ、計画立て、誤りの自己修正</li>
+        <li><strong>マルチモダリティ (multimodality)</strong> ── 画面、音声、空間を一体として扱う</li>
+        <li><strong>継続学習 (continual learning)</strong> ── 使うほど賢くなる、ユーザーごとに適応する</li>
+        <li><strong>記憶 (memory)</strong> ── セッションを越えて、関係を越えて、覚え続ける</li>
+      </ul>
+
+      <p>これらは「次の四半期で解決される」種類の問題ではない。だから Karpathy は「<em>this is the decade of agents, not the year of agents</em>」と言う。年単位の話としてマーケティングするのは煽りだが、十年単位の話として投資する価値は十分にある、という両面の主張だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ロードマップを 9 で書き直す</h3>
+
+      <p>これを日々の意思決定にどう翻訳するか。第一に、AI 機能のロードマップを <strong>9 の単位で書き直す</strong>。「Q3 にエージェントをリリース」ではなく、「Q3 に 90% 動くプロトタイプ」「Q4 に 99% (社内ユーザー限定)」「翌年に 99.9% (一部本番)」── という具合に。各段階で何を測り、どこで人間を残すかを明示する。</p>
+
+      <p>第二に、<strong>失敗時の人間フォールバック</strong>を設計の一級市民として扱う。エージェントが詰まったとき、誰が、どう介入するか。これを「例外処理」ではなく、製品仕様の中核として書く。Tesla Autopilot がドライバーをループに残し続けたのと同じ発想だ。</p>
+
+      <p>第三に、「<strong>エージェントが読める Web</strong>」を意識する。自社のドキュメント、API、SDK、エラーメッセージは、いまや人間より先にエージェントが読む。<code>llms.txt</code>、構造化されたエラー、機械可読な変更履歴、エージェント用のクイックスタート ── これらを整備しておくと、外部のエージェントが自社プロダクトを <em>使える</em>状態になる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">エージェントの「年」ではなく「十年」を信じるなら、設計の重心は <strong>マラソンの装備</strong>に移る。完成形を待つのではなく、毎年 9 を一つ伸ばせる工程を作る。途中で人間が降りられる停留所をたくさん設ける。エージェントが読みやすい Web を整える。これらが、十年の中盤で差を生む。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>9 を一つ進めるのは、それまでと同じ仕事量がかかる</li>
+          <li><b>思想</b>エージェントに足りないのは知性・マルチモーダル・継続学習・記憶</li>
+          <li><b>実務</b>ロードマップを 90% → 99% → 99.9% で書き直す</li>
+          <li><b>実務</b>人間フォールバックを一級市民に。エージェントが読む Web を整える</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 データ・エンジンと評価</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 スクラッチから作る</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章 スクラッチから作る
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">スクラッチから作る<br>── taste と学び続ける筋肉</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Software 3.0 の時代にこそ、基盤の理解が効く</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまで、Karpathy の七つの地図を辿ってきた。最後の章では少し角度を変えて、彼の <strong>学習者としての姿勢</strong>を見る。なぜか。AI 時代の開発手法は、ツールやベストプラクティスのリストにはならない。それらは半年で陳腐化する。残るのは、<em>自分が学び続けられる筋肉</em>だけだからだ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>build from scratch の系譜</h3>
+
+      <p>Karpathy が公開してきた教育リポジトリには明確な系譜がある。<strong>micrograd</strong> (自動微分エンジンを 100 行で)、<strong>makemore</strong> (文字レベル言語モデルを段階的に)、<strong>nanoGPT</strong> (GPT-2 を 300 行で再実装)、そして 2025 年の <strong>nanochat</strong> (4 時間・100 ドルで自分の ChatGPT を最初から最後まで作る)。</p>
+
+      <p>共通する哲学はこうだ。<em>巨大なシステムを丸ごと触るのではなく、最小限のスクラッチ実装を一行ずつ読み、自分で動かす</em>。ライブラリの中身がブラックボックスでなくなった瞬間、抽象の隙間が見えてくる。Software 3.0 の時代、つまり LLM がコードを書いてくれる時代に、なぜわざわざスクラッチから書くのか。答えは逆説的だ。<strong>AI に書かせるからこそ、基盤を自分で持っていないと、出てきたコードの良し悪しが分からない</strong>。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── Eureka Labs と LLM101n</span>
+        Karpathy は 2024 年に教育会社 Eureka Labs を設立した。nanochat は、その旗艦講座 LLM101n のキャップストーン課題になる。「AI と一緒にいい教師になる」というのが Eureka Labs のスローガンで、Karpathy 自身がこの 10 年でやりたいのは「最高の学習体験を作ること」だと公言している。
+        <span class="sidenote__attr">— <a href="https://github.com/karpathy/nanochat" target="_blank" rel="noopener">github.com/karpathy/nanochat</a></span>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>自動化されないもの ── taste</h3>
+
+      <p>ヴァイブ・コーディングが普及するほど、開発者のあいだに差が出にくくなる、と思われがちだ。事実はおそらく逆だ。誰でも「動くもの」を出せるようになるからこそ、<strong>「何を作るか」「どう作るか」の判断 ── すなわち taste</strong> ── の差が、可視化される。</p>
+
+      <p>Taste は美的感覚と訳されがちだが、ここでは「<em>無数の選択肢の中から、いいものを選び取る感覚</em>」のことだ。UI の手触り、API のシグネチャ、エラーメッセージの文面、コードの読みやすさ、ドキュメントの順序。これらは LLM がいくらでも草稿を生成してくれるが、その中から「これを採用する」と決めるのは依然として人間の仕事だ。そしてその判断は、長年の経験と無数の比較から育つ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>三つの筋肉を磨く</h3>
+
+      <p>では月曜から何を続けるか。Karpathy の地図全体から導かれる、開発者として磨くべき三つの筋肉はこうだ。</p>
+
+      <table>
+        <thead><tr><th>筋肉</th><th>定義</th><th>日々の演習</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Orchestration</strong></td>
+            <td>LLM 呼び出しを束ね、context を設計し、エージェントを組む技術</td>
+            <td>週に一つ、自分の作業の一部をエージェントに置き換える。失敗したら何が context に足りなかったかを記録する</td>
+          </tr>
+          <tr>
+            <td><strong>Evaluation</strong></td>
+            <td>出力の良し悪しを測る基準を作り、自動化する技術</td>
+            <td>"vibe check" で済ませそうになったら、3 件だけテストケースを書く。それを CI に乗せる</td>
+          </tr>
+          <tr>
+            <td><strong>Taste</strong></td>
+            <td>無数の選択肢の中から、いいものを選び取る感覚</td>
+            <td>優れた製品・コード・文章を毎週読む。なぜ良いと感じたかを言語化する</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>そして、<strong>スクラッチから一つ作る</strong>。LLM ではなくても、自動微分でも、トークナイザでも、小さなレイトレーサでもいい。完成形をコピペするのではなく、一行ずつ読み、自分で型のエラーに遭い、自分で動かすまで持っていく。これをやった経験が、AI が書いてきたコードを読むときの目になる。</p>
+
+      <p>最後に Karpathy 自身が引用される言葉を一つ。彼は nanochat の README にこう書いた ── <em>「最小限・読みやすい・ハックしやすい・フォークしやすい <strong>強いベースライン</strong>」</em>。これは彼が作るものすべてに通底する美学であり、AI 時代の開発者が自分のコードに対して持つべき態度でもある。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>AI が書くからこそ、基盤を自分で持つ意味が増す</li>
+          <li><b>思想</b>自動化されないのは「何を作るか」の judgement ── taste</li>
+          <li><b>実務</b>三つの筋肉: orchestration / evaluation / taste</li>
+          <li><b>実務</b>スクラッチから何か一つ作る ── 抽象の隙間を体で覚える</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 ナインの行進</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">地図を持って歩く</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">ゴーストと働くための、八つの言葉</p>
+    </header>
+
+    <div class="prose">
+      <p>八つの章を辿ってきた。<strong>Software 3.0</strong> という三層の地図、<strong>ゴースト</strong>としての LLM、<strong>コンテキスト・エンジニアリング</strong>、<strong>オートノミー・スライダー</strong>、<strong>ヴァイブ・コーディング</strong>、<strong>データ・エンジンと evals</strong>、<strong>ナインの行進</strong>、そして <strong>スクラッチから作る筋肉</strong>。これらの言葉はバラバラに見えて、実は一つの姿勢で繋がっている。</p>
+
+      <p>その姿勢を一言で書くなら、<em>「ゴーストを過信せず、過小評価もしない」</em>ということだ。LLM は人間ではないので、人間の代わりにはならない。だが、人間が苦手な作業の多くを ── プロトタイプ、ボイラープレート、書き直し、要約、検索 ── 劇的に速くしてくれる。その境界をどこに引くかが設計者の腕で、境界は固定ではなくスライダーで、年単位で少しずつ右へ動く。</p>
+
+      <p>Karpathy が地図屋として優れているのは、彼が「答え」を提供しないからだ。彼の言葉は、<em>輪郭</em>を引いてくれるだけ。輪郭が引かれて初めて、自分のプロダクトで、自分のチームで、自分の文脈で、何を試すかが見えてくる。地図を持つ意味はそこにある。</p>
+
+      <blockquote>地図は領土ではない。<br>でも、地図がなければ、領土を歩けない。</blockquote>
+
+      <p>この本の役目はここまでだ。あとは、月曜の朝に、自分のコードベースを開いて、塗り分けを始めるところから。</p>
+
+      <p>最後に、Karpathy 自身が 2026 年 5 月の Sequoia Ascent で締めくくった一文を借りておく。これは、本書全体の主張を、彼自身の言葉で言い切ったものだ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Karpathy, 2026-05</span>
+        <span class="sidenote__original">"You can outsource your thinking, but you can't outsource your understanding."</span>
+        <span class="sidenote__attr">— <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">Sequoia Ascent 2026 summary</a></span>
+      </div>
+
+      <p>考えることは外注できる。理解することは外注できない。地図を借りるのはいいが、自分の足で歩くのは結局あなただ。</p>
+
+      <p>あなたのゴーストとの旅が、いいものになりますように。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 スクラッチから作る</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参 ── 出典一覧</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">REFERENCES</span>
+      <h2 class="chapter__title">出典一覧</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">本書がよりかかった、Karpathy 自身の言葉と作品</p>
+    </header>
+
+    <div class="prose">
+      <ul class="bibliography">
+        <li><span class="bib__title">Sequoia Ascent 2026 summary</span> ── karpathy.bearblog.dev, 2026-05. <a href="https://karpathy.bearblog.dev/sequoia-ascent-2026/" target="_blank" rel="noopener">karpathy.bearblog.dev/sequoia-ascent-2026</a></li>
+        <li><span class="bib__title">From Vibe Coding to Agentic Engineering</span> ── Sequoia AI Ascent 講演, 2026-05. <a href="https://www.youtube.com/watch?v=96jN2OCOfLs" target="_blank" rel="noopener">youtube.com/watch?v=96jN2OCOfLs</a></li>
+        <li><span class="bib__title">"coding agents basically didn't work before December" 投稿</span> ── on X, 2026. <a href="https://x.com/karpathy/status/2026731645169185220" target="_blank" rel="noopener">x.com/karpathy/status/2026731645169185220</a></li>
+        <li><span class="bib__title">Software 2.0</span> ── Andrej Karpathy, Medium, 2017. <a href="https://karpathy.medium.com/software-2-0-a64152b37c35" target="_blank" rel="noopener">karpathy.medium.com/software-2-0</a></li>
+        <li><span class="bib__title">Software Is Changing (Again)</span> ── AI Startup School 講演, 2025-06. <a href="https://www.latent.space/p/s3" target="_blank" rel="noopener">latent.space/p/s3</a></li>
+        <li><span class="bib__title">2025 LLM Year in Review</span> ── karpathy.bearblog.dev, 2025-12. <a href="https://karpathy.bearblog.dev/year-in-review-2025/" target="_blank" rel="noopener">karpathy.bearblog.dev/year-in-review-2025</a></li>
+        <li><span class="bib__title">AGI is still a decade away</span> ── Dwarkesh Podcast, 2025-10. <a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener">dwarkesh.com/p/andrej-karpathy</a></li>
+        <li><span class="bib__title">"vibe coding" 投稿</span> ── on X, 2025-02. <a href="https://x.com/karpathy/status/1886192184808149383" target="_blank" rel="noopener">x.com/karpathy/status/1886192184808149383</a></li>
+        <li><span class="bib__title">"context engineering" 投稿</span> ── on X, 2025-06. <a href="https://x.com/karpathy/status/1937902205765607626" target="_blank" rel="noopener">x.com/karpathy/status/1937902205765607626</a></li>
+        <li><span class="bib__title">"data engine" 投稿</span> ── on X, 2022-12. <a href="https://x.com/karpathy/status/1599852921541128194" target="_blank" rel="noopener">x.com/karpathy/status/1599852921541128194</a></li>
+        <li><span class="bib__title">"Jagged Intelligence" 投稿</span> ── on X, 2024. <a href="https://x.com/karpathy/status/1816531576228053133" target="_blank" rel="noopener">x.com/karpathy/status/1816531576228053133</a></li>
+        <li><span class="bib__title">nanochat リポジトリ</span> ── github.com, 2025. <a href="https://github.com/karpathy/nanochat" target="_blank" rel="noopener">github.com/karpathy/nanochat</a></li>
+        <li><span class="bib__title">nanoGPT リポジトリ</span> ── github.com. <a href="https://github.com/karpathy/nanoGPT" target="_blank" rel="noopener">github.com/karpathy/nanoGPT</a></li>
+        <li><span class="bib__title">micrograd リポジトリ</span> ── github.com. <a href="https://github.com/karpathy/micrograd" target="_blank" rel="noopener">github.com/karpathy/micrograd</a></li>
+      </ul>
+
+      <p style="margin-top: 3rem; font-size: 0.9rem; color: var(--color-ink-muted);">本書中の英語原文引用は、上記出典からの抜粋。日本語訳は本書著者による意訳で、原文のニュアンスを優先した部分があります。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+      <a href="#prologue" class="chapter-nav__next">
+        <span class="chapter-nav__label">↑ TOP</span>
+        <span class="chapter-nav__title">最初に戻る</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <p>この教科書は 2026 年 5 月時点の Karpathy の発言と作品に基づく。<br>
+  AI の世界は速く動くので、半年後には新しい言葉が増えているはず。<br>
+  ただし、地図の引き方そのものは、もう少し長く役に立つはずだ。</p>
+  <div class="footer__rule"></div>
+  <p class="footer__date">May 2026 · A Field Guide for the LLM Era</p>
+</footer>
+
+<!-- ============================================
+     JavaScript
+     ============================================ -->
+<script src="./textbook.js" defer></script>
+
+</body>
+</html>

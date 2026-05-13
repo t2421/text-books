@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>関係の引き方 ── データベース設計の原典と現代</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">関係の引き方 ── <em>データベース設計の原典と現代</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── スキーマは消えない</a></li>
+    <li><a href="#ch1">第1章 ── 関係モデルの起源 (Codd の問い)</a></li>
+    <li><a href="#ch2">第2章 ── 正規化と非正規化</a></li>
+    <li><a href="#ch3">第3章 ── 主キーの設計</a></li>
+    <li><a href="#ch4">第4章 ── リレーションの引き方</a></li>
+    <li><a href="#ch5">第5章 ── インデックスの内部</a></li>
+    <li><a href="#ch6">第6章 ── トランザクションと隔離</a></li>
+    <li><a href="#ch7">第7章 ── MVCC と並行制御</a></li>
+    <li><a href="#ch8">第8章 ── クエリプランナと最適化</a></li>
+    <li><a href="#ch9">第9章 ── スキーマ進化 (expand-contract)</a></li>
+    <li><a href="#ch10">第10章 ── マルチテナント設計 (三つのパターン)</a></li>
+    <li><a href="#ch11">第11章 ── 拡張性 (パーティション / レプリケーション / Postgres の広がり)</a></li>
+    <li><a href="#epilogue">エピローグ ── 設計判断の集積として</a></li>
+    <li><a href="#bibliography">参 ── 出典一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A FIELD GUIDE TO DATABASE DESIGN</div>
+  <h1 class="hero__title">データベース設計の原典と現代<em>関係の引き方</em></h1>
+  <p class="hero__subtitle">1970 年の Codd から PostgreSQL 18、そして expand-contract の現場まで</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">48 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">11 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">BACKEND DEVS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">スキーマは消えない</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">フレームワークが変わってもテーブルは生き続ける</p>
+    </header>
+
+    <div class="prose">
+      <p>2026 年。私たちの仕事の表層は静かに変わり続けている。フレームワークは三年で世代が変わり、デプロイ手順は半年で書き換わり、AI は SQL を生成してくれる。それでも、おそらく十年後も残っているものがある ── <strong>スキーマ</strong>だ。</p>
+
+      <p>テーブルとカラムと外部キーは、書いた瞬間から組織の決定として固まる。それを変えるには本番のデータを動かさなければならず、本番のデータは何千万行・何億行と積み上がる。だからスキーマ設計の判断は、コードのリファクタリングとは違う重みを持つ。<em>後戻りが難しい決定</em>として残り続ける。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この本の前提</span>
+        <p class="key-concept__text">フレームワーク・ORM・AI コード生成が普及するほど、設計者は <strong>「下のレイヤーがどう動いているか」</strong>を理解している必要が増す。生成された SQL が正しいか、ORM の N+1 を見抜けるか、隔離レベルの違いが本番でどう牙を剥くか ── これらの判断は、抽象を上から眺めているだけでは身につかない。</p>
+      </div>
+
+      <p>本書は、PostgreSQL を主な舞台として、関係型データベース設計を <em>原典から現代まで</em>辿り直す十章である。第1〜2章は理論の土台 (Codd と正規化)、第3〜5章は具体的な設計 (主キー、リレーション、インデックス)、第6〜7章は並行性の現実 (トランザクションと MVCC)、第8章はクエリ最適化、第9〜10章は本番運用 (スキーマ進化と拡張性)。</p>
+
+      <p>各章は<em>思想</em>と<em>実務</em>の二段構えで、月曜の朝に自分のスキーマを開いたとき、すぐに使える形を目指した。コーヒーを淹れて、はじめよう。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 関係モデルの起源</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章 関係モデルの起源
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">関係モデルの起源<br>── Codd の問い</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">なぜテーブルなのか。なぜ集合なのか</p>
+    </header>
+
+    <div class="prose">
+      <p>関係型データベースの根幹を作ったのは Edgar F. Codd という IBM の研究者で、その問いは 1970 年の論文 <em>"A Relational Model of Data for Large Shared Data Banks"</em> に書かれている。彼の問いは単純だった ── <strong>データを保存するアプリケーションが、データの物理的な置き場所を知らずに済むようにできないか</strong>。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>関係 = 集合のサブセット</h3>
+
+      <p>Codd の答えはこうだ。すべてのデータを <em>関係 (relation)</em> として表現する。関係とは、ある属性集合の直積のサブセット ── 平たく言えば、<strong>同じ列構造を持つ行の集合</strong>だ。テーブルというのは関係の見やすい表記法にすぎない。</p>
+
+      <p>ここで重要なのは「集合」という性質だ。集合には順序がない。重複もない。だから関係型データベースでは、テーブルの行に「上から3行目」という意味は本来ない。<code>ORDER BY</code> を書かなければ並び順は保証されない。これは仕様の貧弱さではなく、<em>集合論を素直に表現した結果</em>だ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Codd, 1970</span>
+        <span class="sidenote__original">"Future users of large data banks must be protected from having to know how the data is organized in the machine."</span>
+        <span class="sidenote__attr">— <a href="https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf" target="_blank" rel="noopener">A Relational Model of Data for Large Shared Data Banks</a></span>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>第一正規形と原子性</h3>
+
+      <p>Codd の最初の規律が <strong>第一正規形 (1NF)</strong> だ。「各セルには <em>原子的な値</em>を一つだけ入れる」。配列もネスト構造も入れない。一見窮屈だが、これがなければ集合論的な操作 (選択、射影、結合) が機械的に書けなくなる。</p>
+
+      <p>2010 年代以降、JSONB や配列型の登場で「Postgres でも非原子的な値を持てるじゃないか」という議論が出てきた。これらは確かに便利だが、原則として <em>関係モデルの外側</em>にある機能だと理解しておくべきだ。JSONB を多用するほど、関係代数の恩恵 (型安全な JOIN、宣言的なクエリ、強い整合性) からは離れていく。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>テーブルを「集合」として読み直す</h3>
+
+      <p>自分のスキーマを開いて、各テーブルを「これは何の集合か」と一行で言えるか試してみる。たとえば <code>users</code> は「サービスの利用者という集合」、<code>orders</code> は「注文という事象の集合」、<code>user_roles</code> は「『この利用者にこの役割が付与されている』という事実の集合」。</p>
+
+      <p>言い表せないテーブルがあったら、それは設計が曖昧なサインだ。「この行は何を表しているのか」が不明瞭な状態は、後から JOIN を書くときに必ず痛い目を見る。</p>
+
+      <p>同じ演習で、<strong>非原子的なカラム</strong>も見つけられる。CSV を一つのカラムに突っ込んでいる、JSON にしてはいけない関係データを JSONB に入れている ── そういうコードスメルが、原子性の規律から逸脱した結果として浮き上がる。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>関係 = 同じ属性を持つ行の集合。順序も重複もない</li>
+          <li><b>思想</b>第一正規形 ── 各セルは原子的な値を一つ。集合操作の前提</li>
+          <li><b>実務</b>各テーブルを「何の集合か」を一行で言えるか</li>
+          <li><b>実務</b>JSONB/配列は関係モデルの外。多用するほど整合性は遠ざかる</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 正規化と非正規化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章 正規化と非正規化
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">正規化と非正規化<br>── 関数従属を扱う</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">3NF まではほぼ無条件に行く。BCNF と非正規化は判断</p>
+    </header>
+
+    <div class="prose">
+      <p>正規化 (normalization) はスキーマ設計の最初の規律で、その目的は<strong>更新時の異常 (update anomaly) を防ぐ</strong>ことだ。同じ事実が複数の場所に書かれていると、片方を直し忘れた瞬間にデータが嘘をつき始める。これを構造的に不可能にするのが正規化の仕事だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>関数従属と正規形の階段</h3>
+
+      <p>核心は <em>関数従属 (functional dependency)</em> という概念だ。「A → B」と書けば「A の値が決まれば B の値も決まる」ことを意味する。<code>user_id → email</code> なら、user_id を見れば email が一意に決まる。スキーマ設計の大部分は、こうした関数従属を整理して、どこに置くかを決める作業だ。</p>
+
+      <table>
+        <thead><tr><th>正規形</th><th>規律</th><th>排除する異常</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1NF</strong></td><td>各セルは原子的な値</td><td>非関係的構造</td></tr>
+          <tr><td><strong>2NF</strong></td><td>非キー属性は主キー全体に従属 (複合キーがある場合の話)</td><td>部分従属</td></tr>
+          <tr><td><strong>3NF</strong></td><td>非キー属性は他の非キー属性に従属しない</td><td>推移従属</td></tr>
+          <tr><td><strong>BCNF</strong></td><td>すべての非自明な関数従属の左辺はスーパーキー</td><td>3NF が見逃す稀な異常</td></tr>
+        </tbody>
+      </table>
+
+      <p>実務的には <strong>3NF までは規律として無条件に守る</strong>のが大正解だ。BCNF は 3NF を満たしていても破れる稀なケース (複数の候補キーが重なる場合) で発動するので、必要になったときに対応すればいい。</p>
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 1 ── Normalization Steps</span>
+          <h4 class="figure__title">正規化の進行 ── 一つのテーブルから三つへ</h4>
+          <svg class="figure__svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <!-- Stage 1: 非正規化 -->
+            <text x="60" y="60" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">STAGE 01</text>
+            <text x="60" y="82" font-size="14" font-weight="600" fill="#1c1917">非正規化</text>
+            <text x="60" y="100" font-size="10" fill="#6b6359">配列を含むひとつのテーブル</text>
+            <rect x="200" y="50" width="380" height="90" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="220" y="70" font-size="11" font-weight="600" fill="#1c1917">orders</text>
+            <line x1="200" y1="78" x2="580" y2="78" stroke="#d6cfc1"/>
+            <text x="220" y="98" font-size="10" fill="#3f3a35">id</text>
+            <text x="265" y="98" font-size="10" fill="#3f3a35">customer_name</text>
+            <text x="370" y="98" font-size="10" fill="#3f3a35">customer_email</text>
+            <text x="490" y="98" font-size="10" fill="#a01c1c" font-style="italic">items[ ]</text>
+            <text x="220" y="120" font-size="9" fill="#6b6359">1</text>
+            <text x="265" y="120" font-size="9" fill="#6b6359">Alice</text>
+            <text x="370" y="120" font-size="9" fill="#6b6359">a@ex.com</text>
+            <text x="490" y="120" font-size="9" fill="#a01c1c">pen, book, ink</text>
+            <text x="600" y="80" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#a01c1c">→ 1NF違反</text>
+            <text x="600" y="100" font-size="9" fill="#6b6359">原子的でない</text>
+            <line x1="400" y1="160" x2="400" y2="190" stroke="#8b6914" stroke-width="1.5"/>
+            <polygon points="400,190 395,180 405,180" fill="#8b6914"/>
+            <!-- Stage 2: 1NF -->
+            <text x="60" y="230" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">STAGE 02</text>
+            <text x="60" y="252" font-size="14" font-weight="600" fill="#1c1917">1NF</text>
+            <text x="60" y="270" font-size="10" fill="#6b6359">配列を子テーブルへ分離</text>
+            <rect x="200" y="220" width="180" height="90" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="220" y="240" font-size="11" font-weight="600" fill="#1c1917">orders</text>
+            <line x1="200" y1="248" x2="380" y2="248" stroke="#d6cfc1"/>
+            <text x="220" y="268" font-size="10" fill="#3f3a35">id</text>
+            <text x="255" y="268" font-size="10" fill="#3f3a35">customer_name</text>
+            <text x="220" y="288" font-size="10" fill="#3f3a35">customer_email</text>
+            <line x1="380" y1="260" x2="425" y2="260" stroke="#1c1917" stroke-width="1"/>
+            <polygon points="425,260 420,256 420,264" fill="#1c1917"/>
+            <rect x="435" y="220" width="170" height="90" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="455" y="240" font-size="11" font-weight="600" fill="#1c1917">order_items</text>
+            <line x1="435" y1="248" x2="605" y2="248" stroke="#d6cfc1"/>
+            <text x="455" y="268" font-size="10" fill="#3f3a35">order_id (FK)</text>
+            <text x="455" y="288" font-size="10" fill="#3f3a35">item</text>
+            <text x="625" y="248" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#a01c1c">→ 3NF違反</text>
+            <text x="625" y="268" font-size="9" fill="#6b6359">customer情報が</text>
+            <text x="625" y="280" font-size="9" fill="#6b6359">推移従属</text>
+            <line x1="400" y1="330" x2="400" y2="360" stroke="#8b6914" stroke-width="1.5"/>
+            <polygon points="400,360 395,350 405,350" fill="#8b6914"/>
+            <!-- Stage 3: 3NF -->
+            <text x="60" y="400" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#a01c1c" letter-spacing="3">STAGE 03</text>
+            <text x="60" y="422" font-size="14" font-weight="600" fill="#1c1917">3NF</text>
+            <text x="60" y="440" font-size="10" fill="#6b6359">customer情報を別テーブルに</text>
+            <rect x="200" y="390" width="130" height="80" fill="#faf7f2" stroke="#1c1917" stroke-width="2"/>
+            <text x="265" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">customers</text>
+            <line x1="200" y1="418" x2="330" y2="418" stroke="#d6cfc1"/>
+            <text x="220" y="438" font-size="10" fill="#3f3a35">id</text>
+            <text x="220" y="456" font-size="10" fill="#3f3a35">name, email</text>
+            <line x1="330" y1="430" x2="365" y2="430" stroke="#1c1917" stroke-width="1"/>
+            <polygon points="365,430 360,426 360,434" fill="#1c1917"/>
+            <rect x="375" y="390" width="130" height="80" fill="#faf7f2" stroke="#1c1917" stroke-width="2"/>
+            <text x="440" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">orders</text>
+            <line x1="375" y1="418" x2="505" y2="418" stroke="#d6cfc1"/>
+            <text x="395" y="438" font-size="10" fill="#3f3a35">id</text>
+            <text x="395" y="456" font-size="10" fill="#3f3a35">customer_id (FK)</text>
+            <line x1="505" y1="430" x2="540" y2="430" stroke="#1c1917" stroke-width="1"/>
+            <polygon points="540,430 535,426 535,434" fill="#1c1917"/>
+            <rect x="550" y="390" width="130" height="80" fill="#faf7f2" stroke="#1c1917" stroke-width="2"/>
+            <text x="615" y="410" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">order_items</text>
+            <line x1="550" y1="418" x2="680" y2="418" stroke="#d6cfc1"/>
+            <text x="570" y="438" font-size="10" fill="#3f3a35">order_id (FK)</text>
+            <text x="570" y="456" font-size="10" fill="#3f3a35">item</text>
+            <text x="700" y="430" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#a01c1c">✓</text>
+            <text x="700" y="450" font-size="9" fill="#6b6359">関数従属</text>
+            <text x="700" y="462" font-size="9" fill="#6b6359">が整理</text>
+            <line x1="200" y1="500" x2="700" y2="500" stroke="#d6cfc1" stroke-width="0.5"/>
+            <text x="450" y="525" text-anchor="middle" font-size="11" fill="#3f3a35" font-style="italic">同じ事実は一箇所だけ ── これが更新時異常を防ぐ規律</text>
+          </svg>
+          <p class="figure__caption">一つのテーブルに混在していた情報を、関数従属に沿って三つに分けていく。各ステージで「同じ事実を二度書かない」原則に近づいていく。</p>
+        </div>
+      </figure>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>非正規化はなぜ・いつ・どれだけ</h3>
+
+      <p>では非正規化 (denormalization) はなぜするのか。答えは一つ ── <strong>読み取り性能</strong>のため。3NF で綺麗に分けると JOIN が増え、JOIN が増えるとクエリが重くなる。だから読み取りが極端に多いテーブルや、集計結果を高速に返したい場面では、意図的に冗長を持ち込む。</p>
+
+      <p>ただし非正規化には<em>必ず代償</em>がある。同じ事実が複数の場所に書かれるので、更新時に両方を直す責任が発生する。これを忘れると、サイレントなデータ破損が始まる。Karpathy 流に言えば「自動化できる検証関数を書ける範囲でしか非正規化してはいけない」── 整合性を保つトリガーや、定期バッチで再計算する仕組みがセットでなければ、非正規化は時限爆弾になる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>3NF をデフォルトの規律として守る</strong>。非正規化は「読み取り性能のためだけ」に、整合性を保つ仕組みとセットで導入する。理由を説明できない非正規化は、技術的負債の温床になる。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>非正規化を導入するときのチェックリスト</h3>
+
+      <ul>
+        <li><strong>計測したか?</strong> 想像で「速くなりそう」と決めない。EXPLAIN ANALYZE で実際に重いことを示す</li>
+        <li><strong>キャッシュで解決しないか?</strong> Redis 等のキャッシュで先に試す。スキーマを汚す前の最後の砦</li>
+        <li><strong>マテビュー (Materialized View) ではダメか?</strong> Postgres のマテビューなら、整合性責任を DB が持つ</li>
+        <li><strong>更新時の整合性をどう保つか?</strong> トリガー / バッチ / アプリ責任 ── 必ず決めて文書化する</li>
+        <li><strong>戻せる設計か?</strong> 非正規化を後から消すパスを残しておく (列を追加する形で、既存列を保持)</li>
+      </ul>
+
+      <p>もう一つ、よくある誤解を解いておく。<strong>「集約テーブル (例: orders_summary)」は非正規化ではない</strong>。集計結果のキャッシュであり、元の <code>orders</code> テーブルが真実の源。失われても再計算できる。これは非正規化というより、計算結果の永続化に近い。混同しない。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>正規化の目的は更新時異常を防ぐこと。関数従属を整理する作業</li>
+          <li><b>思想</b>3NF までは規律として守る。BCNF は必要になったら考える</li>
+          <li><b>実務</b>非正規化は読み取り性能のため <em>だけ</em>。整合性を保つ仕組みとセットで</li>
+          <li><b>実務</b>計測・キャッシュ・マテビュー を試した後でなければ手を出さない</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 関係モデルの起源</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 主キーの設計</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章 主キーの設計
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">主キーの設計<br>── 何で識別するか</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">後戻りが最も難しい一つの決定</p>
+    </header>
+
+    <div class="prose">
+      <p>テーブルを作ったら、必ず最初に決めるのが <strong>主キー (primary key)</strong>だ。主キーは行の身分証明書で、外部キーに参照されるアンカーになる。決め直しは原則として不可能で、組織のすべてのテーブル設計に波及する。<em>一番最初に、慎重に決める</em>べき値。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>自然キーかサロゲートキーか</h3>
+
+      <p>選択肢は大きく二つある。</p>
+
+      <p><strong>自然キー (natural key)</strong> は、業務的に意味のある値を主キーに使う。たとえば商品コード、ISBN、ISO 国コード、メールアドレス。データを見ればその行が何を指すか分かるという美点があるが、致命的な弱点が一つある ── <em>変わるかもしれない</em>。メールアドレスは変わる。商品コードは型番変更で書き換わる。主キーが変わると、参照しているすべての外部キーが連鎖して書き換わる必要があり、ほぼ常に事故になる。</p>
+
+      <p><strong>サロゲートキー (surrogate key)</strong> は、業務に意味のない人工的な識別子を使う。auto-increment 整数、UUID、ULID、Snowflake ID。意味がないので変わる理由がない。これが最大の利点だ。デメリットは、データを見ても行の中身が分からない (= 別途ユニーク制約を業務キーに張る必要がある) こと。</p>
+
+      <p>実務上の合意は明確で、<strong>サロゲートキーをデフォルトにし、業務キーには別途 UNIQUE 制約を張る</strong>。Codd 自身も後期にはこの立場を取っている。自然キーを主キーに使うのは、本当に不変が保証される稀なケース (国コード、通貨コードなど) に限る。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>2026 のサロゲートキー選択肢</h3>
+
+      <p>サロゲートキーをどう生成するか、ここに 2026 年の地殻変動がある。</p>
+
+      <table>
+        <thead><tr><th>方式</th><th>サイズ</th><th>順序</th><th>分散生成</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><strong>auto-increment (bigint)</strong></td><td>8 bytes</td><td>厳密に増加</td><td>不可</td><td>単一 DB の最高性能</td></tr>
+          <tr><td><strong>UUIDv4</strong></td><td>16 bytes</td><td>ランダム</td><td>可</td><td>過去のデフォルト。インデックス断片化が痛い</td></tr>
+          <tr><td><strong>UUIDv7</strong></td><td>16 bytes</td><td>時系列順に近い</td><td>可</td><td><em>2026 年のデフォルト</em>。B-tree との相性が良い</td></tr>
+          <tr><td><strong>ULID</strong></td><td>26 chars (16 bytes)</td><td>時系列順</td><td>可</td><td>人間にも読める文字列</td></tr>
+          <tr><td><strong>Snowflake</strong></td><td>8 bytes</td><td>時系列順</td><td>可 (要 worker ID 管理)</td><td>大規模分散システム</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── UUIDv4 の罠</span>
+        UUIDv4 は完全ランダムなので、B-tree インデックスへの挿入位置が毎回バラバラになる。これは <em>ページ分割</em>と <em>キャッシュミス</em>を多発させ、書き込み性能を大きく落とす。これを解決したのが時系列ソート可能な v7 / ULID / Snowflake で、いずれも先頭にタイムスタンプを持つので、新規挿入は B-tree の右端に集中する。
+      </div>
+
+      <p>2026 年現在、グリーンフィールドのプロジェクトでは <strong>UUIDv7 がデフォルト</strong>に近い。RFC として標準化され、Postgres 18 のネイティブサポートも入り、性能と分散生成の両方を取れる。ULID は人間が読みやすい文字列を残したい場合の選択肢。Snowflake は超大規模のサービスで、worker ID 管理のオペコストを払える組織向け。</p>
+
+      <p>一方で、<strong>auto-increment bigint が依然として正解</strong>な場面もある。単一 DB で完結する内部システム、ID を URL に露出させない管理画面、データウェアハウスの集計テーブル ── こうした文脈では性能とサイズの両方で勝るので、無理に UUID にする必要はない。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>主キー設計の判断フロー</h3>
+
+      <p>新しいテーブルを作るときの判断順序:</p>
+
+      <ol>
+        <li><strong>ID を URL や外部 API に露出するか?</strong> → Yes なら UUIDv7。No なら次へ</li>
+        <li><strong>複数の DB / リージョンで分散生成するか?</strong> → Yes なら UUIDv7 か Snowflake。No なら次へ</li>
+        <li><strong>クライアント側で ID を生成して、サーバーに送りたいか?</strong> → Yes なら UUIDv7 か ULID。No なら次へ</li>
+        <li><strong>それ以外</strong> → auto-increment bigint が最適</li>
+      </ol>
+
+      <p>そして必ず守るべき規律:</p>
+
+      <ul>
+        <li><strong>業務キーには UNIQUE 制約を張る。</strong>サロゲートを主キーにしても、メールアドレスや商品コードの一意性は DB で保証する</li>
+        <li><strong>主キー型はプロジェクト全体で統一する。</strong>一部のテーブルだけ UUID、他は bigint、という混在は外部キーの型を悩ませる</li>
+        <li><strong>連番 ID を露出しない。</strong>URL に <code>/orders/12345</code> と出すと、注文数や成長率が外から推測できる。露出するなら UUIDv7</li>
+        <li><strong>主キーを変更しない。</strong>本当にやむを得ない場合は新しい列を追加して expand-contract で移行する (第9章参照)</li>
+      </ul>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>サロゲートキーがデフォルト。自然キーは UNIQUE 制約で守る</li>
+          <li><b>思想</b>2026 のデフォルトは UUIDv7。bigint も用途次第で正解</li>
+          <li><b>実務</b>URL 露出 / 分散生成 / クライアント生成 で UUID を選ぶ</li>
+          <li><b>実務</b>プロジェクト内で主キー型を統一。連番を露出しない</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 正規化と非正規化</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 リレーションの引き方</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章 リレーションの引き方
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">リレーションの引き方<br>── 1対1, 1対多, 多対多, ポリモーフィック</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">関係の四形態と、外部キーという規律</p>
+    </header>
+
+    <div class="prose">
+      <p>テーブル単体は孤独な集合にすぎない。複数のテーブルが <em>関係 (relationship)</em> で結ばれて、はじめてデータベースは意味を持つ。関係の引き方には基本の四形態があり、それぞれに定石がある。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>関係の四形態</h3>
+
+      <p><strong>1対多 (one-to-many)</strong>。最も基本かつ最頻出。<code>users</code> と <code>orders</code> の関係 ── 一人のユーザーが複数の注文を持つ。実装は単純で、<em>多側 (orders) に外部キー</em> <code>user_id</code> を置く。「外部キーは多側に置く」── これだけ覚えておけば 8 割の関係は片付く。</p>
+
+      <p><strong>1対1 (one-to-one)</strong>。ユーザーとプロフィール、注文と請求書のような関係。実装は二通り ── 同じテーブルに統合するか、別テーブルにして UNIQUE 制約付き外部キーを張るか。<em>必須かどうか</em>と<em>列の数</em>で判断する。ほぼ常に存在し、列数も少ないなら統合。任意 (片方だけ持つ場合がある) で列数が多いなら分離。</p>
+
+      <p><strong>多対多 (many-to-many)</strong>。ユーザーとロール、記事とタグ、注文と商品。実装は必ず <strong>中間テーブル (join table)</strong> を経由する。<code>user_roles (user_id, role_id)</code> のように、両方の外部キーを持ち、両者の組み合わせに UNIQUE 制約を張る。中間テーブルが独自の属性 (付与日時、付与者など) を持つ場合は、それも追加する。</p>
+
+      <p><strong>自己参照 (self-referencing)</strong>。階層構造 (カテゴリの親子、コメントのスレッド、組織のレポートライン) を表現する。<code>parent_id</code> を同じテーブルに持つだけ。深い階層を扱う場合は Postgres の <em>再帰 CTE</em> (<code>WITH RECURSIVE</code>) で辿れる。本当に深い・頻繁にアクセスするなら、<code>ltree</code> 拡張やクロージャテーブルも検討する。</p>
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 2 ── Four Relationship Patterns</span>
+          <h4 class="figure__title">リレーションの四形態</h4>
+          <svg class="figure__svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <line x1="400" y1="40" x2="400" y2="460" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <line x1="40" y1="250" x2="760" y2="250" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <!-- Panel 1: 1対1 -->
+            <text x="200" y="70" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PATTERN 01</text>
+            <text x="200" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">1対1</text>
+            <rect x="80" y="120" width="100" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="130" y="142" text-anchor="middle" font-size="11" fill="#1c1917">users</text>
+            <text x="130" y="158" text-anchor="middle" font-size="9" fill="#6b6359">id, email</text>
+            <line x1="180" y1="145" x2="220" y2="145" stroke="#a01c1c" stroke-width="1.5"/>
+            <text x="200" y="138" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="10" fill="#a01c1c">1 ── 1</text>
+            <rect x="220" y="120" width="100" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="270" y="142" text-anchor="middle" font-size="11" fill="#1c1917">profiles</text>
+            <text x="270" y="158" text-anchor="middle" font-size="9" fill="#6b6359">user_id, bio</text>
+            <text x="200" y="210" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">統合 or UNIQUE 外部キー</text>
+            <!-- Panel 2: 1対多 -->
+            <text x="600" y="70" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PATTERN 02</text>
+            <text x="600" y="92" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">1対多</text>
+            <rect x="450" y="125" width="100" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="500" y="147" text-anchor="middle" font-size="11" fill="#1c1917">users</text>
+            <text x="500" y="163" text-anchor="middle" font-size="9" fill="#6b6359">id</text>
+            <rect x="640" y="95" width="100" height="32" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+            <text x="690" y="115" text-anchor="middle" font-size="10" fill="#1c1917">orders #1</text>
+            <rect x="640" y="135" width="100" height="32" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+            <text x="690" y="155" text-anchor="middle" font-size="10" fill="#1c1917">orders #2</text>
+            <rect x="640" y="175" width="100" height="32" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+            <text x="690" y="195" text-anchor="middle" font-size="10" fill="#1c1917">orders #3</text>
+            <line x1="550" y1="150" x2="640" y2="111" stroke="#a01c1c" stroke-width="1"/>
+            <line x1="550" y1="150" x2="640" y2="151" stroke="#a01c1c" stroke-width="1"/>
+            <line x1="550" y1="150" x2="640" y2="191" stroke="#a01c1c" stroke-width="1"/>
+            <text x="600" y="230" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">多側に外部キー (user_id)</text>
+            <!-- Panel 3: 多対多 -->
+            <text x="200" y="290" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PATTERN 03</text>
+            <text x="200" y="312" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">多対多</text>
+            <rect x="60" y="340" width="80" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="100" y="362" text-anchor="middle" font-size="11" fill="#1c1917">users</text>
+            <line x1="140" y1="365" x2="170" y2="365" stroke="#a01c1c" stroke-width="1.5"/>
+            <rect x="170" y="340" width="100" height="50" fill="#f3ede2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="220" y="358" text-anchor="middle" font-size="10" fill="#1c1917">user_roles</text>
+            <text x="220" y="372" text-anchor="middle" font-size="9" fill="#6b6359">user_id,</text>
+            <text x="220" y="384" text-anchor="middle" font-size="9" fill="#6b6359">role_id</text>
+            <line x1="270" y1="365" x2="300" y2="365" stroke="#a01c1c" stroke-width="1.5"/>
+            <rect x="300" y="340" width="80" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="340" y="362" text-anchor="middle" font-size="11" fill="#1c1917">roles</text>
+            <text x="200" y="430" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">中間テーブル経由</text>
+            <!-- Panel 4: 自己参照 -->
+            <text x="600" y="290" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PATTERN 04</text>
+            <text x="600" y="312" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">自己参照</text>
+            <rect x="540" y="340" width="120" height="50" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="600" y="362" text-anchor="middle" font-size="11" fill="#1c1917">categories</text>
+            <text x="600" y="378" text-anchor="middle" font-size="9" fill="#6b6359">id, parent_id</text>
+            <path d="M 660 350 Q 720 320 720 370 Q 720 400 670 385" fill="none" stroke="#a01c1c" stroke-width="1.5"/>
+            <polygon points="670,385 678,378 678,392" fill="#a01c1c"/>
+            <text x="600" y="430" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">parent_id を同じテーブルに</text>
+          </svg>
+          <p class="figure__caption">関係の四形態。外部キーをどこに置くか、中間テーブルが要るか、自己参照になるか ── ほぼ全てのスキーマは、これら四つの組み合わせで表現できる。</p>
+        </div>
+      </figure>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>ポリモーフィック関連の罠</h3>
+
+      <p>Rails や Django でよく見るパターンに <strong>ポリモーフィック関連</strong>がある。<code>comments</code> テーブルが <code>article</code> にも <code>video</code> にもコメントできるように、<code>commentable_id</code> と <code>commentable_type</code> という二つのカラムで多態を実装する。</p>
+
+      <p>これは <em>関係モデルに対する敗北</em>だ、と Codd 派は言う。なぜなら <code>commentable_id</code> は単独では外部キー制約を張れない。型ごとにテーブルが違うから、DB レベルで参照整合性を強制できない。データ整合性は完全にアプリケーション任せになる。</p>
+
+      <p>解決策はいくつかある。(a) ポリモーフィック側を諦めて、<code>article_comments</code> と <code>video_comments</code> に分ける。(b) 共通の親テーブル <code>commentables</code> を作り、article と video がその一種であるようにする (Class Table Inheritance)。(c) どうしても必要なら、アプリ層に整合性チェックを書く。最初の選択肢が最もシンプルで安全だ。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── 「外部キーは制約か、参照か」</span>
+        外部キー制約は、参照先の行が存在することを DB が保証する仕組みだ。これは性能と引き換えに整合性を買う取引で、本番では <strong>必ず張る</strong>のが標準。「外部キーは性能のために外す」という古い助言は、現代の Postgres ではほぼ当てはまらない。整合性が壊れた本番データを修復するコストは、外部キーチェックのコストより何桁も大きい。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ON DELETE / ON UPDATE の判断</h3>
+
+      <p>外部キーを張るとき、削除時の挙動を必ず指定する。デフォルト (NO ACTION) では削除がエラーになるので、意図を明示するのが習慣。</p>
+
+      <table>
+        <thead><tr><th>挙動</th><th>意味</th><th>典型的な用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>CASCADE</code></td><td>親が消えたら子も消える</td><td>所有関係 (post → comments)</td></tr>
+          <tr><td><code>SET NULL</code></td><td>親が消えたら子の FK は NULL</td><td>緩やかな関係 (author → posts、著者削除でも記事は残す)</td></tr>
+          <tr><td><code>RESTRICT</code> / <code>NO ACTION</code></td><td>子があるなら親を消せない</td><td>会計データ、注文履歴 (消してはいけない)</td></tr>
+          <tr><td><code>SET DEFAULT</code></td><td>親が消えたら子の FK は DEFAULT 値</td><td>稀。「未割当」を表すデフォルト行がある場合</td></tr>
+        </tbody>
+      </table>
+
+      <p>判断軸は<strong>「子の存在意義は親に依存しているか」</strong>だ。コメントは記事なしでは意味がないので CASCADE。注文は注文者のアカウント削除後も残る (会計義務がある) ので RESTRICT か SET NULL。これを設計時に決めておかないと、後から GDPR 対応で「ユーザー削除して」と言われた瞬間に詰む。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>関係の四形態 ── 1対多 / 1対1 / 多対多 / 自己参照</li>
+          <li><b>思想</b>ポリモーフィック関連は関係モデルへの敗北。可能なら避ける</li>
+          <li><b>実務</b>外部キーは本番でも必ず張る。整合性 &gt; 性能</li>
+          <li><b>実務</b>ON DELETE は「子の存在意義は親に依存するか」で決める</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 主キーの設計</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 インデックスの内部</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章 インデックスの内部
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">インデックスの内部<br>── B-tree, GIN, GIST, BRIN</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">なぜ B-tree がデフォルトで、いつそれ以外を選ぶか</p>
+    </header>
+
+    <div class="prose">
+      <p>インデックスは「クエリを速くする魔法」ではなく、<em>データ構造の選択</em>だ。何を速くしたいかを宣言し、その代わりに書き込みコストと容量を払う。トレードオフを理解せずインデックスを撒くと、書き込みが遅くなり、ストレージが膨らみ、プランナが迷う。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>なぜ B-tree がデフォルトか</h3>
+
+      <p>Postgres で <code>CREATE INDEX</code> と書くと、デフォルトで作られるのは <strong>B-tree</strong>だ。B-tree (正確には B+tree) は、等価検索 (<code>WHERE x = 5</code>)、範囲検索 (<code>WHERE x BETWEEN 1 AND 10</code>)、並び替え (<code>ORDER BY x</code>)、最小値・最大値 ── これらすべてに対数時間で答えられる。汎用性が極端に高いので、迷ったら B-tree でいい。</p>
+
+      <p>B-tree が苦手なのは、「列の値に対する全文検索」「配列の中の特定の要素を含むか」「JSONB の中のキーを持つか」── つまり、<em>カラムが複合構造を持っていて、その内部を検索したい</em>場合だ。ここから他のインデックス型の出番になる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>四つの主要インデックス型</h3>
+
+      <table>
+        <thead><tr><th>型</th><th>得意</th><th>典型的な用途</th></tr></thead>
+        <tbody>
+          <tr><td><strong>B-tree</strong></td><td>等価・範囲・並び替え</td><td>汎用 (デフォルト)</td></tr>
+          <tr><td><strong>GIN</strong></td><td>「複数値を含むか」</td><td>JSONB, 配列, 全文検索, trigram</td></tr>
+          <tr><td><strong>GIST</strong></td><td>幾何・範囲・近似</td><td>地理データ (PostGIS), 範囲型, 全文検索</td></tr>
+          <tr><td><strong>BRIN</strong></td><td>物理順と相関する範囲</td><td>巨大時系列テーブル, ログ</td></tr>
+        </tbody>
+      </table>
+
+      <p><strong>GIN (Generalized Inverted Index)</strong> は転置インデックス。本のページ番号を逆引きするように、「この値を含む行はどれか」を高速に引ける。JSONB の特定キー検索、配列の包含、Postgres 全文検索の標準。</p>
+
+      <p><strong>GIST (Generalized Search Tree)</strong> は汎用ツリーで、距離や重なりといった<em>幾何学的な関係</em>を扱える。PostGIS の地理空間検索、<code>tstzrange</code> のような範囲型、k-NN 近傍検索などで活躍する。</p>
+
+      <p><strong>BRIN (Block Range Index)</strong> は変わり種で、テーブルの<em>物理ブロックごとの要約値</em>を持つだけ。インデックス自体が極端に小さい (B-tree の 1/1000 以下になることも) かわりに、データの物理順が検索キーと相関している必要がある。ログテーブルやイベントテーブルのように、ほぼ時系列順に挿入されるデータで威力を発揮する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>部分・関数・複合インデックス</h3>
+
+      <p>もうひとつ、<em>インデックスを賢く絞る</em>テクニックがある。</p>
+
+      <p><strong>部分インデックス</strong> ── <code>WHERE</code> 条件付きで作る。「アクティブなユーザーだけ」「未削除の行だけ」のような偏ったデータでは劇的に小さくなる。<code>CREATE INDEX ON users (email) WHERE deleted_at IS NULL;</code></p>
+
+      <p><strong>関数インデックス (expression index)</strong> ── 関数の戻り値を索引化する。<code>LOWER(email)</code> で検索するなら <code>CREATE INDEX ON users (LOWER(email));</code> を張る。普通の B-tree では効かない。</p>
+
+      <p><strong>複合インデックス</strong> ── 複数カラムを並べて作る。順序が重要で、<em>左から順に</em>使われる。<code>(user_id, created_at)</code> なら <code>user_id</code> 単独の検索にも、<code>user_id AND created_at</code> の検索にも効くが、<code>created_at</code> 単独には効かない。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>インデックス設計の流儀</h3>
+
+      <p>本番でインデックスを足すときの実践原則:</p>
+
+      <ol>
+        <li><strong>主キーと外部キーには必ずインデックス。</strong>主キーは自動、外部キーは Postgres では自動で作られないので明示的に張る (JOIN 性能の生命線)</li>
+        <li><strong>WHERE / ORDER BY / JOIN で頻繁に使う列に張る。</strong>SELECT で出す列のためには張らない (= covered index は別の話)</li>
+        <li><strong>EXPLAIN ANALYZE で「効いている」ことを確認する。</strong>張っただけでは安心しない。プランナが使わない場合もある</li>
+        <li><strong>書き込み多いテーブルではインデックス数を絞る。</strong>各 INSERT/UPDATE が全インデックスを更新するため、書き込み性能は線形に劣化する</li>
+        <li><strong>不要インデックスを定期的に削除する。</strong><code>pg_stat_user_indexes</code> で利用回数を確認できる</li>
+        <li><strong>本番では <code>CREATE INDEX CONCURRENTLY</code> を使う。</strong>テーブルロックを取らずに作成できる</li>
+      </ol>
+
+      <p>そして避けるべきアンチパターン:</p>
+
+      <ul>
+        <li><strong>とりあえず全カラムにインデックス。</strong>書き込みが死ぬ。インデックスは投資、無料ではない</li>
+        <li><strong>SELECT 結果に含めたい列のためにインデックスを張る。</strong>それはインデックスの仕事ではない (例外: covering index / INCLUDE 句)</li>
+        <li><strong>クエリを書く前にインデックスを設計する。</strong>クエリのパターンが見えていないと、適切なインデックスは決まらない</li>
+      </ul>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>B-tree は等価・範囲・並び替えに最適。迷ったらこれ</li>
+          <li><b>思想</b>JSONB/配列/全文検索は GIN、地理は GIST、巨大時系列は BRIN</li>
+          <li><b>実務</b>主キー・外部キーには必ず、それ以外は WHERE/JOIN/ORDER BY で必要なものだけ</li>
+          <li><b>実務</b>本番では <code>CONCURRENTLY</code>。EXPLAIN ANALYZE で効いていることを確認</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 リレーションの引き方</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 トランザクションと隔離</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章 トランザクションと隔離
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">トランザクションと隔離<br>── ACID の現実</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">隔離レベルを知らないと、本番で必ず牙を剥く</p>
+    </header>
+
+    <div class="prose">
+      <p>トランザクションは銀行口座の振込のように、複数の処理を「全部成功するか全部やめるか」のひとつの単位にまとめる仕組みだ。これを支えるのが ACID 四つの性質 ── 原子性 (Atomicity)、整合性 (Consistency)、隔離性 (Isolation)、永続性 (Durability)。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>ACID の四つ</h3>
+
+      <ul>
+        <li><strong>A (Atomicity 原子性)</strong> ── トランザクション内の全操作は「全部成功」か「全部失敗」のどちらか。中途半端はない</li>
+        <li><strong>C (Consistency 整合性)</strong> ── 制約 (NOT NULL, UNIQUE, FK, CHECK) を守った状態から守った状態に遷移する</li>
+        <li><strong>I (Isolation 隔離性)</strong> ── 同時に走る他のトランザクションから影響を受けない (=直列に走ったかのように見える)</li>
+        <li><strong>D (Durability 永続性)</strong> ── COMMIT 後はクラッシュしてもデータは残る (WAL で実現)</li>
+      </ul>
+
+      <p>このうち <strong>I (Isolation) が最も誤解されやすく、最も実害が大きい</strong>。完全な隔離は性能を犠牲にするので、SQL 標準は四段階の隔離レベルを定義した。レベルを下げると性能は上がるが、特定の現象 (anomaly) が観測されうる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>四つの隔離レベルと現象</h3>
+
+      <table>
+        <thead><tr><th>レベル</th><th>Dirty Read</th><th>Non-Repeatable Read</th><th>Phantom Read</th><th>Serialization Anomaly</th></tr></thead>
+        <tbody>
+          <tr><td>Read Uncommitted</td><td>起きる</td><td>起きる</td><td>起きる</td><td>起きる</td></tr>
+          <tr><td>Read Committed</td><td>防止</td><td>起きる</td><td>起きる</td><td>起きる</td></tr>
+          <tr><td>Repeatable Read</td><td>防止</td><td>防止</td><td>(Postgresでは防止)</td><td>起きる</td></tr>
+          <tr><td>Serializable</td><td>防止</td><td>防止</td><td>防止</td><td>防止</td></tr>
+        </tbody>
+      </table>
+
+      <p>用語の意味は次の通り:</p>
+
+      <ul>
+        <li><strong>Dirty Read:</strong> 他トランザクションの未コミットの値が見える (常に防止すべき)</li>
+        <li><strong>Non-Repeatable Read:</strong> 同じ行を二度読むと違う値が返る (間に他がコミットした)</li>
+        <li><strong>Phantom Read:</strong> 同じ条件で行を取得すると、二回目に新しい行が現れる</li>
+        <li><strong>Serialization Anomaly:</strong> 複数トランザクションの並行実行結果が、どんな直列実行とも違う</li>
+      </ul>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── Postgres は Read Uncommitted を持たない</span>
+        SQL 標準は四段階を定義しているが、Postgres は実装上 Read Uncommitted を持たない (要求しても Read Committed として扱う)。MVCC で実装しているため、未コミットの値を見せるほうが逆に面倒だからだ。実用的に意識すべき選択肢は三つ ── Read Committed (デフォルト)、Repeatable Read、Serializable。
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Postgres のデフォルトは Read Committed</h3>
+
+      <p>Postgres を含む多くの RDBMS のデフォルトは <strong>Read Committed</strong>だ。これは「他トランザクションがコミット済みの最新値が見える」という、直感的にわかりやすい挙動。性能も最高に近い。</p>
+
+      <p>ただし、Read Committed には落とし穴がある。同じトランザクション内で同じ行を二度 SELECT すると、間に他トランザクションがコミットしていれば違う値が返る ── これが Non-Repeatable Read。アプリ側で「最初の SELECT の結果に基づいて UPDATE する」というロジックを書くと、レースコンディションが入り込む余地が生まれる。</p>
+
+      <p>典型的な事故が在庫管理だ:</p>
+
+      <pre><code>-- T1: 残高を読み取り、計算して書く
+BEGIN;
+SELECT balance FROM accounts WHERE id = 1;  -- 100 を取得
+-- アプリ側で 50 を引いて、新しい残高 50 を計算
+UPDATE accounts SET balance = 50 WHERE id = 1;
+COMMIT;</code></pre>
+
+      <p>このあいだに T2 が同じことをやれば、両方とも「100 から 50 引いて 50」と書き、最終的に 50 になる ── 本来は 0 になるはずなのに。これが <em>lost update</em> 問題で、Read Committed では防げない。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>隔離レベルの選び方と対策</h3>
+
+      <p>実務での選択肢は三つ。</p>
+
+      <p><strong>(A) Read Committed + 明示的ロック</strong>。最も一般的な戦略。デフォルトは Read Committed で走らせ、危険な箇所だけ <code>SELECT ... FOR UPDATE</code> で行ロックを取る:</p>
+
+      <pre><code>BEGIN;
+SELECT balance FROM accounts WHERE id = 1 FOR UPDATE;  -- ロック
+UPDATE accounts SET balance = balance - 50 WHERE id = 1;
+COMMIT;</code></pre>
+
+      <p>これで T2 は T1 が COMMIT するまで待たされる。シンプルで効果的だが、忘れた場所が事故源になる。</p>
+
+      <p><strong>(B) Repeatable Read で重要トランザクションを囲む</strong>。決済や在庫操作のトランザクションを <code>SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;</code> で開始する。Postgres の Repeatable Read は実は SQL 標準より厳しく、Phantom Read も防止する。書き込み衝突時にはエラーになるので、アプリ側でリトライ実装が必要。</p>
+
+      <p><strong>(C) Serializable で全部囲む</strong>。Postgres の Serializable は SSI (Serializable Snapshot Isolation) という賢いアルゴリズムで、ロックを増やさずに整合性を保つ。ただし衝突時のエラー率が上がるので、<em>リトライロジックがアプリ側で書かれている前提</em>が必要。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT ── リトライは設計の一部</span>
+        <p class="key-concept__text">Repeatable Read か Serializable を使うなら、<strong>SQLSTATE 40001 (Serialization Failure)</strong> が返ったとき、アプリ側でトランザクションを最初からやり直す実装が必須。これは性能のための妥協ではなく、<em>正しさのための前提</em>。</p>
+      </div>
+
+      <p>もうひとつ覚えておくべきは、隔離レベルは <strong>そのトランザクション内でのみ</strong>有効ということ。クライアント間で値を共有したいなら、advisory lock や Redis などの DB 外の調停が要る。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>ACID のうち I (隔離) が最も実害を生む</li>
+          <li><b>思想</b>Postgres のデフォルトは Read Committed。三段階を意識的に選ぶ</li>
+          <li><b>実務</b>多くは Read Committed + <code>SELECT FOR UPDATE</code> で十分</li>
+          <li><b>実務</b>Repeatable Read / Serializable を使うならリトライ実装が必須</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 インデックスの内部</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 MVCC と並行制御</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章 MVCC と並行制御
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">MVCC と並行制御<br>── ロックを持たない並行性</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">PostgreSQL がロックを取らずに整合性を保つ仕組み</p>
+    </header>
+
+    <div class="prose">
+      <p>第6章で見た隔離レベルを、Postgres はどう実装しているのか。答えが <strong>MVCC (Multi-Version Concurrency Control)</strong>。多版同時実行制御 ── 行を更新するとき、古いバージョンを残したまま新しいバージョンを書く、という発想だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>MVCC の動作原理</h3>
+
+      <p>従来のロックベースの並行制御では、トランザクションが行を読むあいだ他の書き込みをブロックし、書くあいだ他の読み込みをブロックする。これは確実だが、競合が増えるほど性能が劣化する。</p>
+
+      <p>MVCC は別の発想を取る。すべての行に「いつ作られたか (xmin)」「いつ消されたか (xmax)」のトランザクション ID を持たせる。読み手は <em>スナップショット</em>を取り、その時点で「自分にとって有効だった行」だけを見る。書き手は古い行を残したまま新しい行を作る。<strong>読み手と書き手はブロックし合わない</strong>。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">PostgreSQL 公式ドキュメント</span>
+        <span class="sidenote__original">"The main advantage of using the MVCC model of concurrency control rather than locking is that locks acquired for querying (reading) data do not conflict with locks acquired for writing data, and so reading never blocks writing and writing never blocks reading."</span>
+        <span class="sidenote__attr">— <a href="https://www.postgresql.org/docs/current/mvcc.html" target="_blank" rel="noopener">PostgreSQL Docs ── Concurrency Control</a></span>
+      </div>
+
+      <p>これが Postgres の並行性能を支える土台で、隔離レベルもこの上に実装されている。Read Committed は「ステートメント開始時のスナップショット」を、Repeatable Read は「トランザクション開始時のスナップショット」を取る ── 同じ MVCC の仕組みを、スナップショットの取り方で使い分けているだけだ。</p>
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 3 ── MVCC in Action</span>
+          <h4 class="figure__title">MVCC の動作 ── 古い行と新しい行が共存する</h4>
+          <svg class="figure__svg" viewBox="0 0 800 410" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <!-- Time axis -->
+            <line x1="60" y1="200" x2="740" y2="200" stroke="#1c1917" stroke-width="1.5"/>
+            <polygon points="740,200 732,196 732,204" fill="#1c1917"/>
+            <text x="750" y="204" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#1c1917">time</text>
+            <!-- T1 track -->
+            <text x="60" y="60" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#1a3a5c" letter-spacing="2">T1 (reader, xid=11)</text>
+            <line x1="60" y1="80" x2="700" y2="80" stroke="#1a3a5c" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <circle cx="120" cy="80" r="5" fill="#1a3a5c"/>
+            <text x="120" y="72" text-anchor="middle" font-size="9" fill="#1a3a5c">BEGIN</text>
+            <circle cx="280" cy="80" r="5" fill="#1a3a5c"/>
+            <text x="280" y="72" text-anchor="middle" font-size="9" fill="#1a3a5c">SELECT → v1</text>
+            <circle cx="560" cy="80" r="5" fill="#1a3a5c"/>
+            <text x="560" y="72" text-anchor="middle" font-size="9" fill="#1a3a5c">SELECT → v1 (再)</text>
+            <circle cx="660" cy="80" r="5" fill="#1a3a5c"/>
+            <text x="660" y="72" text-anchor="middle" font-size="9" fill="#1a3a5c">COMMIT</text>
+            <!-- T2 track -->
+            <text x="60" y="350" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#a01c1c" letter-spacing="2">T2 (writer, xid=12)</text>
+            <line x1="60" y1="320" x2="700" y2="320" stroke="#a01c1c" stroke-width="0.5" stroke-dasharray="3,3"/>
+            <circle cx="200" cy="320" r="5" fill="#a01c1c"/>
+            <text x="200" y="338" text-anchor="middle" font-size="9" fill="#a01c1c">BEGIN</text>
+            <circle cx="400" cy="320" r="5" fill="#a01c1c"/>
+            <text x="400" y="338" text-anchor="middle" font-size="9" fill="#a01c1c">UPDATE → v2</text>
+            <circle cx="500" cy="320" r="5" fill="#a01c1c"/>
+            <text x="500" y="338" text-anchor="middle" font-size="9" fill="#a01c1c">COMMIT</text>
+            <!-- Row versions -->
+            <rect x="100" y="170" width="600" height="22" fill="#1a3a5c" opacity="0.16" stroke="#1a3a5c"/>
+            <text x="200" y="186" text-anchor="middle" font-size="10" fill="#1a3a5c">v1 (xmin=5, alive)</text>
+            <line x1="400" y1="170" x2="400" y2="192" stroke="#a01c1c" stroke-width="1.5"/>
+            <text x="500" y="186" text-anchor="middle" font-size="10" fill="#6b6359" font-style="italic">v1 (xmax=12, T2以降からは見えない)</text>
+            <rect x="400" y="210" width="300" height="22" fill="#a01c1c" opacity="0.18" stroke="#a01c1c"/>
+            <text x="550" y="226" text-anchor="middle" font-size="10" fill="#a01c1c">v2 (xmin=12, alive)</text>
+            <!-- Sight lines -->
+            <line x1="280" y1="85" x2="280" y2="170" stroke="#1a3a5c" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+            <line x1="560" y1="85" x2="500" y2="170" stroke="#1a3a5c" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+            <line x1="400" y1="315" x2="400" y2="232" stroke="#a01c1c" stroke-width="1" stroke-dasharray="2,2" opacity="0.5"/>
+            <!-- Note -->
+            <text x="400" y="395" text-anchor="middle" font-size="11" fill="#3f3a35" font-style="italic">T1 のスナップショットは xid=11 時点 ── T2 (xid=12) のコミット後も v1 を見続ける</text>
+          </svg>
+          <p class="figure__caption">同じ行の二つのバージョン (v1, v2) が同居する。T1 は自分のスナップショット時点で有効だった v1 を見続け、T2 が作った v2 は見ない。読み手と書き手はブロックし合わない。</p>
+        </div>
+      </figure>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>VACUUM ── 削除された行は誰が消すか</h3>
+
+      <p>MVCC には代償がある。古い行を残し続けるとテーブルが肥大化するので、誰かが <em>不要になった古い行を回収</em>する仕事をしなければならない。これが <strong>VACUUM</strong>だ。</p>
+
+      <p>Postgres は autovacuum がバックグラウンドで自動的に走り、参照されなくなった行を回収する。普段は意識しなくていいが、大量更新・大量削除があるテーブルでは、autovacuum の設定 (<code>autovacuum_vacuum_scale_factor</code> など) を調整することがある。</p>
+
+      <p>関連する罠が <strong>long-running transaction</strong>。一つの長いトランザクションが居座ると、その時点のスナップショットを保持するために、その後の更新で作られた古い行を VACUUM できなくなる。テーブルがどんどん膨らみ、I/O が劣化する。<em>長時間 BEGIN したまま放置するトランザクションは害悪</em>と覚えておく。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>楽観 vs 悲観 ── どちらでロックするか</h3>
+
+      <p>並行性の戦略は大きく二つ。</p>
+
+      <p><strong>悲観的ロック (pessimistic)</strong> ── 「衝突する前提でロックを先に取る」。<code>SELECT ... FOR UPDATE</code> で行ロックを獲得し、トランザクション完了まで保持する。確実だが、長く保持すると他を待たせる。</p>
+
+      <p><strong>楽観的ロック (optimistic)</strong> ── 「衝突しない前提で進め、最後に確認する」。version 列やタイムスタンプを使い、UPDATE 時に「自分が読んだバージョンと同じか」をチェックする。違えばエラーにしてリトライ。並行性が高い場面で性能が出る。Repeatable Read / Serializable の挙動は、内部的にこれに近い。</p>
+
+      <p>どちらを選ぶかは <em>衝突頻度</em>で決める。衝突が多いと予測される (たくさんの人が同じ在庫を奪い合う) なら悲観的。衝突が稀 (同じ行を二人が同時に編集するのが稀) なら楽観的のほうが速い。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>デッドロックを防ぐパターン</h3>
+
+      <p>悲観的ロックの最大の敵は <strong>デッドロック</strong>だ。T1 が A をロックして B を待ち、T2 が B をロックして A を待つ ── どちらも永遠に進めない。Postgres はデッドロックを検出して片方を強制終了させるが、頻発するとエラー率が上がる。</p>
+
+      <p>防止策はシンプル ── <strong>常に同じ順序でロックを取る</strong>。複数の行をロックする必要があるなら、ID 昇順で <code>FOR UPDATE</code> を取るルールを決める。これだけでデッドロックの大半は消える。</p>
+
+      <pre><code>-- 良い例: id 昇順でロック
+SELECT * FROM accounts
+WHERE id IN (1, 2)
+ORDER BY id
+FOR UPDATE;</code></pre>
+
+      <p>もうひとつ、<code>SELECT ... FOR UPDATE SKIP LOCKED</code> という強力な機能を覚えておく。ジョブキューやタスクキューで「次の未処理タスクを取って、他のワーカーには見せない」というパターンに完璧に合う:</p>
+
+      <pre><code>-- ワーカーが次のタスクを掴む
+SELECT * FROM tasks
+WHERE status = 'pending'
+ORDER BY created_at
+LIMIT 1
+FOR UPDATE SKIP LOCKED;</code></pre>
+
+      <p>そして最後に <strong>advisory lock</strong>。Postgres の <code>pg_advisory_lock()</code> / <code>pg_advisory_xact_lock()</code> は、テーブルの行に縛られない名前付きロック。Cron 重複防止や、外部システム連携の排他制御に便利。Redis のロックを使う前に、まず DB の advisory lock で済まないかを考える。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>MVCC ── 古い行を残して新しい行を書く。読み書きはブロックし合わない</li>
+          <li><b>思想</b>long-running transaction は VACUUM を妨げる害悪</li>
+          <li><b>実務</b>衝突多い → 悲観 (<code>FOR UPDATE</code>) / 衝突稀 → 楽観 (version 列)</li>
+          <li><b>実務</b>デッドロック防止は「常に同じ順序でロック」。<code>SKIP LOCKED</code> はジョブキューに最適</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 トランザクションと隔離</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 クエリプランナと最適化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章 クエリプランナと最適化
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">クエリプランナと最適化<br>── EXPLAIN を読む</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">プランナはコスト推定で動く。読み方が分かれば味方になる</p>
+    </header>
+
+    <div class="prose">
+      <p>SQL は <em>宣言的</em>な言語だ。「何が欲しいか」を書き、「どう取るか」はプランナが決める。プランナは複数の取り方 (実行計画) を生成し、それぞれにコストを見積もり、最も安いものを選んで実行する。<strong>クエリのチューニングとは、プランナにより良い計画を選ばせる作業</strong>であり、SQL を物理的に書き換える作業ではない。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>プランナのコストモデル</h3>
+
+      <p>Postgres のプランナはコスト計算機だ。テーブルサイズの推定、インデックスの選択肢、結合戦略、ソートの必要性、利用可能なメモリ (<code>work_mem</code>) などを入力に、各実行計画の<em>抽象的なコスト値</em>を弾き出す。コストの単位は時間ではなく、シーケンシャル I/O 1 ページぶんを 1.0 とした相対値。</p>
+
+      <p>この見積もりは <em>統計情報</em>に依存する。<code>ANALYZE</code> コマンドや autovacuum がテーブルから定期的にサンプリングし、<code>pg_statistic</code> に保存する。統計が古いと、プランナの判断は外れる。「最近大量に INSERT したテーブルが急に遅くなった」── 多くの場合、犯人は古い統計情報だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>三つの結合戦略</h3>
+
+      <p>JOIN の実装は三種類しかない。プランナはこの三つから一つを選ぶ。</p>
+
+      <table>
+        <thead><tr><th>戦略</th><th>仕組み</th><th>得意な状況</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nested Loop</strong></td><td>外側の各行に対して内側を引く</td><td>外側が小さく、内側にインデックスがある</td></tr>
+          <tr><td><strong>Hash Join</strong></td><td>小さい側でハッシュテーブルを作り、大きい側で引く</td><td>両方が大きく、等価結合</td></tr>
+          <tr><td><strong>Merge Join</strong></td><td>両方をソートして並行スキャン</td><td>両方が大きく、すでにソート済み</td></tr>
+        </tbody>
+      </table>
+
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 4 ── Three Join Strategies</span>
+          <h4 class="figure__title">三つの結合戦略</h4>
+          <svg class="figure__svg" viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <line x1="270" y1="40" x2="270" y2="290" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <line x1="535" y1="40" x2="535" y2="290" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <!-- Panel 1: Nested Loop -->
+            <text x="135" y="65" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="2">STRATEGY 01</text>
+            <text x="135" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">Nested Loop</text>
+            <rect x="50" y="120" width="60" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="80" y="115" text-anchor="middle" font-size="10" fill="#1c1917">A (小)</text>
+            <line x1="50" y1="140" x2="110" y2="140" stroke="#d6cfc1"/>
+            <line x1="50" y1="160" x2="110" y2="160" stroke="#d6cfc1"/>
+            <line x1="50" y1="180" x2="110" y2="180" stroke="#d6cfc1"/>
+            <line x1="50" y1="200" x2="110" y2="200" stroke="#d6cfc1"/>
+            <line x1="115" y1="150" x2="155" y2="150" stroke="#a01c1c" stroke-width="1"/>
+            <polygon points="155,150 150,146 150,154" fill="#a01c1c"/>
+            <line x1="115" y1="170" x2="155" y2="170" stroke="#a01c1c" stroke-width="1"/>
+            <polygon points="155,170 150,166 150,174" fill="#a01c1c"/>
+            <line x1="115" y1="190" x2="155" y2="190" stroke="#a01c1c" stroke-width="1"/>
+            <polygon points="155,190 150,186 150,194" fill="#a01c1c"/>
+            <rect x="160" y="120" width="60" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="190" y="115" text-anchor="middle" font-size="10" fill="#1c1917">B (大)</text>
+            <text x="190" y="170" text-anchor="middle" font-size="9" fill="#8b6914" font-style="italic">+ index</text>
+            <text x="135" y="255" text-anchor="middle" font-size="10" fill="#3f3a35">外側を走査 → 内側を引く</text>
+            <text x="135" y="273" text-anchor="middle" font-size="9" fill="#6b6359" font-style="italic">外側が小・内側にindex で速い</text>
+            <!-- Panel 2: Hash Join -->
+            <text x="400" y="65" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="2">STRATEGY 02</text>
+            <text x="400" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">Hash Join</text>
+            <rect x="290" y="125" width="55" height="60" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="318" y="120" text-anchor="middle" font-size="10" fill="#1c1917">A (小)</text>
+            <line x1="350" y1="155" x2="385" y2="155" stroke="#8b6914" stroke-width="1.5"/>
+            <polygon points="385,155 380,151 380,159" fill="#8b6914"/>
+            <text x="367" y="147" text-anchor="middle" font-size="9" fill="#8b6914" font-style="italic">build</text>
+            <rect x="390" y="120" width="65" height="80" fill="#1c1917" stroke="#a01c1c" stroke-width="1.5"/>
+            <text x="422" y="143" text-anchor="middle" font-size="9" fill="#f4e8c1" font-style="italic">Hash</text>
+            <text x="422" y="160" text-anchor="middle" font-size="9" fill="#f4e8c1" font-style="italic">Table</text>
+            <text x="422" y="178" text-anchor="middle" font-size="8" fill="#d6cfc1" font-style="italic">in mem</text>
+            <line x1="510" y1="155" x2="475" y2="155" stroke="#a01c1c" stroke-width="1.5"/>
+            <polygon points="475,155 480,151 480,159" fill="#a01c1c"/>
+            <text x="492" y="147" text-anchor="middle" font-size="9" fill="#a01c1c" font-style="italic">probe</text>
+            <rect x="465" y="120" width="55" height="105" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="492" y="115" text-anchor="middle" font-size="10" fill="#1c1917">B (大)</text>
+            <text x="400" y="255" text-anchor="middle" font-size="10" fill="#3f3a35">小さい側でハッシュを作る</text>
+            <text x="400" y="273" text-anchor="middle" font-size="9" fill="#6b6359" font-style="italic">work_mem に収まる範囲で最速</text>
+            <!-- Panel 3: Merge Join -->
+            <text x="665" y="65" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="2">STRATEGY 03</text>
+            <text x="665" y="86" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">Merge Join</text>
+            <rect x="560" y="120" width="55" height="105" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="587" y="115" text-anchor="middle" font-size="10" fill="#1c1917">A sorted</text>
+            <line x1="560" y1="140" x2="615" y2="140" stroke="#d6cfc1"/>
+            <line x1="560" y1="160" x2="615" y2="160" stroke="#d6cfc1"/>
+            <line x1="560" y1="180" x2="615" y2="180" stroke="#d6cfc1"/>
+            <line x1="560" y1="200" x2="615" y2="200" stroke="#d6cfc1"/>
+            <text x="587" y="155" text-anchor="middle" font-size="8" fill="#6b6359">1</text>
+            <text x="587" y="173" text-anchor="middle" font-size="8" fill="#6b6359">2</text>
+            <text x="587" y="193" text-anchor="middle" font-size="8" fill="#6b6359">3</text>
+            <line x1="640" y1="125" x2="640" y2="220" stroke="#a01c1c" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <polygon points="640,220 636,213 644,213" fill="#a01c1c"/>
+            <rect x="660" y="120" width="55" height="105" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="687" y="115" text-anchor="middle" font-size="10" fill="#1c1917">B sorted</text>
+            <line x1="660" y1="140" x2="715" y2="140" stroke="#d6cfc1"/>
+            <line x1="660" y1="160" x2="715" y2="160" stroke="#d6cfc1"/>
+            <line x1="660" y1="180" x2="715" y2="180" stroke="#d6cfc1"/>
+            <line x1="660" y1="200" x2="715" y2="200" stroke="#d6cfc1"/>
+            <text x="687" y="155" text-anchor="middle" font-size="8" fill="#6b6359">1</text>
+            <text x="687" y="173" text-anchor="middle" font-size="8" fill="#6b6359">3</text>
+            <text x="687" y="193" text-anchor="middle" font-size="8" fill="#6b6359">5</text>
+            <text x="665" y="255" text-anchor="middle" font-size="10" fill="#3f3a35">両側ソート済み・並行スキャン</text>
+            <text x="665" y="273" text-anchor="middle" font-size="9" fill="#6b6359" font-style="italic">既にソート済みのときに勝つ</text>
+          </svg>
+          <p class="figure__caption">JOIN の実装は三戦略しかない。プランナはデータサイズとインデックスから最適なものを選ぶ。エンジニアの仕事は「プランナが正しく選べる状況を整える」こと。</p>
+        </div>
+      </figure>
+
+      <p>「どれが速い」という普遍的な答えはなく、データサイズとインデックスの組み合わせで最適解が変わる。プランナがこの選択をするので、エンジニアは <em>プランナが正しく選べる状況を整える</em>のが仕事。具体的には、適切なインデックスを張り、統計情報を新鮮に保ち、サブクエリの構造を素直に書く。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>EXPLAIN ANALYZE を読む</h3>
+
+      <p>遅いクエリに出会ったら、まず <code>EXPLAIN ANALYZE</code> を打つ。<code>EXPLAIN</code> だけだと推定値、<code>EXPLAIN ANALYZE</code> は実際に実行して実測値も出す:</p>
+
+      <pre><code>EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT u.name, COUNT(o.id)
+FROM users u
+LEFT JOIN orders o ON o.user_id = u.id
+WHERE u.created_at > '2026-01-01'
+GROUP BY u.id;</code></pre>
+
+      <p>読み方の急所:</p>
+
+      <ul>
+        <li><strong>木構造で読む。</strong>下から上へ、内側から外側へ。インデント深いほど内側</li>
+        <li><strong>cost と actual time の乖離を見る。</strong>推定 100 行で実測 1,000,000 行なら、統計情報が腐っている</li>
+        <li><strong>Seq Scan を疑う。</strong>大きいテーブルの全スキャンは、たいていインデックスが足りていない</li>
+        <li><strong>Filter で大量を捨てているなら、その条件をインデックスに含める</strong></li>
+        <li><strong>Rows Removed by Filter の数字</strong>が大きいと、無駄な行を取って捨てているサイン</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>N+1 を見つけて潰す</h3>
+
+      <p>ORM が普及した世界で最頻出のアンチパターンが <strong>N+1 クエリ</strong>だ。「ユーザー一覧を取得 (1 クエリ)」「各ユーザーの注文数を取得 (N クエリ)」── 合計 N+1 クエリ走る。一見正しく動くが、ユーザーが千人いれば千一回 DB を叩く。</p>
+
+      <p>検出と対策:</p>
+
+      <ul>
+        <li><strong>ログを見る。</strong>同じ形のクエリが連続して大量に出ていたら N+1</li>
+        <li><strong>ORM のクエリログを開発時に標準で出す。</strong>Rails の <code>bullet</code>、Django の <code>django-debug-toolbar</code>、Prisma の <code>logger</code>。N+1 検出ツールを CI に入れる手もある</li>
+        <li><strong>JOIN か IN(...) で一括取得。</strong>Rails なら <code>includes</code>、Django なら <code>select_related</code> / <code>prefetch_related</code></li>
+        <li><strong>そもそも一発の SQL で書けないか</strong>考える。集計なら GROUP BY、ランキングなら window 関数</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>work_mem と一時ファイル</h3>
+
+      <p>ハッシュ結合やソートが <code>work_mem</code> に収まらないと、ディスク上の一時ファイルにあふれる。これが起きると劇的に遅くなる。EXPLAIN で <code>external merge Disk: 256000kB</code> のような表示があれば、それは赤旗だ。</p>
+
+      <p>対策は二つ。(a) <code>work_mem</code> を上げる (全体だと危険なのでセッション単位で <code>SET work_mem</code>)。(b) ソート対象を絞る (WHERE で先に削る、LIMIT を効かせる)。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>遅い SQL の犯人は、ほぼ常にプランナの選択ではなく、人間の側にある。</strong>足りないインデックス、腐った統計、必要以上に広い JOIN、ORM の N+1 ── プランナを責める前に、これらを順に潰す。EXPLAIN ANALYZE が読めれば、99% の遅さは自分で解決できる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>プランナはコスト推定で動く。統計情報が燃料</li>
+          <li><b>思想</b>JOIN は三戦略 (nested loop / hash / merge) しかない</li>
+          <li><b>実務</b>遅いクエリは EXPLAIN ANALYZE。cost vs actual の乖離・Seq Scan・Filter 捨てを疑う</li>
+          <li><b>実務</b>N+1 を CI で検出する。work_mem 不足は一時ファイル落ちで分かる</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 MVCC と並行制御</span>
+      </a>
+      <a href="#ch9" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第9章 スキーマ進化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章 スキーマ進化
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER NINE</span>
+      <h2 class="chapter__title">スキーマ進化<br>── expand-contract で本番を生かす</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">ゼロダウンタイムは祈りではなく、手順</p>
+    </header>
+
+    <div class="prose">
+      <p>スキーマ設計の最後の壁は、<em>本番で動いているテーブルをどう変えるか</em>だ。テーブルが空っぽなら何でもできる。1,000 万行入って、24 時間トラフィックが来ているテーブルでは、軽率な ALTER 一発でサービスが止まる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>parallel change の原則</h3>
+
+      <p>ゼロダウンタイムのスキーマ変更の中核は <strong>expand-contract</strong> (parallel change とも呼ばれる) というパターンだ。考え方はこう ── <em>古い形と新しい形を一時的に共存させ、段階的に移行する</em>。</p>
+
+      <ol>
+        <li><strong>Expand (拡張)</strong> ── 新しい構造を追加する。古い構造はそのまま残す</li>
+        <li><strong>Backfill (埋め込み)</strong> ── 古いデータを新しい構造に複写する。バッチで分割実行</li>
+        <li><strong>Switch (切替)</strong> ── アプリの書き込み・読み込みを新しい構造に向ける</li>
+        <li><strong>Contract (収縮)</strong> ── 古い構造への参照がなくなったことを確認してから削除</li>
+      </ol>
+
+      <p>この四段階はそれぞれ独立したデプロイで進める。各段階で「アプリの旧バージョンも新バージョンも動く」という後方互換性を保つ。これが祈りではなく手順としてのゼロダウンタイムだ。</p>
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 5 ── Expand-Contract Timeline</span>
+          <h4 class="figure__title">expand-contract の四フェーズ</h4>
+          <svg class="figure__svg" viewBox="0 0 800 410" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <!-- Phase headers -->
+            <text x="160" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PHASE 01</text>
+            <text x="160" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">EXPAND</text>
+            <text x="320" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PHASE 02</text>
+            <text x="320" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">BACKFILL</text>
+            <text x="480" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="3">PHASE 03</text>
+            <text x="480" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">SWITCH</text>
+            <text x="640" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#a01c1c" letter-spacing="3">PHASE 04</text>
+            <text x="640" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">CONTRACT</text>
+            <!-- Vertical dividers -->
+            <line x1="240" y1="80" x2="240" y2="320" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <line x1="400" y1="80" x2="400" y2="320" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <line x1="560" y1="80" x2="560" y2="320" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <!-- Old column row -->
+            <text x="50" y="130" font-size="10" fill="#6b6359" font-style="italic">old col</text>
+            <rect x="80" y="110" width="160" height="32" fill="#1a3a5c" opacity="0.22" stroke="#1a3a5c"/>
+            <text x="160" y="131" text-anchor="middle" font-size="9" fill="#1a3a5c">full data</text>
+            <rect x="240" y="110" width="160" height="32" fill="#1a3a5c" opacity="0.22" stroke="#1a3a5c"/>
+            <text x="320" y="131" text-anchor="middle" font-size="9" fill="#1a3a5c">full data</text>
+            <rect x="400" y="110" width="160" height="32" fill="#1a3a5c" opacity="0.1" stroke="#1a3a5c" stroke-dasharray="3,3"/>
+            <text x="480" y="131" text-anchor="middle" font-size="9" fill="#6b6359" font-style="italic">unused (まだ存在)</text>
+            <rect x="560" y="110" width="160" height="32" fill="none" stroke="#a01c1c" stroke-dasharray="3,3"/>
+            <text x="640" y="131" text-anchor="middle" font-size="9" fill="#a01c1c">DROP</text>
+            <!-- New column row -->
+            <text x="50" y="190" font-size="10" fill="#a01c1c" font-style="italic">new col</text>
+            <rect x="80" y="170" width="160" height="32" fill="none" stroke="#a01c1c" stroke-dasharray="3,3"/>
+            <text x="160" y="191" text-anchor="middle" font-size="9" fill="#a01c1c">empty (ADD COLUMN)</text>
+            <rect x="240" y="170" width="160" height="32" fill="#a01c1c" opacity="0.18" stroke="#a01c1c"/>
+            <text x="320" y="191" text-anchor="middle" font-size="9" fill="#a01c1c">filling ↓</text>
+            <rect x="400" y="170" width="160" height="32" fill="#a01c1c" opacity="0.35" stroke="#a01c1c"/>
+            <text x="480" y="191" text-anchor="middle" font-size="9" fill="#a01c1c">full + reads</text>
+            <rect x="560" y="170" width="160" height="32" fill="#a01c1c" opacity="0.35" stroke="#a01c1c"/>
+            <text x="640" y="191" text-anchor="middle" font-size="9" fill="#a01c1c">final state</text>
+            <!-- App version bands -->
+            <line x1="80" y1="240" x2="720" y2="240" stroke="#d6cfc1" stroke-width="0.5"/>
+            <rect x="80" y="225" width="400" height="22" fill="#8b6914" opacity="0.18"/>
+            <text x="280" y="240" text-anchor="middle" font-size="10" fill="#8b6914">old app: reads old col</text>
+            <rect x="400" y="255" width="320" height="22" fill="#a01c1c" opacity="0.18"/>
+            <text x="560" y="270" text-anchor="middle" font-size="10" fill="#a01c1c">new app: reads new col</text>
+            <text x="400" y="305" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#3f3a35">↑ 旧/新両アプリが並走する重なり (= ゼロダウンタイム)</text>
+            <!-- Bottom note -->
+            <text x="400" y="385" text-anchor="middle" font-size="11" fill="#3f3a35" font-style="italic">各フェーズは独立したデプロイ。後方互換を保ったまま、段階的に切り替える</text>
+          </svg>
+          <p class="figure__caption">同じスキーマ変更を「拡張 → 埋め込み → 切替 → 収縮」の四段階に分け、各段階で旧/新両方のアプリが動くようにする。これがゼロダウンタイムの実装パターン。</p>
+        </div>
+      </figure>
+
+
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Xata 公式ブログ</span>
+        <span class="sidenote__original">"The expand-contract pattern tackles these challenges by splitting schema changes into two phases: Expand and Contract. This pattern avoids downtime and allows old and new versions of your application to coexist while the migration is underway."</span>
+        <span class="sidenote__attr">— <a href="https://xata.io/blog/pgroll-expand-contract" target="_blank" rel="noopener">Schema changes and the power of expand-contract</a></span>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>危険な操作と安全な操作</h3>
+
+      <p>Postgres の DDL は、内部でテーブルロックを取るものとそうでないものがある。これを知らないと事故る。</p>
+
+      <table>
+        <thead><tr><th>操作</th><th>本番安全性</th><th>備考</th></tr></thead>
+        <tbody>
+          <tr><td>列を追加 (DEFAULT なし)</td><td>安全</td><td>Postgres 11+ で全行書き換え不要</td></tr>
+          <tr><td>列を追加 (DEFAULT あり)</td><td>条件付き安全</td><td>静的 DEFAULT は安全、動的 (now() 等) は全行書き換え</td></tr>
+          <tr><td>NOT NULL 追加 (新列)</td><td>注意</td><td>既存値が NULL の場合エラー</td></tr>
+          <tr><td>NOT NULL 追加 (既存列)</td><td>注意</td><td>制約検証中、テーブル全体をスキャン</td></tr>
+          <tr><td>列名変更</td><td>条件付き</td><td>瞬時だがアプリが旧名を参照していると壊れる</td></tr>
+          <tr><td>列の型変更</td><td>危険</td><td>多くの場合、全行書き換え + 長時間ロック</td></tr>
+          <tr><td>列を削除</td><td>瞬時</td><td>論理的削除のみ。物理回収は VACUUM</td></tr>
+          <tr><td>インデックス作成</td><td>要 CONCURRENTLY</td><td>普通の CREATE INDEX はテーブル書き込みをブロック</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>列名変更を expand-contract で</h3>
+
+      <p>具体例として「<code>users.username</code> を <code>users.handle</code> にリネームしたい」を見る。素朴に <code>ALTER TABLE users RENAME COLUMN username TO handle;</code> は一見動くが、瞬時にアプリの旧バージョン (まだ <code>username</code> を参照している) が全滅する。</p>
+
+      <p>expand-contract での手順:</p>
+
+      <ol>
+        <li><strong>Expand</strong> ── <code>handle</code> 列を追加 (NULL 許容)、必要ならトリガーで <code>username</code> と双方向同期</li>
+        <li><strong>Backfill</strong> ── <code>UPDATE users SET handle = username</code> をバッチで実行 (1000 行ずつなど)</li>
+        <li><strong>Deploy (アプリ)</strong> ── アプリが <code>handle</code> を読み書きするように切替。書き込みは両方に書く期間を設ける</li>
+        <li><strong>Validate</strong> ── 旧 <code>username</code> 列への参照がコードベースとログから消えたことを確認</li>
+        <li><strong>Contract</strong> ── <code>username</code> 列を削除</li>
+      </ol>
+
+      <p>面倒だが、これがゼロダウンタイム本番運用の標準フォーマット。慣れると数日〜数週間の作業として淡々と回せる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ツールに頼る</h3>
+
+      <p>expand-contract を毎回手で組むのは大変なので、ツールが助けてくれる。</p>
+
+      <ul>
+        <li><strong>pgroll</strong> (Xata 社) ── スキーマを「ビュー」として複数バージョン共存させる。アプリは <code>SET search_path</code> で旧/新を切り替えるだけ</li>
+        <li><strong>Atlas</strong> ── 宣言的スキーマ管理、デストラクティブ変更の警告</li>
+        <li><strong>gh-ost / pt-online-schema-change</strong> ── MySQL 系のオンライン DDL ツール</li>
+        <li><strong>Django / Rails / Prisma のマイグレーション</strong> ── 基本機能は揃っているが、本番ゼロダウンタイムは追加配慮が必要 (CI で警告を出すなど)</li>
+      </ul>
+
+      <p>そして組織のルールとして決めるべきこと:</p>
+
+      <ul>
+        <li><strong>マイグレーションファイルは PR で必ずレビュー。</strong>誰かが見て「これ ALTER TYPE じゃない?」と気付ける形を保つ</li>
+        <li><strong>本番に流すマイグレーションは、staging で同等データに対して走らせる。</strong>所要時間とロック範囲を測る</li>
+        <li><strong>長時間かかる UPDATE はバッチで。</strong>一度に全行を更新しない。ロックタイムアウトを設定する</li>
+        <li><strong>ロールバック手順を書いてから流す。</strong>「これは戻せない」と分かったら、戻せる形に分割し直す</li>
+      </ul>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>ゼロダウンタイムの中核は expand-contract (parallel change)</li>
+          <li><b>思想</b>各段階で旧/新両方のアプリが動くよう後方互換を保つ</li>
+          <li><b>実務</b>Postgres の DDL には危険な操作と安全な操作がある。事前に表で確認</li>
+          <li><b>実務</b>マイグレーションは PR レビュー必須、staging で計測、ロールバック手順をセットで</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 クエリプランナと最適化</span>
+      </a>
+      <a href="#ch10" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第10章 マルチテナント設計</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章 マルチテナント設計
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TEN</span>
+      <h2 class="chapter__title">マルチテナント設計<br>── テナント分離の三つのパターン</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">SaaS を作るなら避けて通れない、最初に決めるべき構造</p>
+    </header>
+
+    <div class="prose">
+      <p>SaaS を作るなら、避けて通れないのが <strong>複数の顧客 (テナント) のデータをどう同居させ、どう分離するか</strong>という設計だ。「最初から考えるべきか、後で導入できるか」── 答えはほぼ常に、<em>最初から</em>。後から足すのは expand-contract の長い旅になり、組織にとって最も高くつくマイグレーションの一つになる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>三つのパターン</h3>
+
+      <p>テナント分離の実装は、大きく分けて三つしかない。<em>論理的に分けるか、Postgres スキーマで分けるか、データベースごと分けるか</em>。それぞれにコスト、隔離度、運用負荷のトレードオフがある。</p>
+
+      <table>
+        <thead><tr><th>パターン</th><th>分離単位</th><th>隔離度</th><th>運用コスト</th><th>典型的な向き先</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Shared Schema + RLS</strong></td><td>行 (<code>tenant_id</code>)</td><td>論理的</td><td>低</td><td>多数の中小テナント (B2C SaaS, 早期 B2B)</td></tr>
+          <tr><td><strong>Schema per Tenant</strong></td><td>Postgres スキーマ</td><td>名前空間レベル</td><td>中</td><td>中規模テナント、カスタマイズあり</td></tr>
+          <tr><td><strong>Database per Tenant</strong></td><td>データベース</td><td>物理的</td><td>高</td><td>規制業界 (医療、金融)、エンタープライズ</td></tr>
+        </tbody>
+      </table>
+
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 6 ── Three Multitenancy Patterns</span>
+          <h4 class="figure__title">マルチテナント分離の三パターン</h4>
+          <svg class="figure__svg" viewBox="0 0 800 410" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <line x1="270" y1="40" x2="270" y2="310" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <line x1="535" y1="40" x2="535" y2="310" stroke="#d6cfc1" stroke-dasharray="3,3"/>
+            <!-- Panel 1: Shared Schema + RLS -->
+            <text x="135" y="55" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="2">PATTERN 01</text>
+            <text x="135" y="77" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Shared Schema</text>
+            <text x="135" y="93" text-anchor="middle" font-size="10" fill="#6b6359" font-style="italic">+ Row-Level Security</text>
+            <rect x="40" y="115" width="195" height="160" fill="none" stroke="#1c1917" stroke-width="2"/>
+            <text x="55" y="110" font-family="Cormorant Garamond, serif" font-style="italic" font-size="10" fill="#1c1917">database</text>
+            <rect x="60" y="140" width="155" height="115" fill="#f3ede2" stroke="#6b6359" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="75" y="135" font-size="9" fill="#6b6359" font-style="italic">schema: public</text>
+            <rect x="80" y="160" width="115" height="40" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="138" y="180" text-anchor="middle" font-size="11" fill="#1c1917">users</text>
+            <text x="138" y="195" text-anchor="middle" font-size="9" fill="#a01c1c">tenant_id, ...</text>
+            <circle cx="92" cy="220" r="5" fill="#1a3a5c"/>
+            <text x="92" y="239" text-anchor="middle" font-size="8" fill="#6b6359">T1</text>
+            <circle cx="118" cy="220" r="5" fill="#a01c1c"/>
+            <text x="118" y="239" text-anchor="middle" font-size="8" fill="#6b6359">T2</text>
+            <circle cx="144" cy="220" r="5" fill="#8b6914"/>
+            <text x="144" y="239" text-anchor="middle" font-size="8" fill="#6b6359">T3</text>
+            <circle cx="170" cy="220" r="5" fill="#1a3a5c"/>
+            <text x="170" y="239" text-anchor="middle" font-size="8" fill="#6b6359">T1</text>
+            <text x="135" y="295" text-anchor="middle" font-size="9" fill="#3f3a35">行で分離 (tenant_id + RLS)</text>
+            <!-- Panel 2: Schema per Tenant -->
+            <text x="400" y="55" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914" letter-spacing="2">PATTERN 02</text>
+            <text x="400" y="77" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Schema per Tenant</text>
+            <rect x="290" y="115" width="220" height="160" fill="none" stroke="#1c1917" stroke-width="2"/>
+            <text x="305" y="110" font-family="Cormorant Garamond, serif" font-style="italic" font-size="10" fill="#1c1917">database</text>
+            <rect x="305" y="135" width="60" height="125" fill="#f3ede2" stroke="#1a3a5c" stroke-width="1"/>
+            <text x="335" y="130" text-anchor="middle" font-size="9" fill="#1a3a5c" font-style="italic">tenant_a</text>
+            <rect x="315" y="150" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="335" y="168" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="315" y="190" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="335" y="208" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <rect x="370" y="135" width="60" height="125" fill="#f3ede2" stroke="#a01c1c" stroke-width="1"/>
+            <text x="400" y="130" text-anchor="middle" font-size="9" fill="#a01c1c" font-style="italic">tenant_b</text>
+            <rect x="380" y="150" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="400" y="168" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="380" y="190" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="400" y="208" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <rect x="435" y="135" width="60" height="125" fill="#f3ede2" stroke="#8b6914" stroke-width="1"/>
+            <text x="465" y="130" text-anchor="middle" font-size="9" fill="#8b6914" font-style="italic">tenant_c</text>
+            <rect x="445" y="150" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="465" y="168" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="445" y="190" width="40" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="465" y="208" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <text x="400" y="295" text-anchor="middle" font-size="9" fill="#3f3a35">スキーマで分離 (namespace)</text>
+            <!-- Panel 3: Database per Tenant -->
+            <text x="665" y="55" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#a01c1c" letter-spacing="2">PATTERN 03</text>
+            <text x="665" y="77" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Database per Tenant</text>
+            <rect x="555" y="115" width="65" height="160" fill="none" stroke="#1a3a5c" stroke-width="2"/>
+            <text x="588" y="110" text-anchor="middle" font-size="9" fill="#1a3a5c" font-style="italic">db_tenant_a</text>
+            <rect x="565" y="140" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="588" y="158" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="565" y="180" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="588" y="198" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <rect x="635" y="115" width="65" height="160" fill="none" stroke="#a01c1c" stroke-width="2"/>
+            <text x="668" y="110" text-anchor="middle" font-size="9" fill="#a01c1c" font-style="italic">db_tenant_b</text>
+            <rect x="645" y="140" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="668" y="158" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="645" y="180" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="668" y="198" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <rect x="715" y="115" width="65" height="160" fill="none" stroke="#8b6914" stroke-width="2"/>
+            <text x="748" y="110" text-anchor="middle" font-size="9" fill="#8b6914" font-style="italic">db_tenant_c</text>
+            <rect x="725" y="140" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="748" y="158" text-anchor="middle" font-size="9" fill="#1c1917">users</text>
+            <rect x="725" y="180" width="45" height="30" fill="#faf7f2" stroke="#1c1917"/>
+            <text x="748" y="198" text-anchor="middle" font-size="9" fill="#1c1917">orders</text>
+            <text x="665" y="295" text-anchor="middle" font-size="9" fill="#3f3a35">DBレベルで物理分離</text>
+            <!-- Isolation axis -->
+            <line x1="80" y1="350" x2="720" y2="350" stroke="#1c1917" stroke-width="1.5"/>
+            <polygon points="720,350 712,345 712,355" fill="#1c1917"/>
+            <text x="80" y="370" font-size="10" fill="#6b6359">低</text>
+            <text x="720" y="370" text-anchor="end" font-size="10" fill="#6b6359">高</text>
+            <text x="400" y="390" text-anchor="middle" font-size="11" fill="#3f3a35" font-style="italic">隔離度 / 運用コスト ── 必要なだけ右へ進む</text>
+          </svg>
+          <p class="figure__caption">三つのパターンは隔離度と運用コストのトレードオフ。Shared Schema + RLS から始めて、ホットなテナントだけ右へ移していくのが現代の作法。</p>
+        </div>
+      </figure>
+
+      <p><strong>Shared Schema + RLS</strong> は、すべてのテナントが同じテーブルを共有する。各行に <code>tenant_id</code> を持ち、Postgres の Row-Level Security (RLS) で「自分のテナントの行しか見えない」状態を作る。テーブル数が増えない・運用がシンプル・コストが低い、と利点は明快だが、テーブルが巨大化したときにテナント間で性能干渉が起きる。隔離はあくまで論理的なので、RLS ポリシーやアプリのバグでテナント間漏洩のリスクが残る。</p>
+
+      <p><strong>Schema per Tenant</strong> は、Postgres の「スキーマ (namespace)」機能を使い、テナントごとに同じ構造のスキーマを持つ。<code>tenant_a.users</code>, <code>tenant_b.users</code> のように、テーブルの完全コピーが各テナントに存在する。<code>SET search_path = tenant_a, public;</code> でアクセスするスキーマを切り替える。隔離度は一段上がる ── テナント単位のバックアップ、削除、移行が一発で済む。引き換えに、スキーマ数が増えるとマイグレーションが厄介になる (全スキーマに DDL を流す)。Postgres は数千スキーマまでなら問題なく扱えるが、数万に到達するとカタログテーブルが膨らむ。</p>
+
+      <p><strong>Database per Tenant</strong> は、データベース自体を分ける。最も強い隔離。HIPAA など規制要件で「データが他組織と物理的に混在してはならない」と書かれている場合は、これが唯一の選択肢になる。引き換えに運用コストが最大で、テナント間横断の集計はほぼ不可能になる (アプリ層で集計するしかない)。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>Shared Schema + RLS から始めて、必要に応じて分離していく</strong>のが現代の作法。最初から Database per Tenant にすると、運用コストでスタートアップが潰れる。逆に、ホットなテナントだけ後から Schema や Database に切り出す<em>段階的な進化</em>は実装可能で、それが現代の B2B SaaS でよく見られる構成。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>tenant_id を全テーブルに最初から</h3>
+
+      <p>Shared Schema + RLS で始めるとき、規律は次の通り。</p>
+
+      <ul>
+        <li><strong>すべての業務テーブルに <code>tenant_id UUID NOT NULL</code> を最初から仕込む。</strong>後から追加するのは、全テーブルへの ALTER + バックフィル + 外部キー再設計 + RLS 設定の総工事になる</li>
+        <li><strong>主キー / ユニーク制約に <code>tenant_id</code> を含める。</strong><code>UNIQUE(tenant_id, email)</code> のように。「メールアドレスはテナント内で一意」が正しい制約</li>
+        <li><strong>外部キーに <code>tenant_id</code> を含める。</strong><code>FOREIGN KEY (parent_id, tenant_id) REFERENCES parents(id, tenant_id)</code>。これで <em>誤って他テナントの行を参照する事故</em>を DB レベルで防げる</li>
+        <li><strong>インデックスの先頭は <code>tenant_id</code>。</strong>あらゆるクエリが <code>WHERE tenant_id = ?</code> を持つので、複合インデックスの最左に置く</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Row-Level Security の設定</h3>
+
+      <p>アプリ層の <code>WHERE tenant_id = ?</code> だけに頼ると、一箇所書き忘れただけで本番でテナント間漏洩が起きる。DB が保証する形に持っていくのが <strong>RLS</strong> だ。</p>
+
+      <pre><code>-- 1. テーブルに RLS を有効化
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- 2. 「自分のテナントの行しか見えない」ポリシーを定義
+CREATE POLICY tenant_isolation ON users
+  USING (tenant_id = current_setting('app.current_tenant')::uuid);
+
+-- 3. アプリは接続ごとに current_tenant をセット
+SET app.current_tenant = 'a1b2c3d4-...'; -- リクエスト開始時
+SELECT * FROM users; -- 自動でテナント絞り込み</code></pre>
+
+      <p>これで、たとえアプリのバグで <code>WHERE</code> を書き忘れても、別テナントの行は返らない。Supabase をはじめ、近年の SaaS スターターキットの多くがこの設計を採用している。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── RLS と性能</span>
+        RLS ポリシーは、内部的にクエリの WHERE 条件に自動追加される形で動く。簡単な等価条件 (<code>tenant_id = ?</code>) なら性能影響はほぼゼロだが、ポリシー内で副問い合わせを書くと劇的に重くなる。RLS は「シンプルな等価フィルタ」で使い、複雑な権限ロジックはアプリ層で書く ── これが安全な使い方。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>段階的な進化 ── ホットなテナントを分離する</h3>
+
+      <p>B2B SaaS では、トップ 10% のテナントが負荷の 80% を占めるパターンが多い (パレートの法則)。Shared Schema で全テナントを抱え続けると、巨大テナントの重いクエリが小さなテナントのレスポンスを押し下げる ── 「ノイジーネイバー (noisy neighbor) 問題」だ。</p>
+
+      <p>このとき採る手は二つ。</p>
+
+      <ol>
+        <li><strong>ホットなテナントを Schema per Tenant に切り出す。</strong>該当テナントだけ <code>tenant_xyz</code> スキーマにテーブルを複製し、アプリが <code>search_path</code> で切替えるようにする。残り全テナントは Shared Schema のまま</li>
+        <li><strong>ホットなテナントを Database per Tenant に切り出す。</strong>別 RDS / 別 Aurora インスタンスに移して、リソースを物理的に分ける。コネクション文字列をテナント ID で切替</li>
+      </ol>
+
+      <p>どちらも、<em>最初から tenant_id を仕込んでおいた</em>からこそ可能な引き出しだ。テナント単位でデータを切り出す SQL が一発で書ける。これが「最初から tenant_id」の真価。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>パターン選択の判断軸</h3>
+
+      <table>
+        <thead><tr><th>条件</th><th>推奨</th></tr></thead>
+        <tbody>
+          <tr><td>テナント数 1,000 以上が見込まれる</td><td>Shared Schema + RLS</td></tr>
+          <tr><td>テナント数 数十〜数百、テナントごとにカスタマイズがある</td><td>Schema per Tenant</td></tr>
+          <tr><td>医療・金融など物理隔離が規制で要求される</td><td>Database per Tenant</td></tr>
+          <tr><td>テナント横断の集計・分析が頻繁にある</td><td>Shared Schema + RLS</td></tr>
+          <tr><td>大口テナントが負荷の大半を占めている</td><td>Shared が基本、ホットだけ Schema/DB に分離</td></tr>
+          <tr><td>「とにかく最速で動かしたい」</td><td>Shared Schema + RLS</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>避けるべき罠</h3>
+
+      <ul>
+        <li><strong>tenant_id を「後から追加」する。</strong>全テーブルへの ALTER、全行のバックフィル、全外部キーの再設計、RLS 設定 ── 数ヶ月の総工事になる。最初から仕込んでおけば回避できる</li>
+        <li><strong>アプリ層の <code>WHERE tenant_id = ?</code> だけに頼る。</strong>一箇所の書き忘れがテナント間漏洩を引き起こす。RLS で DB が保証する形に</li>
+        <li><strong>「テナント情報」を共有テーブルに残すのを忘れる。</strong>Schema per Tenant に移行しても、テナント自体のメタ情報 (会社名、契約状態など) は共有スキーマに残す。これは多くの設計者がはまる</li>
+        <li><strong>RLS ポリシーをテストしない。</strong>「ポリシーがあるから安全」と思い込まず、別テナントを装ったクエリが本当に弾かれることを CI でテスト</li>
+        <li><strong>テナント増加で破綻するキーを使う。</strong>テナントごとに <code>SERIAL</code> を独立採番したくなる誘惑があるが、Shared Schema ではグローバルなサロゲートキー (UUIDv7) が正解</li>
+      </ul>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>三パターン: Shared+RLS / Schema per Tenant / Database per Tenant</li>
+          <li><b>思想</b>Shared+RLS から始めて、必要に応じて段階的に分離していく</li>
+          <li><b>実務</b><code>tenant_id UUID NOT NULL</code> を全業務テーブルに最初から</li>
+          <li><b>実務</b>RLS でテナント分離を DB が保証する形に。アプリ層の WHERE は補助</li>
+          <li><b>実務</b>ホットテナントの分離は、tenant_id を持っているからこそ可能</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch9" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第9章 スキーマ進化</span>
+      </a>
+      <a href="#ch11" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第11章 拡張性</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第11章 拡張性
+     ============================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ELEVEN</span>
+      <h2 class="chapter__title">拡張性<br>── パーティション、レプリケーション、Postgres の広がり</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">単一インスタンスを越えて、PostgreSQL がどこまで伸びるか</p>
+    </header>
+
+    <div class="prose">
+      <p>テーブルが 10 億行になっても、トラフィックが秒間 10 万リクエストになっても、Postgres は伸ばし方を用意している。順序は決まっていて、<strong>(1) インデックスとクエリの最適化 → (2) 読み取りレプリカ → (3) パーティショニング → (4) シャーディング</strong>。この順で必要なだけ取り組む。一足飛びにシャーディングに行くのは典型的な over-engineering。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>パーティショニング ── 一つのテーブルを物理的に分ける</h3>
+
+      <p><strong>パーティショニング</strong>は、論理的には一つのテーブルを、物理的には複数の子テーブルに分割する仕組み。Postgres 11 以降の宣言的パーティショニング (declarative partitioning) を使うのが標準。クエリは親テーブルに対して書き、Postgres が適切な子テーブルにルーティングする (partition pruning)。</p>
+
+      <table>
+        <thead><tr><th>戦略</th><th>分割キー</th><th>典型的な用途</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Range</strong></td><td>範囲 (日付など)</td><td>時系列データ。月次・日次の分割</td></tr>
+          <tr><td><strong>List</strong></td><td>カテゴリ値の集合</td><td>地域、テナント、ステータス</td></tr>
+          <tr><td><strong>Hash</strong></td><td>キーのハッシュ値</td><td>均等分散したい、特定の鍵を持たない</td></tr>
+        </tbody>
+      </table>
+
+      <p>最大の恩恵は二つ。(a) <strong>クエリの絞り込み</strong> ── <code>WHERE created_at &gt; '2026-01-01'</code> が、その期間の子テーブルだけスキャンすればよくなる。(b) <strong>古いデータの安価な削除</strong> ── 子テーブルを <code>DETACH</code> して落とすだけ。<code>DELETE</code> でなく構造として消せる。</p>
+
+      <p>注意点もある。子テーブルの数が増えすぎると、プランナのオーバーヘッドが効いてくる。数十〜数百の子テーブルが目安。<code>pg_partman</code> 拡張で自動管理するのが現代の作法。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>レプリケーションとシャーディング</h3>
+
+      <p><strong>レプリケーション</strong>は同じデータを別インスタンスに複製する。Postgres の物理レプリケーション (streaming replication) が標準で、読み取り専用の <em>standby</em> を複数立てて読み取りを分散する。書き込みは依然として primary 一台に集中する点に注意。</p>
+
+      <p><strong>シャーディング</strong>は別物で、データを<em>水平に分割して別インスタンスに置く</em>。書き込みも分散できる代わりに、複雑性が桁違いに上がる。トランザクションの跨ぎ、JOIN の分散実行、再シャーディングの困難さ ── 簡単に「最後の手段」と言いたくなる重さがある。</p>
+
+      <p>シャーディング層を提供する Postgres エコシステム:</p>
+
+      <ul>
+        <li><strong>Citus</strong> ── Postgres 拡張として動く分散シャーディング。同じ Postgres SQL がそのまま動く</li>
+        <li><strong>YugabyteDB / CockroachDB</strong> ── Postgres 互換だが内部は分散ストレージ。シャードを意識せず使える</li>
+        <li><strong>アプリ層シャーディング</strong> ── アプリでテナントごとに DB を分けるなど。シンプルだが運用負荷</li>
+      </ul>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Postgres を「ほぼ唯一の正解」にする拡張モジュール</h3>
+
+      <p>Postgres の真の強さは、拡張モジュールで <em>多様なデータモデルを関係型の上に乗せられる</em>こと。「Postgres があれば他の DB はあまり要らない」と言われる根拠だ。</p>
+
+      <table>
+        <thead><tr><th>拡張</th><th>提供</th><th>代替を考えるべき DB</th></tr></thead>
+        <tbody>
+          <tr><td><strong>JSONB</strong> (組込)</td><td>スキーマレスな文書ストア</td><td>MongoDB</td></tr>
+          <tr><td><strong>pg_trgm</strong> (組込)</td><td>類似度・あいまい検索</td><td>Elasticsearch (軽い用途)</td></tr>
+          <tr><td><strong>tsvector / tsquery</strong> (組込)</td><td>多言語全文検索</td><td>Elasticsearch (中規模)</td></tr>
+          <tr><td><strong>pgvector</strong></td><td>ベクトル検索 (RAG, 類似度)</td><td>Pinecone, Weaviate</td></tr>
+          <tr><td><strong>PostGIS</strong></td><td>地理空間データと演算</td><td>専用地理 DB</td></tr>
+          <tr><td><strong>TimescaleDB</strong></td><td>時系列向け最適化</td><td>InfluxDB</td></tr>
+          <tr><td><strong>pg_partman</strong></td><td>パーティション自動管理</td><td>(なし)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── Vol.I との接続</span>
+        Vol.I 第5章は「PostgreSQL はほぼ唯一の正解」という強い主張をした。その理由の半分は拡張モジュールの広さにある。LLM の RAG パイプラインで pgvector を使い、地理アプリで PostGIS を使い、ログ分析で TimescaleDB を使い、ファクトテーブルで Citus を使う ── すべて同じ Postgres SQL で書ける。スタックがシンプルでなくなるが、運用する DB の数は減る。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>スケールへの段階的アプローチ</h3>
+
+      <p>「将来スケールするから」と言って最初からシャーディングするのは、よくある自滅パターン。実務的な段階:</p>
+
+      <ol>
+        <li><strong>ステージ0 (〜数十万行):</strong> 単一インスタンス + 適切なインデックス。何も足さない</li>
+        <li><strong>ステージ1 (〜数億行):</strong> インデックス見直し、N+1 撲滅、不要列の削除。VACUUM 設定の調整</li>
+        <li><strong>ステージ2 (〜数十億行):</strong> 読み取り専用 replica で読み取りを分散。pgbouncer で接続プール</li>
+        <li><strong>ステージ3 (〜数百億行):</strong> パーティショニング (時系列なら Range が最も効く)</li>
+        <li><strong>ステージ4 (それ以上):</strong> Citus 等のシャーディング、もしくは分散 SQL DB (YugabyteDB / CockroachDB) への移行</li>
+      </ol>
+
+      <p>多くのプロダクトはステージ1〜2 で十分に走り続ける。「シャーディングが必要だ」と気付くのは、それ自体が組織のサイズを示すマイルストーンで、その時には専任の DBA がいる規模になっているはずだ。<strong>設計時の判断は、未来のパーティション化を妨げない形にしておく</strong>こと。たとえばパーティションキーになりうる <code>created_at</code> や <code>tenant_id</code> を主要テーブルに必ず持たせる ── これだけで、将来パーティション化が必要になったときの工数が大幅に減る。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>スケール順序 ── インデックス → replica → パーティション → シャーディング</li>
+          <li><b>思想</b>Postgres 拡張 (pgvector / PostGIS / TimescaleDB) で多くの専門 DB を代替できる</li>
+          <li><b>実務</b>多くのプロダクトはステージ 1〜2 で完走する</li>
+          <li><b>実務</b>設計時に「将来パーティション可能か」を意識する (パーティションキー候補を持たせる)</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch10" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第10章 マルチテナント設計</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">設計判断の集積として</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">スキーマは、後から書く長い手紙</p>
+    </header>
+
+    <div class="prose">
+      <p>十章を辿ってきた。<strong>関係モデルの原典</strong>、<strong>正規化と非正規化</strong>、<strong>主キー設計</strong>、<strong>リレーションと外部キー</strong>、<strong>インデックスの内部</strong>、<strong>ACID と隔離レベル</strong>、<strong>MVCC と並行制御</strong>、<strong>クエリ最適化</strong>、<strong>expand-contract のスキーマ進化</strong>、<strong>パーティションと Postgres の広がり</strong>。</p>
+
+      <p>これらの章はバラバラに見えて、ひとつの姿勢で繋がっている ── <em>スキーマは長期意思決定の集積である</em>という認識だ。一つひとつの主キー選択、一つひとつの外部キー、一つひとつのインデックスは、それぞれは小さな判断に見える。でも、合わせると組織が次の十年に渡って使う「契約書」になる。</p>
+
+      <p>だから本書の章は、どれも「<em>後から書く長い手紙</em>」のような重みを持つ判断だった。今日 UUIDv7 を選んだあなたが、五年後の自分にどう読まれるか。今日 <code>ON DELETE CASCADE</code> を書いたあなたが、十年後の GDPR 対応でどう感謝されるか、あるいは恨まれるか。</p>
+
+      <p>同時に、本書はもう一つの主張を裏に持っていた ── <strong>関係モデルは、いまも (そしてこれからも) 最も汎用的なデータの組織法だ</strong>。NoSQL の波、AI 生成の波、ORM 万能の風潮が来ても、テーブル・行・関係という三つの基本概念は揺らがない。むしろ、それらを十分に理解していないと、上に乗っかった抽象を使いこなせない。</p>
+
+      <blockquote>テーブルは消えない。<br>あなたが書く SQL も、十年後の誰かが読んでいる。</blockquote>
+
+      <p>もし本書を読み終えて、自分のリポジトリのスキーマファイルを開き直したくなったなら、それがこの本の目的だ。<em>関係を引き直す</em>のはいつでもできる。expand-contract という手順がある。</p>
+
+      <p>あなたのスキーマが、長く生き残りますように。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch11" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第11章 拡張性</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参 ── 出典一覧</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">REFERENCES</span>
+      <h2 class="chapter__title">出典一覧</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">本書がよりかかった、関係モデルと Postgres の一次資料</p>
+    </header>
+
+    <div class="prose">
+      <ul class="bibliography">
+        <li><span class="bib__title">A Relational Model of Data for Large Shared Data Banks</span> ── E. F. Codd, Communications of the ACM, 1970. <a href="https://www.seas.upenn.edu/~zives/03f/cis550/codd.pdf" target="_blank" rel="noopener">PDF</a></li>
+        <li><span class="bib__title">Codd's 12 Rules</span> ── Wikipedia. <a href="https://en.wikipedia.org/wiki/Codd%27s_12_rules" target="_blank" rel="noopener">en.wikipedia.org/wiki/Codd's_12_rules</a></li>
+        <li><span class="bib__title">PostgreSQL 18: Concurrency Control</span> ── 公式ドキュメント. <a href="https://www.postgresql.org/docs/current/mvcc.html" target="_blank" rel="noopener">postgresql.org/docs/current/mvcc</a></li>
+        <li><span class="bib__title">PostgreSQL 18: Transaction Isolation</span> ── 公式ドキュメント. <a href="https://www.postgresql.org/docs/current/transaction-iso.html" target="_blank" rel="noopener">postgresql.org/docs/current/transaction-iso</a></li>
+        <li><span class="bib__title">PostgreSQL 18: Index Types</span> ── 公式ドキュメント. <a href="https://www.postgresql.org/docs/current/indexes-types.html" target="_blank" rel="noopener">postgresql.org/docs/current/indexes-types</a></li>
+        <li><span class="bib__title">PostgreSQL 18: Table Partitioning</span> ── 公式ドキュメント. <a href="https://www.postgresql.org/docs/current/ddl-partitioning.html" target="_blank" rel="noopener">postgresql.org/docs/current/ddl-partitioning</a></li>
+        <li><span class="bib__title">PostgreSQL 18: Planner/Optimizer</span> ── 公式ドキュメント. <a href="https://www.postgresql.org/docs/current/planner-optimizer.html" target="_blank" rel="noopener">postgresql.org/docs/current/planner-optimizer</a></li>
+        <li><span class="bib__title">pgroll ── Zero-downtime schema migrations</span> ── Xata. <a href="https://github.com/xataio/pgroll" target="_blank" rel="noopener">github.com/xataio/pgroll</a></li>
+        <li><span class="bib__title">Schema changes and the power of expand-contract</span> ── Xata Blog, 2024. <a href="https://xata.io/blog/pgroll-expand-contract" target="_blank" rel="noopener">xata.io/blog/pgroll-expand-contract</a></li>
+        <li><span class="bib__title">UUIDv7 (RFC 9562)</span> ── IETF, 2024. <a href="https://www.rfc-editor.org/rfc/rfc9562.html" target="_blank" rel="noopener">rfc-editor.org/rfc/rfc9562</a></li>
+        <li><span class="bib__title">MVCC in PostgreSQL ── Isolation</span> ── Postgres Professional. <a href="https://postgrespro.com/blog/pgsql/5967856" target="_blank" rel="noopener">postgrespro.com/blog/pgsql/5967856</a></li>
+        <li><span class="bib__title">関連: Vol.I 「フロントから来たあなたのための、フルスタック越境地図」</span> ── 第5章 (永続性) と 第6章 (スキーマ設計の作法) は本書のダイジェスト版として機能する. <a href="./web-service-defacto-standard-textbook.html#ch5" target="_blank">本サイト内</a></li>
+      </ul>
+
+      <p style="margin-top: 3rem; font-size: 0.9rem; color: var(--color-ink-muted);">本書は PostgreSQL 18 (2025年9月リリース) の挙動に準拠しています。MySQL / MariaDB / SQL Server の独自挙動については本書では触れていません。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+      <a href="#prologue" class="chapter-nav__next">
+        <span class="chapter-nav__label">↑ TOP</span>
+        <span class="chapter-nav__title">最初に戻る</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <p>この教科書は 2026 年 5 月時点の PostgreSQL 18 と業界慣行に基づく。<br>
+  関係モデルの基礎部分はおそらく長く有効。<br>
+  ツール名や具体的なバージョン挙動は半年で動くので、出典のドキュメントも当たること。</p>
+  <div class="footer__rule"></div>
+  <p class="footer__date">May 2026 · A Field Guide to Database Design</p>
+</footer>
+
+<script src="./textbook.js" defer></script>
+
+</body>
+</html>

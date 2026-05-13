@@ -6,11 +6,15 @@
 ```
 text-books/
 ├── docs/                                   ← GitHub Pages の公開ルート
+│   ├── textbook-ds.css                     ← 共通デザインシステム (single source of truth)
+│   ├── textbook.js                         ← 共通スクリプト (進捗バー/目次/フェード)
 │   ├── index.html                          ← 全教科書のコレクション目録
 │   └── <textbook-slug>.html                ← 各教科書 (1冊1ファイル)
-├── single-file-demo.html                   ← デザインシステムのデモ
+├── single-file-demo.html                   ← デザインシステムのデモ (自己完結)
 └── README.md                               ← textbook-ds の仕様
 ```
+
+**重要:** `textbook-ds.css` と `textbook.js` はすべての教科書 + index.html が共有する単一ソース。教科書を増やしても、デザインを揃えるための変更は常に**この 2 ファイルだけ**を編集する。各教科書 HTML には CSS/JS をインライン化しない。
 
 ---
 
@@ -23,9 +27,32 @@ text-books/
 `docs/<slug>.html` として作成する。
 
 - スラグは英小文字とハイフンのみ (例: `web-service-defacto-standard-textbook.html`)
-- `single-file-demo.html` または `docs/web-service-defacto-standard-textbook.html` をベースにする
-- デザイントークン (`--color-paper`, `--color-accent`, `--font-serif-jp` など) は基本いじらない。テーマを変える場合のみ `tokens.css` 相当の変数を上書きする
+- 既存の `docs/karpathy-ai-era-development-textbook.html` か `docs/web-service-defacto-standard-textbook.html` をベースにコピーして始める
+- `<head>` 内には次の 2 行だけ書く (CSS をインライン化しない):
+
+  ```html
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./textbook-ds.css">
+  ```
+
+- 末尾の `</body>` 直前に共通スクリプトを 1 行で読み込む:
+
+  ```html
+  <script src="./textbook.js" defer></script>
+  ```
+
+- デザイントークン (`--color-paper`, `--color-accent`, `--font-serif-jp` など) は基本いじらない。テーマを変える必要があるときも、`textbook-ds.css` の `:root` を変更する (= 全教科書に波及する) 方を優先する
 - `<title>`, `.hero__title`, `.hero__subtitle`, `.hero__meta` を必ず埋める
+- 利用できる主要コンポーネント (詳細は `textbook-ds.css` 内のコメント参照):
+  - `.chapter` / `.chapter__header` / `.chapter__number` / `.chapter__title` / `.chapter__intro`
+  - `.prose` ── 本文。中で `<h3>` (装飾あり)、リスト、表、コードブロックが使える
+  - `.prose h3.h3--thought` / `.h3--practice` ── 二段構え用見出しバリアント
+  - `.key-concept` ── 墨色の要点カード (Dual Coding)
+  - `.sidenote` / `.sidenote--quote` ── 補足 / 英語原文引用
+  - `.summary` ── 章末まとめ (Chunking)
+  - `.figure` ── SVG 図解
+  - `.chapter-nav` ── 前後章ナビ
+  - `.bibliography` ── 参考文献リスト
 
 ### 2. `docs/index.html` にエントリを追加する **(忘れない)**
 
@@ -70,8 +97,10 @@ text-books/
 - **古い順に並べる** ── 新しい巻が下に埋もれると、訪問者が最新作を見つけにくい。常に新しい巻が一番上
 - **巻番号をスキップ・重複させる** ── ローマ数字は連番 (I, II, III, IV, V, VI, VII, VIII, IX, X)
 - **デザインを毎回作り直す** ── index.html と教科書本体は同じデザイントークンで統一されている。一冊だけ別テイストにしたくなっても、まず既存トークンの範囲で表現できないか検討する
+- **教科書 HTML に CSS/JS をインライン化する** ── 共通デザインシステムから切り離れる原因になる。必ず `textbook-ds.css` / `textbook.js` を外部参照する。スタイルを増やしたくなったら、`textbook-ds.css` 側に追加して全教科書が使える形にする
 - **docs/ の外に教科書を置く** ── 公開教科書はすべて `docs/` 配下 (= GitHub Pages の公開ルート)。下書きやWIPは別ディレクトリ (例: `drafts/`) を切る
 - **`docs/` をリネームする** ── GitHub Pages の Source 設定が `/docs` 固定なので、ディレクトリ名を変えると即座にサイトが落ちる
+- **`textbook-ds.css` / `textbook.js` をリネーム・移動する** ── すべての HTML が `./textbook-ds.css` のような相対パスで参照しているので、リネームすると即座にデザインが崩れる
 
 ---
 
