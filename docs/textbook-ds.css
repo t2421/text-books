@@ -492,6 +492,22 @@ body {
 .chapter-nav__prev { text-align: left; }
 .chapter-nav__next { text-align: right; margin-left: auto; }
 
+/* --- カラム (callout) ── .sidenote より軽い、短い注釈や Tip 用 --- */
+.callout {
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  border-left: 3px solid var(--color-ink-muted);
+  background: var(--color-paper-deep);
+}
+.callout--info { border-left-color: var(--color-indigo); }
+.callout--warn {
+  border-left-color: var(--color-accent);
+  background: rgba(160, 28, 28, 0.04);
+}
+.callout--note { border-left-color: var(--color-gold); }
+
 /* --- 参考文献リスト --- */
 .bibliography {
   max-width: var(--measure); margin: 0 auto;

@@ -3,1085 +3,523 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サンプル教科書 ── タイトルをここに</title>
+<title>サンプル教科書 ── textbook-ds デモ</title>
+<meta name="description" content="textbook-ds デザインシステムの全コンポーネントを 1 ファイルに収めたデモ。新しい教科書を起こすときの設計参照に使う。">
 
-<!-- ============================================
-     CSS は textbook.css 1つだけ読めば全部入る
-     ============================================ -->
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+<!-- ============================================================
+     このファイルは textbook-ds デザインシステムの自己完結デモ。
+
+     - インライン CSS は docs/textbook-ds.css のスナップショット
+     - インライン JS  は docs/textbook.js のスナップショット
+     - 本番の教科書は外部参照で同じ CSS/JS を共有する (= 単一の真実)
+
+     新しい教科書を起こすときは、このファイルではなく
+     docs/karpathy-ai-era-development-textbook.html などの
+     既存教科書をコピーして外部 CSS/JS リンクごと流用するのが速い。
+     このファイルは「どの部品が使えるか」を一覧する辞書として残す。
+     ============================================================ -->
+
 <style>
+/* ============================================================
+   textbook-ds.css ── text-books の共通デザインシステム
+   ============================================================
+   このファイルは index.html / すべての教科書 (docs/*.html) で
+   共有される唯一の真実 (single source of truth)。
 
+   ファイル構成:
+     1. デザイントークン (:root)
+     2. リセット & ベース
+     3. 進捗バー / トップナビ / 目次ドロワー
+     4. ヒーロー
+     5. チャプター本体 (chapter / prose / sidenote / key-concept / summary / figure / chapter-nav / bibliography)
+     6. カタログ (index.html 専用 / cover / catalog / entry)
+     7. 共通フッター
+     8. レスポンシブ / 印刷 / アニメーション
 
-/* ========= /* === tokens.css === */
-/* =============================================================
-   tokens.css — デザイントークン
-   
-   このファイルだけを差し替えれば、別テーマに着せ替えできる。
-   色名は意味で命名(--color-ink, --color-accent)している。
-   ============================================================= */
+   新しい教科書を作るときは textbook-ds.css と textbook.js を
+   読み込むだけで OK。デザインに差を出したい場合は、まずトークン
+   (:root の CSS 変数) で表現できないかを検討する。
+   ============================================================ */
 
+/* ============================================================
+   1. デザイントークン
+   ── 古典書の佇まいに着想 ── 鉄紺、墨、辰砂、雁皮
+   ============================================================ */
 :root {
-  /* ── カラー: 古典書テーマ (classic-book) ───────────────
-     和の色彩名から拝借: 雁皮(がんぴ)、墨、鉄紺、辰砂、黄土
-     ─────────────────────────────────────── */
-  
-  /* 紙・背景 */
-  --color-paper: #faf7f2;          /* 雁皮色: 本文の地 */
-  --color-paper-deep: #f3ede2;     /* 深い雁皮: コードブロックや差分背景 */
-  
-  /* 文字 */
-  --color-ink: #1c1917;            /* 墨: 主要テキスト */
-  --color-ink-soft: #3f3a35;       /* 薄墨: 補助テキスト */
-  --color-ink-muted: #6b6359;      /* 灰墨: メタ情報 */
-  
-  /* 罫線 */
-  --color-rule: #d6cfc1;           /* 表罫・境界線 */
-  --color-rule-soft: #e8e2d4;      /* やわらかい境界 */
-  
-  /* アクセント */
-  --color-accent: #a01c1c;         /* 辰砂(しんしゃ): 強調・リンク */
-  --color-accent-soft: #c46868;    /* 薄辰砂: リンク下線 */
-  --color-indigo: #1a3a5c;         /* 鉄紺: 副次強調 (em) */
-  --color-gold: #8b6914;           /* 黄土: 章番号・ラベル */
-  --color-highlight: #f4e8c1;      /* 淡い金: ハイライト背景 */
+  /* カラーパレット */
+  --color-paper: #faf7f2;
+  --color-paper-deep: #f3ede2;
+  --color-ink: #1c1917;
+  --color-ink-soft: #3f3a35;
+  --color-ink-muted: #6b6359;
+  --color-rule: #d6cfc1;
+  --color-rule-soft: #e8e2d4;
+  --color-accent: #a01c1c;       /* 朱・辰砂 ── 強調 */
+  --color-accent-soft: #c46868;
+  --color-indigo: #1a3a5c;       /* 鉄紺 ── 副次強調 */
+  --color-gold: #8b6914;         /* 黄土 ── 章番号など */
+  --color-highlight: #f4e8c1;    /* 雁皮 ── ハイライト背景 */
 
-  /* ── タイポグラフィ ───────────────────────────────── */
-  
-  /* 日本語セリフ: 本文 */
-  --font-serif-jp: 'Noto Serif JP', 'YuMincho', 'Yu Mincho',
-                   'Hiragino Mincho ProN', serif;
-  
-  /* 欧文セリフ(装飾): 章番号、章間の引用、英語見出し */
+  /* タイポグラフィ */
+  --font-serif-jp: 'Noto Serif JP', 'YuMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
   --font-display: 'Cormorant Garamond', 'Noto Serif JP', serif;
-  
-  /* 等幅: コード */
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-  
-  /* UI(サンセリフ): ナビゲーション、ボタン */
   --font-ui: 'Inter', system-ui, sans-serif;
 
-  /* ── サイズ ────────────────────────────────────── */
-  
-  --font-size-base: 17px;
-  --line-height-base: 1.95;        /* 日本語の長文に最適化 */
-  --letter-spacing-base: 0.02em;
-
-  /* ── 寸法 ──────────────────────────────────────── */
-  
-  --measure: 38rem;                /* 本文の最適行幅 (約 60-70字) */
-  --measure-wide: 56rem;           /* 図解や広い要素用 */
-  --measure-narrow: 28rem;         /* 引用や狭い要素用 */
-
-  /* ── 余白 (リズム) ──────────────────────────────── */
-  
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.875rem;
-  --space-4: 1.5rem;
-  --space-5: 2rem;
-  --space-6: 3rem;
-  --space-7: 4rem;
-  --space-8: 6rem;
-
-  /* ── トランジション ─────────────────────────────── */
-  
-  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --duration-fast: 0.2s;
-  --duration-base: 0.35s;
-  --duration-slow: 0.8s;
-
-  /* ── z-index 階層 ──────────────────────────────── */
-  
-  --z-progress: 1000;
-  --z-nav: 100;
-  --z-drawer: 200;
-  --z-backdrop: 150;
+  /* 寸法 */
+  --measure: 38rem;              /* 本文の最適行幅 (約 60-70字) */
+  --measure-wide: 56rem;
+  --side-width: 14rem;
 }
 
-/* =============================================================
-   テーマ差し替えの例
-   
-   別テーマを作るときは、ルール全体を上書きするのではなく、
-   :root.theme-modern { --color-paper: #fff; ... } のように
-   テーマクラスを付ける形にする。
-   
-   例:
-   :root.theme-modern {
-     --color-paper: #ffffff;
-     --color-ink: #0a0a0a;
-     --color-accent: #2563eb;
-     --font-serif-jp: 'Noto Sans JP', sans-serif;
-     --font-display: 'Inter', sans-serif;
-   }
-   ============================================================= */
- ========= */
-
-/* === base.css === */
-/* =============================================================
-   base.css — リセットとグローバルベース
-   
-   html/body の地となるスタイル。
-   ============================================================= */
-
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ============================================================
+   2. リセット & ベース
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;        /* 固定ヘッダー分のオフセット */
+  scroll-padding-top: 5rem;
 }
 
 body {
   font-family: var(--font-serif-jp);
   font-weight: 400;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-base);
-  letter-spacing: var(--letter-spacing-base);
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
   color: var(--color-ink);
   background: var(--color-paper);
-
-  /* 紙の質感 ── ノイズと、わずかな色斑 */
   background-image:
     radial-gradient(circle at 20% 30%, rgba(180, 160, 120, 0.04) 0%, transparent 50%),
     radial-gradient(circle at 80% 70%, rgba(160, 28, 28, 0.02) 0%, transparent 50%),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 2px,
-      rgba(140, 120, 90, 0.012) 2px,
-      rgba(140, 120, 90, 0.012) 3px
-    );
-
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(140, 120, 90, 0.012) 2px, rgba(140, 120, 90, 0.012) 3px);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* リンクのリセット (個別コンポーネントで上書き) */
-a {
-  color: inherit;
-  text-decoration: none;
+/* ============================================================
+   3. 進捗バー / トップナビ / 目次ドロワー
+   ============================================================ */
+.progress-bar {
+  position: fixed; top: 0; left: 0; width: 100%; height: 3px;
+  background: transparent; z-index: 1000;
 }
-
-/* 画像 */
-img, svg {
-  max-width: 100%;
-  height: auto;
+.progress-bar__fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-gold) 100%);
+  transition: width 0.1s ease-out;
 }
-
-/* ── 印刷スタイル ──────────────────────────────── */
-
-@media print {
-  body {
-    background: white;
-    color: black;
-    font-size: 11pt;
-    background-image: none;
-  }
-}
- ========= */
-
-/* === layout.css === */
-/* =============================================================
-   layout.css — ページ全体のレイアウト構造
-   
-   含まれるもの:
-   - .top-nav        固定上部ナビ
-   - .toc-drawer     右側スライドイン目次
-   - .toc-backdrop   背景オーバーレイ
-   - .hero           表紙ヒーロー
-   - .chapter        章コンテナ
-   ============================================================= */
-
-/* ── 固定上部ナビゲーション ─────────────────────────── */
 
 .top-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: fixed; top: 0; left: 0; right: 0;
   background: rgba(250, 247, 242, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-rule-soft);
-  z-index: var(--z-nav);
-  padding: 0.875rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: var(--font-ui);
-  font-size: 0.78rem;
-  letter-spacing: 0.05em;
+  z-index: 100; padding: 0.875rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-ui); font-size: 0.78rem; letter-spacing: 0.05em;
 }
-
-.top-nav__title {
-  color: var(--color-ink-soft);
-  font-weight: 500;
-}
-
-.top-nav__title em {
-  font-style: italic;
-  color: var(--color-accent);
-}
-
+.top-nav__title { color: var(--color-ink-soft); font-weight: 500; }
+.top-nav__title em { font-style: italic; color: var(--color-accent); }
 .top-nav__toc-toggle {
-  background: none;
-  border: 1px solid var(--color-rule);
-  color: var(--color-ink-soft);
-  padding: 0.35rem 0.875rem;
-  border-radius: 2px;
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
-  cursor: pointer;
-  letter-spacing: 0.1em;
-  transition: all var(--duration-fast);
+  background: none; border: 1px solid var(--color-rule); color: var(--color-ink-soft);
+  padding: 0.35rem 0.875rem; border-radius: 2px;
+  font-family: var(--font-ui); font-size: 0.72rem; cursor: pointer; letter-spacing: 0.1em;
+  transition: all 0.2s;
 }
-
 .top-nav__toc-toggle:hover {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  border-color: var(--color-ink);
+  background: var(--color-ink); color: var(--color-paper); border-color: var(--color-ink);
 }
-
-/* ── 目次ドロワー (右側スライドイン) ───────────────── */
 
 .toc-drawer {
-  position: fixed;
-  top: 0;
-  right: -380px;
-  width: 360px;
-  height: 100vh;
-  background: var(--color-paper-deep);
-  border-left: 1px solid var(--color-rule);
-  z-index: var(--z-drawer);
-  padding: 5rem 2.5rem 2rem;
-  overflow-y: auto;
-  transition: right var(--duration-base) var(--ease-out);
+  position: fixed; top: 0; right: -380px; width: 360px; height: 100vh;
+  background: var(--color-paper-deep); border-left: 1px solid var(--color-rule);
+  z-index: 200; padding: 5rem 2.5rem 2rem; overflow-y: auto;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.08);
 }
-
-.toc-drawer.is-open {
-  right: 0;
-}
-
+.toc-drawer.is-open { right: 0; }
 .toc-drawer__close {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--color-ink-soft);
-  cursor: pointer;
-  font-family: var(--font-serif-jp);
+  position: absolute; top: 1.5rem; right: 1.5rem;
+  background: none; border: none; font-size: 1.5rem; color: var(--color-ink-soft);
+  cursor: pointer; font-family: var(--font-serif-jp);
 }
-
 .toc-drawer h3 {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--color-ink-muted);
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--color-rule);
+  font-family: var(--font-display); font-size: 0.85rem; font-weight: 500;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-ink-muted);
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-rule);
 }
-
-.toc-drawer ol {
-  list-style: none;
-  counter-reset: toc-counter;
-}
-
+.toc-drawer ol { list-style: none; counter-reset: toc-counter; }
 .toc-drawer li {
-  margin-bottom: 0.875rem;
-  padding-left: 2.5rem;
-  position: relative;
-  counter-increment: toc-counter;
-  line-height: 1.5;
+  margin-bottom: 0.875rem; padding-left: 2.5rem; position: relative;
+  counter-increment: toc-counter; line-height: 1.5;
 }
-
 .toc-drawer li::before {
   content: counter(toc-counter, decimal-leading-zero);
-  position: absolute;
-  left: 0;
-  top: 0.1rem;
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  color: var(--color-gold);
-  letter-spacing: 0.1em;
-  font-style: italic;
+  position: absolute; left: 0; top: 0.1rem;
+  font-family: var(--font-display); font-size: 0.75rem; color: var(--color-gold);
+  letter-spacing: 0.1em; font-style: italic;
 }
-
 .toc-drawer a {
-  color: var(--color-ink-soft);
-  text-decoration: none;
-  font-size: 0.92rem;
-  display: block;
-  padding: 0.2rem 0.5rem;
-  border-left: 2px solid transparent;
-  margin-left: -0.5rem;
-  transition: all var(--duration-fast);
+  color: var(--color-ink-soft); text-decoration: none; font-size: 0.92rem;
+  display: block; padding: 0.2rem 0;
+  border-left: 2px solid transparent; padding-left: 0.5rem; margin-left: -0.5rem;
+  transition: all 0.2s;
 }
-
 .toc-drawer a:hover {
   color: var(--color-accent);
   border-left-color: var(--color-accent);
   background: rgba(160, 28, 28, 0.03);
 }
 
-/* バックドロップ */
 .toc-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(28, 25, 23, 0.4);
-  z-index: var(--z-backdrop);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--duration-base);
+  position: fixed; inset: 0; background: rgba(28, 25, 23, 0.4); z-index: 150;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
 }
+.toc-backdrop.is-open { opacity: 1; pointer-events: auto; }
 
-.toc-backdrop.is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ── ヒーローセクション ─────────────────────────── */
-
+/* ============================================================
+   4. ヒーロー (教科書1ページ目)
+   ============================================================ */
 .hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 6rem 2rem 4rem;
-  text-align: center;
-  position: relative;
-  border-bottom: 1px solid var(--color-rule);
+  min-height: 100vh; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  padding: 6rem 2rem 4rem; position: relative;
 }
-
 .hero__ornament {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  letter-spacing: 0.4em;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.8rem; letter-spacing: 0.5em; text-transform: uppercase;
   color: var(--color-gold);
-  margin-bottom: 3rem;
-  font-style: italic;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  display: flex; align-items: center; gap: 1.5rem;
 }
-
-.hero__ornament::before,
-.hero__ornament::after {
-  content: '';
-  width: 3rem;
-  height: 1px;
-  background: var(--color-gold);
+.hero__ornament::before, .hero__ornament::after {
+  content: ''; display: block; width: 3rem; height: 1px; background: var(--color-rule);
 }
-
+/* タイトル ── 日本語の本文セリフをベースに、字面を上品に */
 .hero__title {
   font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 500;
+  font-size: clamp(1.85rem, 4.4vw, 3.1rem);
   line-height: 1.45;
-  letter-spacing: 0.05em;
-  color: var(--color-ink);
-  max-width: 22ch;
-  margin-bottom: 2.5rem;
-}
-
-.hero__title em {
-  font-style: normal;
-  color: var(--color-accent);
-  position: relative;
-}
-
-.hero__title em::after {
-  content: '';
-  position: absolute;
-  bottom: -0.15em;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--color-highlight);
-  z-index: -1;
-}
-
-.hero__subtitle {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
-  color: var(--color-ink-soft);
-  max-width: 38rem;
-  margin-bottom: 4rem;
-  line-height: 1.6;
-  font-weight: 400;
-}
-
-.hero__meta {
-  display: flex;
-  gap: 2.5rem;
-  font-family: var(--font-ui);
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--color-ink-muted);
-}
-
-.hero__meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-.hero__meta-label {
-  color: var(--color-gold);
-  font-style: italic;
-  font-family: var(--font-display);
-  text-transform: none;
-  letter-spacing: 0.05em;
-  font-size: 0.7rem;
-}
-
-.hero__meta-value {
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.hero__scroll-cue {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-style: italic;
-  color: var(--color-ink-muted);
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.hero__scroll-cue::after {
-  content: '';
-  width: 1px;
-  height: 2rem;
-  background: var(--color-ink-muted);
-  animation: scroll-cue 2s ease-in-out infinite;
-  transform-origin: top;
-}
-
-/* ── 章コンテナ ───────────────────────────────── */
-
-.chapter {
-  padding: 6rem 0 4rem;
-  position: relative;
-}
-
-.chapter:not(:last-child) {
-  border-bottom: 1px solid var(--color-rule);
-}
-
-.chapter__inner {
-  max-width: var(--measure-wide);
-  margin: 0 auto;
-  padding: 0 2rem;
-  position: relative;
-}
-
-/* 章ヘッダー (中央配置) */
-.chapter__header {
-  margin-bottom: 4rem;
-  max-width: var(--measure);
-  margin-left: auto;
-  margin-right: auto;
-  text-align: center;
-}
-
-.chapter__number {
-  font-family: var(--font-display);
-  font-size: 0.8rem;
-  letter-spacing: 0.5em;
-  color: var(--color-gold);
-  font-style: italic;
-  margin-bottom: 1.5rem;
-  display: block;
-}
-
-.chapter__title {
-  font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-  line-height: 1.5;
   letter-spacing: 0.04em;
   color: var(--color-ink);
-}
-
-.chapter__rule {
-  width: 4rem;
-  height: 2px;
-  background: var(--color-accent);
-  margin: 2rem auto;
-}
-
-.chapter__intro {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.2rem;
-  line-height: 1.7;
-  color: var(--color-ink-soft);
-  text-align: center;
-  max-width: 36rem;
-  margin: 0 auto;
-}
-
-/* ── 章間ナビゲーション ──────────────────────────── */
-
-.chapter-nav {
-  max-width: var(--measure);
-  margin: 4rem auto 0;
-  padding: 2rem 0 0;
-  border-top: 1px solid var(--color-rule);
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-family: var(--font-ui);
-  font-size: 0.85rem;
-}
-
-.chapter-nav a {
-  color: var(--color-ink-soft);
-  text-decoration: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.875rem 1.25rem;
-  border: 1px solid var(--color-rule);
-  border-radius: 2px;
-  transition: all var(--duration-fast);
-  max-width: 45%;
-}
-
-.chapter-nav a:hover {
-  border-color: var(--color-ink);
-  background: var(--color-paper-deep);
-}
-
-.chapter-nav__label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.72rem;
-  color: var(--color-gold);
-  letter-spacing: 0.15em;
-}
-
-.chapter-nav__title {
-  font-weight: 500;
-  color: var(--color-ink);
-}
-
-.chapter-nav__prev { text-align: left; }
-.chapter-nav__next { text-align: right; margin-left: auto; }
-
-/* ── フッター ─────────────────────────────────── */
-
-.footer {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  padding: 4rem 2rem;
-  text-align: center;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: rgba(250, 247, 242, 0.7);
-}
-
-.footer__rule {
-  width: 3rem;
-  height: 1px;
-  background: var(--color-gold);
-  margin: 2rem auto;
-}
-
-.footer__date {
-  font-family: var(--font-ui);
-  font-style: normal;
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-}
-
-/* ── レスポンシブ ─────────────────────────────── */
-
-@media (max-width: 768px) {
-  .top-nav { padding: 0.75rem 1rem; }
-  .top-nav__title { font-size: 0.7rem; max-width: 60%; }
-  .chapter { padding: 4rem 0 3rem; }
-  .chapter__inner { padding: 0 1.5rem; }
-  .hero__meta { flex-direction: column; gap: 1.25rem; }
-  .toc-drawer { width: 90%; right: -100%; }
-  .chapter-nav { flex-direction: column; }
-  .chapter-nav a { max-width: 100%; }
-}
-
-@media print {
-  .top-nav, .toc-drawer, .toc-backdrop, .hero__scroll-cue {
-    display: none;
-  }
-  .chapter { page-break-before: always; padding: 1rem 0; }
-}
- ========= */
-
-/* === prose.css === */
-/* =============================================================
-   prose.css — 本文タイポグラフィ
-   
-   .prose 配下の要素を網羅的にスタイル。
-   日本語の長文を美しく組むことに最適化。
-   ============================================================= */
-
-.prose {
-  max-width: var(--measure);
-  margin: 0 auto;
-}
-
-/* ── 段落 ─────────────────────────────────── */
-
-.prose p {
   margin-bottom: 1.5rem;
-  text-align: justify;
-  text-justify: inter-character;
+  max-width: 34rem;
+  text-wrap: balance;
+  word-break: keep-all;          /* 単語の途中で折れない (英数字や記号を含むタイトルで効く) */
+  overflow-wrap: anywhere;       /* それでも収まらないときは折る */
+}
+/* タイトル内のアクセント (em) は「メインタイトル直下のサブタイトル」として扱う ──
+   新行で、小さく、色だけ強調 */
+.hero__title em {
+  display: block;
+  font-style: normal;            /* JP セリフは合成イタリックを避ける */
+  font-weight: 400;
+  font-size: 0.5em;              /* メインの半分 ── 明確に階層が落ちる */
+  letter-spacing: 0.12em;        /* 字間を空けて静かに */
+  line-height: 1.6;
+  color: var(--color-accent);
+  font-family: inherit;
+  margin-top: 0.7em;
+}
+.hero__title em::after {
+  display: none;                 /* 折り返し時に位置がずれる下線は廃止 */
 }
 
-/* リード段落のドロップキャップ
-   各章の最初の段落の最初の文字を大きく */
+/* サブタイトル ── タイトルとの階層差を強くつける */
+.hero__subtitle {
+  font-family: var(--font-serif-jp);
+  font-weight: 300;
+  font-size: clamp(0.82rem, 1.05vw, 0.95rem);
+  line-height: 1.95;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-soft);
+  max-width: 28rem;
+  margin-bottom: 3rem;
+  text-wrap: balance;
+}
+.hero__meta {
+  display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.9rem; color: var(--color-ink-muted); letter-spacing: 0.1em;
+}
+.hero__meta-item { display: flex; flex-direction: column; gap: 0.5rem; align-items: center; }
+.hero__meta-label {
+  font-family: var(--font-ui); font-style: normal; font-size: 0.7rem;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--color-ink-muted);
+}
+.hero__meta-value {
+  font-family: var(--font-display); font-style: italic;
+  color: var(--color-accent); font-size: 1.1rem; letter-spacing: 0.15em;
+}
+.hero__scroll-cue {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.75rem; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--color-ink-muted); animation: pulse 2.5s ease-in-out infinite;
+}
+.hero__scroll-cue::after {
+  content: '↓'; display: block; margin-top: 0.5rem; font-style: normal; font-size: 1rem;
+}
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ============================================================
+   5. チャプター本体
+   ============================================================ */
+.chapter { padding: 6rem 0 5rem; position: relative; }
+.chapter:not(:last-child) { border-bottom: 1px solid var(--color-rule-soft); }
+.chapter__inner { max-width: 62rem; margin: 0 auto; padding: 0 2rem; }
+.chapter__header { text-align: center; margin-bottom: 4rem; padding: 0 1rem; }
+.chapter__number {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--color-gold); display: block; margin-bottom: 1.5rem;
+}
+.chapter__title {
+  font-family: var(--font-serif-jp); font-weight: 500;
+  font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.35;
+  color: var(--color-ink); margin-bottom: 1.5rem;
+  text-wrap: balance; letter-spacing: 0.01em;
+}
+.chapter__rule { width: 3rem; height: 1px; background: var(--color-accent); margin: 1.5rem auto; }
+.chapter__intro {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 1.2rem; line-height: 1.7; color: var(--color-ink-soft);
+  text-align: center; max-width: 36rem; margin: 0 auto;
+}
+
+/* --- 本文 (prose) --- */
+.prose { max-width: var(--measure); margin: 0 auto; }
+.prose p { margin-bottom: 1.5rem; text-align: justify; text-justify: inter-character; }
 .prose > p:first-of-type::first-letter {
-  font-family: var(--font-display);
-  font-size: 4rem;
-  font-weight: 500;
-  float: left;
-  line-height: 0.9;
-  padding-right: 0.5rem;
-  padding-top: 0.4rem;
+  font-family: var(--font-display); font-size: 4rem; font-weight: 500;
+  float: left; line-height: 0.9; padding-right: 0.5rem; padding-top: 0.4rem;
   color: var(--color-accent);
 }
 
-/* ── 見出し ───────────────────────────────── */
-
-/* h3: 章内のセクション見出し (◆マーカー付き) */
 .prose h3 {
-  font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: 1.35rem;
-  line-height: 1.5;
-  margin-top: 3.5rem;
-  margin-bottom: 1.5rem;
-  color: var(--color-ink);
-  letter-spacing: 0.02em;
-  position: relative;
-  padding-left: 1.25rem;
+  font-family: var(--font-serif-jp); font-weight: 600;
+  font-size: 1.35rem; line-height: 1.5;
+  margin-top: 3.5rem; margin-bottom: 1.5rem;
+  color: var(--color-ink); letter-spacing: 0.02em;
+  position: relative; padding-left: 1.25rem;
 }
-
 .prose h3::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.7rem;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--color-accent);
-  transform: rotate(45deg);
+  content: ''; position: absolute; left: 0; top: 0.7rem;
+  width: 0.5rem; height: 0.5rem;
+  background: var(--color-accent); transform: rotate(45deg);
 }
-
-/* h4: より細かい見出し */
-.prose h4 {
-  font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: 1.1rem;
-  line-height: 1.5;
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  color: var(--color-ink);
+/* 二段構え用バリアント ── 思想 / 実務 */
+.prose h3.h3--thought::before { background: var(--color-indigo); }
+.prose h3.h3--practice::before { background: var(--color-gold); }
+.prose h3 .h3__tag {
+  display: inline-block;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.7rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--color-ink-muted); margin-right: 0.75rem; vertical-align: 0.15em;
 }
+.prose h3.h3--thought .h3__tag { color: var(--color-indigo); }
+.prose h3.h3--practice .h3__tag { color: var(--color-gold); }
 
-/* ── インライン強調 ──────────────────────────── */
-
-/* strong: 黄色ハイライト風の下線 */
 .prose strong {
-  font-weight: 700;
-  color: var(--color-ink);
+  font-weight: 700; color: var(--color-ink);
   background: linear-gradient(transparent 65%, var(--color-highlight) 65%);
   padding: 0 0.1em;
 }
-
-/* em: 鉄紺の斜体 */
-.prose em {
-  font-style: italic;
-  color: var(--color-indigo);
-}
-
-/* ── リンク ──────────────────────────────── */
-
+.prose em { font-style: italic; color: var(--color-indigo); }
 .prose a {
-  color: var(--color-accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--color-accent-soft);
-  transition: all var(--duration-fast);
+  color: var(--color-accent); text-decoration: none;
+  border-bottom: 1px solid var(--color-accent-soft); transition: all 0.2s;
 }
+.prose a:hover { background: var(--color-highlight); }
 
-.prose a:hover {
-  background: var(--color-highlight);
-}
-
-/* ── リスト ──────────────────────────────── */
-
-.prose ul, .prose ol {
-  margin: 1.5rem 0;
-  padding-left: 2rem;
-}
-
-.prose li {
-  margin-bottom: 0.6rem;
-  line-height: 1.85;
-}
-
-/* 箇条書きは • マーカーを朱色で */
-.prose ul li {
-  list-style: none;
-  position: relative;
-}
-
+.prose ul, .prose ol { margin: 1.5rem 0; padding-left: 2rem; }
+.prose li { margin-bottom: 0.6rem; line-height: 1.85; }
+.prose ul li { list-style: none; position: relative; }
 .prose ul li::before {
-  content: '•';
-  position: absolute;
-  left: -1.25rem;
-  color: var(--color-accent);
-  font-weight: bold;
+  content: '•'; position: absolute; left: -1.25rem;
+  color: var(--color-accent); font-weight: bold;
 }
 
-/* ── コード ──────────────────────────────── */
-
-/* インラインコード */
 .prose code {
-  font-family: var(--font-mono);
-  font-size: 0.88em;
-  background: var(--color-paper-deep);
-  color: var(--color-indigo);
-  padding: 0.1em 0.4em;
-  border-radius: 2px;
+  font-family: var(--font-mono); font-size: 0.88em;
+  background: var(--color-paper-deep); color: var(--color-indigo);
+  padding: 0.1em 0.4em; border-radius: 2px;
   border: 1px solid var(--color-rule-soft);
 }
 
-/* コードブロック (右上に 'code' ラベル付き) */
 .prose pre {
-  font-family: var(--font-mono);
-  background: var(--color-ink);
-  color: var(--color-highlight);
-  padding: 1.5rem;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 2rem 0;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  border-left: 3px solid var(--color-accent);
-  position: relative;
+  font-family: var(--font-mono); background: #1c1917; color: #f4e8c1;
+  padding: 1.5rem; border-radius: 4px; overflow-x: auto;
+  margin: 2rem 0; font-size: 0.85rem; line-height: 1.7;
+  border-left: 3px solid var(--color-accent); position: relative;
 }
-
 .prose pre::before {
-  content: 'code';
-  position: absolute;
-  top: 0.5rem;
-  right: 0.875rem;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.7rem;
-  color: var(--color-gold);
-  letter-spacing: 0.2em;
+  content: 'code'; position: absolute; top: 0.5rem; right: 0.875rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.7rem; color: var(--color-gold); letter-spacing: 0.2em;
 }
+.prose pre code { background: none; border: none; color: inherit; padding: 0; font-size: inherit; }
 
-.prose pre code {
-  background: none;
-  border: none;
-  color: inherit;
-  padding: 0;
-  font-size: inherit;
-}
-
-/* ── テーブル ───────────────────────────── */
-
-.prose table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 2rem 0;
-  font-size: 0.95rem;
-}
-
+.prose table { width: 100%; border-collapse: collapse; margin: 2rem 0; font-size: 0.95rem; }
 .prose th, .prose td {
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--color-rule);
-  line-height: 1.6;
+  text-align: left; padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-rule); line-height: 1.6;
 }
-
 .prose th {
-  font-weight: 600;
-  background: var(--color-paper-deep);
-  font-family: var(--font-serif-jp);
-  color: var(--color-ink);
-  border-bottom: 2px solid var(--color-ink);
-  letter-spacing: 0.03em;
+  font-weight: 600; background: var(--color-paper-deep);
+  font-family: var(--font-serif-jp); color: var(--color-ink);
+  border-bottom: 2px solid var(--color-ink); letter-spacing: 0.03em;
 }
-
-.prose tbody tr:hover {
-  background: rgba(244, 232, 193, 0.3);
-}
-
-/* ── 引用 ────────────────────────────── */
+.prose tbody tr:hover { background: rgba(244, 232, 193, 0.3); }
 
 .prose blockquote {
-  margin: 2rem -2rem;
-  padding: 1.5rem 2rem;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 1.15rem;
-  line-height: 1.7;
-  color: var(--color-ink-soft);
-  border-left: 3px solid var(--color-accent);
-  background: var(--color-paper-deep);
+  margin: 2rem -2rem; padding: 1.5rem 2rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 1.15rem; line-height: 1.7; color: var(--color-ink-soft);
+  border-left: 3px solid var(--color-accent); background: var(--color-paper-deep);
 }
 
-/* ── 印刷時 ───────────────────────────── */
-
-@media print {
-  .prose pre {
-    background: #f5f5f5;
-    color: black;
-    border-left: 2px solid #666;
-  }
-}
-
-/* ── モバイル ──────────────────────────── */
-
-@media (max-width: 768px) {
-  .prose blockquote { margin: 2rem 0; }
-  .prose > p:first-of-type::first-letter { font-size: 3rem; }
-}
- ========= */
-
-/* === components.css === */
-/* =============================================================
-   components.css — 教科書用コンポーネント
-   
-   各コンポーネントは独立した責務を持つ。
-   どれも .prose の内側で使えるよう設計されている。
-   
-   含まれるコンポーネント:
-   - .key-concept     重要概念ボックス (黒地・金ラベル・朱印)
-   - .summary         章末まとめ
-   - .sidenote        サイドノート (補足情報)
-   - .callout         汎用カラム (.callout--info / --warn / --note)
-   ============================================================= */
-
-
-/* ────────────────────────────────────────────
-   .key-concept — 重要概念ボックス
-   
-   章の核心メッセージを強調する。
-   1章につき 1〜2 個までが適切。
-   学習科学: Dual Coding を活用する視覚アンカー。
-   
-   構造:
-   <div class="key-concept">
-     <span class="key-concept__label">ラベル</span>
-     <p class="key-concept__text">本文...</p>
-   </div>
-   ──────────────────────────────────────────── */
-
-.key-concept {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  padding: 2rem 2.25rem;
-  margin: 3rem 0;
+/* --- サイドノート (補足 / 引用) --- */
+.sidenote {
+  background: linear-gradient(180deg, var(--color-paper-deep) 0%, var(--color-paper) 100%);
+  border-left: 3px solid var(--color-gold);
+  padding: 1.25rem 1.5rem; margin: 2rem 0;
+  font-size: 0.9rem; line-height: 1.75; color: var(--color-ink-soft);
   position: relative;
-  border-radius: 2px;
 }
+.sidenote__label {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--color-gold); display: block; margin-bottom: 0.5rem;
+}
+/* 引用バリアント (英語原文を残す用途) */
+.sidenote--quote { border-left-color: var(--color-accent); }
+.sidenote--quote .sidenote__label { color: var(--color-accent); }
+.sidenote__original {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.95rem; line-height: 1.6; color: var(--color-ink-soft);
+  display: block; margin-bottom: 0.5rem;
+}
+.sidenote__attr {
+  display: block; margin-top: 0.5rem;
+  font-family: var(--font-ui); font-style: normal;
+  font-size: 0.72rem; letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+}
+.sidenote__attr a { color: var(--color-ink-muted); border-bottom: 1px dotted var(--color-ink-muted); text-decoration: none; }
+.sidenote__attr a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
 
+/* --- KEY CONCEPT カード (要点強調) --- */
+.key-concept {
+  background: var(--color-ink); color: var(--color-paper);
+  padding: 2rem 2.25rem; margin: 3rem 0; position: relative; border-radius: 2px;
+}
 .key-concept::before {
-  content: '✦';
-  position: absolute;
-  top: -0.6rem;
-  left: 1.5rem;
-  background: var(--color-paper);
-  color: var(--color-accent);
-  width: 1.5rem;
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
+  content: '✦'; position: absolute; top: -0.6rem; left: 1.5rem;
+  background: var(--color-paper); color: var(--color-accent);
+  width: 1.5rem; height: 1.5rem;
+  display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
 }
-
 .key-concept__label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.78rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  display: block;
-  margin-bottom: 0.875rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--color-gold); display: block; margin-bottom: 0.875rem;
 }
-
 .key-concept__text {
-  font-family: var(--font-serif-jp);
-  font-size: 1.05rem;
-  line-height: 1.75;
-  color: var(--color-paper);
-  font-weight: 400;
+  font-family: var(--font-serif-jp); font-size: 1.05rem;
+  line-height: 1.75; color: var(--color-paper); font-weight: 400;
 }
+.key-concept__text strong { color: #f4e8c1; background: none; font-weight: 600; }
 
-.key-concept__text strong {
-  color: var(--color-highlight);
-  background: none;
-  font-weight: 600;
-}
-
-.key-concept__text code {
-  background: rgba(244, 232, 193, 0.15);
-  color: var(--color-highlight);
-  border-color: rgba(244, 232, 193, 0.3);
-}
-
-
-/* ────────────────────────────────────────────
-   .summary — 章末まとめ
-   
-   章で押さえたことの箇条書きリスト。
-   学習科学: Spaced Repetition の補助、復習用。
-   
-   構造:
-   <div class="summary">
-     <span class="summary__label">CHAPTER SUMMARY</span>
-     <h4 class="summary__title">この章で押さえたこと</h4>
-     <ul>
-       <li>項目1</li>
-       <li>項目2</li>
-     </ul>
-   </div>
-   ──────────────────────────────────────────── */
-
+/* --- 章末まとめ (Chunking) --- */
 .summary {
   background: var(--color-paper-deep);
   border-top: 2px solid var(--color-ink);
-  padding: 2rem 2.5rem;
-  margin: 4rem 0 0;
-  position: relative;
+  padding: 2rem 2.5rem; margin: 4rem 0 0; position: relative;
 }
-
 .summary__label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.8rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--color-accent);
-  display: block;
-  margin-bottom: 1rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.8rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--color-accent); display: block; margin-bottom: 1rem;
 }
-
 .summary__title {
-  font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: 1.15rem;
-  margin-bottom: 1.25rem;
-  color: var(--color-ink);
+  font-family: var(--font-serif-jp); font-weight: 600;
+  font-size: 1.15rem; margin-bottom: 1.25rem; color: var(--color-ink);
 }
-
-.summary ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
+.summary ul { list-style: none; padding: 0; margin: 0; }
 .summary li {
-  padding: 0.4rem 0 0.4rem 1.75rem;
-  position: relative;
-  line-height: 1.7;
-  font-size: 0.95rem;
+  padding: 0.4rem 0 0.4rem 1.75rem; position: relative;
+  line-height: 1.7; font-size: 0.95rem;
 }
-
 .summary li::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: var(--color-gold);
-  font-weight: bold;
+  content: '→'; position: absolute; left: 0;
+  color: var(--color-gold); font-weight: bold;
+}
+.summary li b {
+  font-family: var(--font-display); font-style: italic;
+  font-weight: 500; color: var(--color-accent); margin-right: 0.5rem;
+  letter-spacing: 0.05em;
 }
 
-
-/* ────────────────────────────────────────────
-   .sidenote — サイドノート
-   
-   本文の流れを切らずに補足情報を提供する。
-   Tufte の Marginalia の発想。
-   
-   構造:
-   <div class="sidenote">
-     <span class="sidenote__label">補 ── タイトル</span>
-     本文...
-   </div>
-   ──────────────────────────────────────────── */
-
-.sidenote {
-  background: linear-gradient(180deg,
-    var(--color-paper-deep) 0%,
-    var(--color-paper) 100%);
-  border-left: 3px solid var(--color-gold);
-  padding: 1.25rem 1.5rem;
-  margin: 2rem 0;
-  font-size: 0.9rem;
-  line-height: 1.75;
-  color: var(--color-ink-soft);
-  position: relative;
+/* --- 図解 (SVG figure) --- */
+.figure {
+  margin: 3rem -2rem;
+  padding: 2rem 0;
+  background: var(--color-paper-deep);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.figure__inner { max-width: 52rem; margin: 0 auto; padding: 0 2rem; }
+.figure__label {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--color-gold); text-align: center; margin-bottom: 0.5rem; display: block;
+}
+.figure__title {
+  font-family: var(--font-serif-jp); font-weight: 600;
+  font-size: 1.05rem; text-align: center; color: var(--color-ink);
+  margin-bottom: 1.75rem; letter-spacing: 0.03em;
+}
+.figure__svg { width: 100%; height: auto; display: block; margin: 0 auto; }
+.figure__caption {
+  font-family: var(--font-serif-jp); font-size: 0.85rem; line-height: 1.7;
+  color: var(--color-ink-muted); text-align: center;
+  margin-top: 1.5rem; padding: 0 2rem; font-style: italic;
 }
 
-.sidenote__label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  display: block;
-  margin-bottom: 0.5rem;
+/* --- 章間ナビゲーション --- */
+.chapter-nav {
+  max-width: var(--measure); margin: 4rem auto 0;
+  padding: 2rem 0 0; border-top: 1px solid var(--color-rule);
+  display: flex; justify-content: space-between; gap: 1rem;
+  font-family: var(--font-ui); font-size: 0.85rem;
 }
+.chapter-nav a {
+  color: var(--color-ink-soft); text-decoration: none;
+  display: flex; flex-direction: column; gap: 0.25rem;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--color-rule); border-radius: 2px;
+  transition: all 0.2s; max-width: 45%;
+}
+.chapter-nav a:hover { border-color: var(--color-ink); background: var(--color-paper-deep); }
+.chapter-nav__label {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.72rem; color: var(--color-gold); letter-spacing: 0.15em;
+}
+.chapter-nav__title { font-weight: 500; color: var(--color-ink); }
+.chapter-nav__prev { text-align: left; }
+.chapter-nav__next { text-align: right; margin-left: auto; }
 
-
-/* ────────────────────────────────────────────
-   .callout — 汎用カラム
-   
-   .sidenote よりも軽く、簡単な注釈や Tip を入れる。
-   バリエーション: --info / --warn / --note
-   
-   構造:
-   <div class="callout callout--warn">
-     注意してほしいのは...
-   </div>
-   ──────────────────────────────────────────── */
-
+/* --- カラム (callout) ── .sidenote より軽い、短い注釈や Tip 用 --- */
 .callout {
   padding: 1rem 1.25rem;
   margin: 1.5rem 0;
@@ -1090,249 +528,293 @@ img, svg {
   border-left: 3px solid var(--color-ink-muted);
   background: var(--color-paper-deep);
 }
-
-.callout--info {
-  border-left-color: var(--color-indigo);
-}
-
+.callout--info { border-left-color: var(--color-indigo); }
 .callout--warn {
   border-left-color: var(--color-accent);
   background: rgba(160, 28, 28, 0.04);
 }
+.callout--note { border-left-color: var(--color-gold); }
 
-.callout--note {
-  border-left-color: var(--color-gold);
+/* --- 参考文献リスト --- */
+.bibliography {
+  max-width: var(--measure); margin: 0 auto;
+  font-family: var(--font-ui); font-size: 0.85rem; line-height: 1.8;
 }
-
-
-/* ────────────────────────────────────────────
-   モバイル
-   ──────────────────────────────────────────── */
-
-@media (max-width: 768px) {
-  .key-concept,
-  .summary {
-    padding: 1.5rem;
-  }
+.bibliography li {
+  padding: 0.5rem 0; border-bottom: 1px dotted var(--color-rule-soft);
+  list-style: none; position: relative; padding-left: 1.75rem;
 }
- ========= */
-
-/* === figure.css === */
-/* =============================================================
-   figure.css — 図解 (Figure) 用スタイル
-   
-   SVG 図解を本文中に挿入するためのコンテナ。
-   キャプション、ラベル、タイトルを統一。
-   
-   構造:
-   <figure class="figure">
-     <div class="figure__inner">
-       <span class="figure__label">Figure N ── Category</span>
-       <h4 class="figure__title">図のタイトル</h4>
-       <svg class="figure__svg" viewBox="0 0 720 360">...</svg>
-       <p class="figure__caption">図の説明...</p>
-     </div>
-   </figure>
-   ============================================================= */
-
-.figure {
-  margin: 3rem -2rem;
-  padding: 2rem 0;
-  background: var(--color-paper-deep);
-  border-top: 1px solid var(--color-rule);
-  border-bottom: 1px solid var(--color-rule);
+.bibliography li::before {
+  content: '§'; position: absolute; left: 0; top: 0.55rem;
+  color: var(--color-gold); font-family: var(--font-display); font-style: italic;
 }
+.bibliography a { color: var(--color-ink-soft); text-decoration: none; border-bottom: 1px solid var(--color-rule); }
+.bibliography a:hover { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+.bibliography .bib__title { color: var(--color-ink); font-weight: 500; }
 
-.figure__inner {
-  max-width: 52rem;
-  margin: 0 auto;
-  padding: 0 2rem;
+/* ============================================================
+   6. カタログ (index.html 専用)
+   ── cover + catalog + entry
+   ============================================================ */
+body.catalog-page { min-height: 100vh; display: flex; flex-direction: column; line-height: 1.85; }
+
+.cover {
+  padding: clamp(5rem, 10vw, 9rem) 1.5rem clamp(3rem, 6vw, 5rem);
+  text-align: center; position: relative;
 }
+.cover__ornament {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.78rem; letter-spacing: 0.55em; text-transform: uppercase;
+  color: var(--color-gold); margin-bottom: 2.25rem;
+  display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+}
+.cover__ornament::before, .cover__ornament::after {
+  content: ''; display: block;
+  width: clamp(2.5rem, 8vw, 5rem); height: 1px; background: var(--color-rule);
+}
+.cover__title {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(3.2rem, 9vw, 6rem); line-height: 1;
+  letter-spacing: 0.32em; color: var(--color-ink);
+  margin-left: 0.32em; margin-bottom: 1.4rem; text-wrap: balance;
+}
+.cover__diamond {
+  display: flex; align-items: center; justify-content: center; gap: 0.85rem;
+  margin: 1.5rem 0 1.75rem; color: var(--color-accent); font-size: 0.9rem;
+}
+.cover__diamond::before, .cover__diamond::after {
+  content: ''; display: block;
+  width: clamp(3rem, 10vw, 6rem); height: 1px;
+  background: var(--color-accent); opacity: 0.5;
+}
+.cover__subtitle {
+  font-family: var(--font-serif-jp); font-weight: 300;
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem); line-height: 1.9;
+  color: var(--color-ink-soft); max-width: 30rem; margin: 0 auto; text-wrap: balance;
+}
+.cover__meta {
+  margin-top: 2.75rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.85rem; letter-spacing: 0.2em; color: var(--color-ink-muted);
+}
+.cover__meta strong { font-style: normal; font-weight: 600; color: var(--color-ink); }
 
-.figure__label {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 0.78rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--color-gold);
-  text-align: center;
-  margin-bottom: 0.5rem;
+.catalog {
+  flex: 1; max-width: var(--measure-wide); margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) 1.5rem clamp(4rem, 8vw, 7rem); width: 100%;
+}
+.catalog__header { text-align: center; margin-bottom: clamp(3rem, 6vw, 5rem); }
+.catalog__label {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.78rem; letter-spacing: 0.45em; text-transform: uppercase;
+  color: var(--color-gold); display: block; margin-bottom: 1rem;
+}
+.catalog__heading {
+  font-family: var(--font-serif-jp); font-weight: 500;
+  font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+  letter-spacing: 0.06em; color: var(--color-ink);
+}
+.catalog__rule { width: 4rem; height: 1px; background: var(--color-rule); margin: 1.4rem auto 0; }
+
+.entry {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0;
+  border-top: 1px solid var(--color-rule-soft);
+  position: relative;
+}
+.entry:first-of-type {
+  border-top: 2px solid var(--color-ink);
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+.entry:last-of-type { border-bottom: 1px solid var(--color-rule-soft); }
+
+.entry__volume {
+  text-align: right; padding-top: 0.4rem;
+  border-right: 1px solid var(--color-rule-soft);
+  padding-right: clamp(1rem, 2.5vw, 1.75rem);
+}
+.entry__volume-roman {
+  font-family: var(--font-display); font-weight: 500; font-style: italic;
+  font-size: clamp(2.4rem, 5vw, 3.2rem); line-height: 1;
+  color: var(--color-accent); letter-spacing: 0.05em;
+}
+.entry__volume-label {
   display: block;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.7rem; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--color-ink-muted); margin-top: 0.6rem;
 }
 
-.figure__title {
-  font-family: var(--font-serif-jp);
-  font-weight: 600;
-  font-size: 1.05rem;
-  text-align: center;
-  color: var(--color-ink);
-  margin-bottom: 1.75rem;
-  letter-spacing: 0.03em;
+.entry__body { padding-top: 0.2rem; }
+.entry__title {
+  font-family: var(--font-serif-jp); font-weight: 500;
+  font-size: clamp(1.45rem, 2.6vw, 1.85rem); line-height: 1.45;
+  color: var(--color-ink); margin-bottom: 0.85rem; text-wrap: balance;
 }
-
-.figure__svg {
-  width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+.entry__title a {
+  color: inherit; text-decoration: none;
+  background-image: linear-gradient(transparent 92%, var(--color-accent) 92%, var(--color-accent) 96%, transparent 96%);
+  background-size: 0% 100%; background-repeat: no-repeat;
+  transition: background-size 0.4s ease;
 }
+.entry__title a:hover { background-size: 100% 100%; }
+.entry__subtitle {
+  font-family: var(--font-serif-jp); font-weight: 300;
+  font-size: 0.98rem; line-height: 1.85;
+  color: var(--color-ink-soft); margin-bottom: 1.5rem;
+  max-width: var(--measure); text-wrap: balance;
+}
+.entry__meta {
+  display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.75rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.85rem; letter-spacing: 0.18em; color: var(--color-ink-muted);
+}
+.entry__meta-item { display: flex; align-items: baseline; gap: 0.55rem; }
+.entry__meta-item + .entry__meta-item::before {
+  content: '·'; color: var(--color-rule);
+  margin-right: 0.95rem; margin-left: -0.4rem; font-style: normal;
+}
+.entry__meta-value {
+  font-style: normal; font-weight: 600;
+  color: var(--color-ink); letter-spacing: 0.12em;
+}
+.entry__cta {
+  display: inline-flex; align-items: baseline; gap: 0.85rem;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.95rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--color-accent); text-decoration: none;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--color-accent);
+  transition: gap 0.25s ease, color 0.25s ease;
+}
+.entry__cta:hover {
+  gap: 1.25rem; color: var(--color-ink); border-bottom-color: var(--color-ink);
+}
+.entry__cta::after { content: '→'; font-style: normal; letter-spacing: 0; }
 
-.figure__caption {
-  font-family: var(--font-serif-jp);
-  font-size: 0.85rem;
-  line-height: 1.7;
+/* 「執筆中」プレースホルダ */
+.entry--upcoming .entry__volume-roman { color: var(--color-ink-muted); }
+.entry--upcoming .entry__title,
+.entry--upcoming .entry__subtitle { color: var(--color-ink-muted); }
+.entry--upcoming .entry__cta {
   color: var(--color-ink-muted);
-  text-align: center;
-  margin-top: 1.5rem;
-  padding: 0 2rem;
-  font-style: italic;
+  border-bottom-color: var(--color-rule);
+  pointer-events: none;
 }
 
-/* ── モバイル ──────────────────────────────── */
+/* ============================================================
+   7. フッター ── 教科書本体用 (.footer) と カタログ用 (.footer--catalog) を区別
+   ============================================================ */
+.footer {
+  background: var(--color-ink); padding: 4rem 2rem; text-align: center;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.95rem; line-height: 1.8; color: rgba(250, 247, 242, 0.7);
+}
+.footer__rule { width: 3rem; height: 1px; background: var(--color-gold); margin: 2rem auto; }
+.footer__date {
+  font-family: var(--font-ui); font-style: normal;
+  font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--color-gold);
+}
+/* カタログ用フッターは紙地のまま、テキストは ink-muted */
+.footer--catalog {
+  background: var(--color-paper-deep);
+  border-top: 1px solid var(--color-rule-soft);
+  color: var(--color-ink-muted);
+  padding: 3rem 1.5rem 4rem;
+}
+.footer--catalog .footer__ornament {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 0.75rem; letter-spacing: 0.4em; text-transform: uppercase;
+  color: var(--color-gold); margin-bottom: 1rem;
+}
+.footer--catalog .footer__text {
+  font-family: var(--font-serif-jp); font-weight: 300;
+  font-size: 0.85rem; color: var(--color-ink-muted);
+  line-height: 1.8; max-width: 28rem; margin: 0 auto;
+}
+.footer--catalog a { color: var(--color-ink-soft); }
 
+/* ============================================================
+   8. レスポンシブ / 印刷 / アニメーション
+   ============================================================ */
 @media (max-width: 768px) {
-  .figure {
-    margin: 2rem -1.5rem;
-  }
-  .figure__inner {
-    padding: 0 1rem;
-  }
-  .figure__caption {
-    padding: 0 1rem;
-  }
+  body { font-size: 16px; line-height: 1.85; }
+  .top-nav { padding: 0.75rem 1rem; }
+  .top-nav__title { font-size: 0.7rem; max-width: 60%; }
+  .chapter { padding: 4rem 0 3rem; }
+  .chapter__inner { padding: 0 1.5rem; }
+  .hero__meta { flex-direction: column; gap: 1.25rem; }
+  .prose blockquote { margin: 2rem 0; }
+  .toc-drawer { width: 90%; right: -100%; }
+  .summary, .key-concept { padding: 1.5rem; }
+  .chapter-nav { flex-direction: column; }
+  .chapter-nav a { max-width: 100%; }
+  .prose > p:first-of-type::first-letter { font-size: 3rem; }
+  .figure { margin: 2rem -1.5rem; }
+  .figure__inner { padding: 0 1rem; }
 }
 
-/* ── 印刷 ─────────────────────────────────── */
+@media (max-width: 640px) {
+  .entry { grid-template-columns: 1fr; gap: 1rem; }
+  .entry__volume {
+    text-align: left; border-right: none;
+    border-bottom: 1px solid var(--color-rule-soft);
+    padding-right: 0; padding-bottom: 0.75rem;
+    display: flex; align-items: baseline; gap: 1rem;
+  }
+  .entry__volume-roman { font-size: 2rem; }
+  .entry__volume-label { margin-top: 0; }
+}
 
 @media print {
-  .figure {
-    page-break-inside: avoid;
-    background: white;
-    border-top: 1px solid #ccc;
-    border-bottom: 1px solid #ccc;
-  }
+  .top-nav, .progress-bar, .toc-drawer, .toc-backdrop, .hero__scroll-cue { display: none; }
+  body { background: white; color: black; font-size: 11pt; }
+  .chapter { page-break-before: always; padding: 1rem 0; }
+  .entry__cta { display: none; }
 }
- ========= */
-
-/* === motion.css === */
-/* =============================================================
-   motion.css — アニメーションと動的UI要素
-   
-   含まれるもの:
-   - .progress-bar    読了進捗バー
-   - .fade-in         スクロール時のフェードイン
-   - @keyframes       共通アニメーション
-   ============================================================= */
-
-/* ── 読了進捗バー (固定上部) ─────────────────────── */
-
-.progress-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: transparent;
-  z-index: var(--z-progress);
-}
-
-.progress-bar__fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg,
-    var(--color-accent) 0%,
-    var(--color-gold) 100%);
-  transition: width 0.1s ease-out;
-}
-
-/* ── フェードイン (Intersection Observer 連動) ──── */
 
 .fade-in {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity var(--duration-slow) ease-out,
-              transform var(--duration-slow) ease-out;
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
-
-.fade-in.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ── キーフレーム ─────────────────────────────── */
-
-@keyframes scroll-cue {
-  0%, 100% {
-    transform: scaleY(0.3);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-/* prefers-reduced-motion 対応
-   ユーザーが「動きを減らす」設定をしている場合は、アニメーションを無効化 */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-  .fade-in {
-    opacity: 1;
-    transform: none;
-  }
-}
+.fade-in.is-visible { opacity: 1; transform: translateY(0); }
 
 </style>
 </head>
 <body>
 
-<!-- ============================================
-     1. 読了進捗バー (固定上部)
-     ============================================ -->
-<div class="progress-bar">
-  <div class="progress-bar__fill" id="progressFill"></div>
-</div>
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
 
-<!-- ============================================
-     2. トップナビゲーション
-     ============================================ -->
 <nav class="top-nav">
-  <div class="top-nav__title">サンプル教科書 ── <em>サブタイトル</em></div>
+  <div class="top-nav__title">textbook-ds ── <em>デモ</em></div>
   <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
 </nav>
 
-<!-- ============================================
-     3. 目次ドロワー
-     ============================================ -->
 <div class="toc-backdrop" id="tocBackdrop"></div>
 <aside class="toc-drawer" id="tocDrawer">
   <button class="toc-drawer__close" id="tocClose">×</button>
   <h3>目 次</h3>
   <ol>
-    <li><a href="#prologue">プロローグ ── 導入</a></li>
-    <li><a href="#ch1">第1章 ── 章タイトル</a></li>
-    <li><a href="#ch2">第2章 ── 章タイトル</a></li>
-    <li><a href="#epilogue">エピローグ ── まとめ</a></li>
+    <li><a href="#prologue">プロローグ ── 基本コンポーネント</a></li>
+    <li><a href="#ch1">第1章 ── 二段構えと引用</a></li>
+    <li><a href="#ch2">第2章 ── 図解 (figure)</a></li>
+    <li><a href="#epilogue">エピローグ ── 締め</a></li>
+    <li><a href="#bibliography">参 ── 参考文献リスト</a></li>
   </ol>
 </aside>
 
 <!-- ============================================
-     4. ヒーロー (表紙)
+     1. ヒーロー (表紙)
+     ── 上段: メインタイトル (ink, 大)
+     ── 下段: em でサブタイトル (accent, 小, 自動で改行)
      ============================================ -->
 <section class="hero">
   <div class="hero__ornament">A FIELD GUIDE FOR LEARNERS</div>
-  <h1 class="hero__title">
-    本のタイトル<br>
-    <em>強調したい部分</em>
-  </h1>
-  <p class="hero__subtitle">
-    サブタイトル(本の説明)<br>
-    2行までで簡潔に
-  </p>
+  <h1 class="hero__title">本のメインタイトル<em>強調するサブタイトル</em></h1>
+  <p class="hero__subtitle">本の説明 ── 一文か二文で簡潔に、何を扱うかを伝える</p>
   <div class="hero__meta">
     <div class="hero__meta-item">
       <span class="hero__meta-label">読了目安</span>
@@ -1351,7 +833,7 @@ img, svg {
 </section>
 
 <!-- ============================================
-     5. 章 (プロローグ)
+     2. 章 (プロローグ) ── 基本コンポーネント
      ============================================ -->
 <section class="chapter" id="prologue">
   <div class="chapter__inner">
@@ -1359,103 +841,113 @@ img, svg {
       <span class="chapter__number">PROLOGUE</span>
       <h2 class="chapter__title">章タイトル</h2>
       <div class="chapter__rule"></div>
-      <p class="chapter__intro">章のリード(導入の一文)</p>
+      <p class="chapter__intro">章のリード (導入の一文)</p>
     </header>
 
     <div class="prose">
-      <!-- 最初の段落の冒頭文字は自動でドロップキャップになる -->
-      <p>ここから本文が始まる。最初の段落の最初の一文字は、自動的にドロップキャップ(大きな飾り文字)になる。</p>
+      <p>本文の最初の段落の冒頭一字は、自動でドロップキャップになる。本文中では <strong>強調</strong>、<em>イタリック</em>、<code>code</code> がそれぞれ違う扱いを受ける。</p>
 
-      <p>段落と段落のあいだは <strong>強調</strong> や <em>イタリック</em> を交えて、リズムを作る。<code>code</code> もインラインで使える。</p>
+      <h3>セクション見出し (h3)</h3>
 
-      <h3>セクション見出し</h3>
+      <p>章内のセクションは h3 で。朱色のダイヤモンドマーカーが自動で付く。リスト・表・コードもそのまま使える。</p>
 
-      <p>章内のセクションは h3 で。朱色のダイヤモンドマーカーが自動で付く。</p>
+      <ul>
+        <li>箇条書きはこんな見え方になる</li>
+        <li>左の点は朱色になる</li>
+        <li>本文と同じ字面で読みやすく</li>
+      </ul>
 
-      <!-- Key Concept: 章の核心メッセージ -->
       <div class="key-concept">
         <span class="key-concept__label">章の核心</span>
-        <p class="key-concept__text">
-          ここに章の最も重要なメッセージを入れる。<strong>強い主張</strong>を、簡潔に。
-        </p>
+        <p class="key-concept__text">章で最も伝えたいメッセージを <strong>墨地の黒札</strong>に置く。Dual Coding ── 本文で説明したことを別形式でも提示する設計。</p>
       </div>
 
-      <p>サイドノートは本文の流れを切らずに補足を入れる:</p>
+      <p>本文の流れを切らずに補足を入れるなら、サイドノートを使う:</p>
 
       <div class="sidenote">
         <span class="sidenote__label">補 ── サイドノートのタイトル</span>
         本文の脇に置く補足情報。読み飛ばしても本筋は失われない、けれども興味があれば読み込める情報を入れる。
       </div>
 
-      <p>軽い注釈には callout を使う:</p>
+      <p>軽い注釈なら callout で:</p>
 
       <div class="callout callout--warn">
-        注意したいポイントを、シンプルに伝える。
+        注意してほしいポイントを、短く伝える。<code>--warn</code> は朱、<code>--info</code> は鉄紺、<code>--note</code> は黄土に変えられる。
       </div>
 
-      <!-- 章末まとめ -->
+      <p>章末では Chunking 用の「まとめ」を:</p>
+
       <div class="summary">
         <span class="summary__label">CHAPTER SUMMARY</span>
         <h4 class="summary__title">この章で押さえたこと</h4>
         <ul>
-          <li>ポイント1</li>
-          <li>ポイント2</li>
-          <li>ポイント3</li>
+          <li>本文・h3・リスト・<code>code</code> の見え方</li>
+          <li><code>.key-concept</code> ── 章の核心を提示する墨札</li>
+          <li><code>.sidenote</code> / <code>.callout</code> ── 補足と注釈</li>
+          <li><code>.summary</code> ── 章末まとめ</li>
         </ul>
       </div>
     </div>
 
-    <!-- 章間ナビゲーション -->
     <nav class="chapter-nav">
       <span></span>
       <a href="#ch1" class="chapter-nav__next">
         <span class="chapter-nav__label">NEXT ──</span>
-        <span class="chapter-nav__title">第1章 章タイトル</span>
+        <span class="chapter-nav__title">第1章 二段構えと引用</span>
       </a>
     </nav>
   </div>
 </section>
 
 <!-- ============================================
-     6. 章 (第1章) ── 図解の例
+     3. 章 (第1章) ── 二段構えと英語引用 (Vol.II / III で使ったパターン)
      ============================================ -->
 <section class="chapter" id="ch1">
   <div class="chapter__inner">
     <header class="chapter__header">
       <span class="chapter__number">CHAPTER ONE</span>
-      <h2 class="chapter__title">図解を含む章の例</h2>
+      <h2 class="chapter__title">二段構えと引用</h2>
       <div class="chapter__rule"></div>
-      <p class="chapter__intro">章のリード(導入の一文)</p>
+      <p class="chapter__intro">章を「思想 / 実務」の二段構えで書くときのマークアップ</p>
     </header>
 
     <div class="prose">
-      <p>図解を入れる場合は、figure コンポーネントを使う。</p>
+      <p>長文教科書では、各章を <strong>「I. 思想」</strong> と <strong>「II. 実務」</strong> の二段構えで書くと、読者が「概念」と「行動」を切り分けて受け取れる。h3 にバリアントを当てれば、視覚的にもラベルがつく:</p>
 
-      <!-- 図解の例 -->
-      <figure class="figure">
-        <div class="figure__inner">
-          <span class="figure__label">Figure 1 ── Conceptual Diagram</span>
-          <h4 class="figure__title">図のタイトル</h4>
-          <svg class="figure__svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
-            <rect x="50" y="50" width="200" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
-            <text x="150" y="105" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">概念A</text>
-            <line x1="260" y1="100" x2="340" y2="100" stroke="#8b6914" stroke-width="2"/>
-            <polygon points="340,100 330,95 330,105" fill="#8b6914"/>
-            <rect x="350" y="50" width="200" height="100" fill="#1c1917"/>
-            <text x="450" y="105" text-anchor="middle" font-size="14" font-weight="600" fill="#faf7f2">概念B</text>
-          </svg>
-          <p class="figure__caption">図の説明(キャプション)。図だけで意味が完結するように書く。</p>
-        </div>
-      </figure>
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>主張をここに置く</h3>
 
-      <p>図のあとには、その図が示すポイントを言葉でも繰り返すと、読者の理解が安定する。</p>
+      <p>「思想」パートは <code>.h3--thought</code> + <code>.h3__tag</code> で書く。ダイヤモンドマーカーが鉄紺になり、左上にラベルが立つ。著者がここで伝えたい <em>輪郭</em>を述べる場所。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">引用元の人物名と日付</span>
+        <span class="sidenote__original">"This is how an English original quote looks ── italic display font for Latin chars, with the source URL underneath."</span>
+        <span class="sidenote__attr">— <a href="https://example.com/" target="_blank" rel="noopener">出典タイトル (リンクは点線)</a></span>
+      </div>
+
+      <p>原文を残したい引用は <code>.sidenote.sidenote--quote</code> を使う。辰砂色の縦線に切り替わり、<code>.sidenote__original</code> がイタリック表記、<code>.sidenote__attr</code> が出典のクレジット。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>月曜の朝から何を変えるか</h3>
+
+      <p>「実務」パートは <code>.h3--practice</code>。マーカーが黄土色になり、ラベルも切り替わる。<em>抽象論を行動に落とす</em>段落をここに置く。</p>
+
+      <table>
+        <thead><tr><th>項目</th><th>意味</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><td><code>h3</code></td><td>通常のセクション見出し</td><td>マーカー: 朱</td></tr>
+          <tr><td><code>h3.h3--thought</code></td><td>思想パートの見出し</td><td>マーカー: 鉄紺 / ラベル: 鉄紺</td></tr>
+          <tr><td><code>h3.h3--practice</code></td><td>実務パートの見出し</td><td>マーカー: 黄土 / ラベル: 黄土</td></tr>
+        </tbody>
+      </table>
+
+      <blockquote>章末や核心の引用は blockquote で。<br>余白を広く取り、読者の頭を一度休ませる。</blockquote>
 
       <div class="summary">
         <span class="summary__label">CHAPTER SUMMARY</span>
         <h4 class="summary__title">この章で押さえたこと</h4>
         <ul>
-          <li>図解は figure コンポーネントで挿入する</li>
-          <li>SVG をそのまま埋め込むのが最も柔軟</li>
+          <li><b>思想</b><code>.h3--thought</code> + <code>.h3__tag</code> で鉄紺のセクション</li>
+          <li><b>実務</b><code>.h3--practice</code> + <code>.h3__tag</code> で黄土のセクション</li>
+          <li><b>引用</b><code>.sidenote--quote</code> ── 原文 + 出典 URL</li>
         </ul>
       </div>
     </div>
@@ -1464,6 +956,63 @@ img, svg {
       <a href="#prologue" class="chapter-nav__prev">
         <span class="chapter-nav__label">── PREV</span>
         <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 図解</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     4. 章 (第2章) ── 図解 (figure)
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">図解を含む章</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">概念を視覚化するときのマークアップ</p>
+    </header>
+
+    <div class="prose">
+      <p>SVG をインラインで <code>.figure</code> に入れる。デザイントークン (墨・辰砂・黄土) と同じ色をハードコードすれば、本文の色調と合う。</p>
+
+      <figure class="figure">
+        <div class="figure__inner">
+          <span class="figure__label">Figure 1 ── Conceptual Diagram</span>
+          <h4 class="figure__title">概念 A から概念 B への移行</h4>
+          <svg class="figure__svg" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+            <rect x="50" y="50" width="200" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+            <text x="150" y="105" text-anchor="middle" font-size="14" font-weight="600" fill="#1c1917">概念 A</text>
+            <line x1="260" y1="100" x2="340" y2="100" stroke="#8b6914" stroke-width="2"/>
+            <polygon points="340,100 330,95 330,105" fill="#8b6914"/>
+            <rect x="350" y="50" width="200" height="100" fill="#1c1917"/>
+            <text x="450" y="105" text-anchor="middle" font-size="14" font-weight="600" fill="#faf7f2">概念 B</text>
+          </svg>
+          <p class="figure__caption">図のキャプション ── 図単体で意味が完結するように書く (本文を読まなくても何の図か分かる)。</p>
+        </div>
+      </figure>
+
+      <p>図のあとは、その図が示すポイントを言葉でも繰り返すと理解が安定する。視覚と言語の両方で同じ概念に触れる Dual Coding の応用。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><code>.figure</code> ── SVG を本文の幅外まで広げる枠</li>
+          <li>SVG のフォントは Noto Serif JP に揃えると統一感が出る</li>
+          <li>色は <code>#1c1917</code> (墨) / <code>#a01c1c</code> (辰砂) / <code>#8b6914</code> (黄土) を直書きでOK</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 二段構えと引用</span>
       </a>
       <a href="#epilogue" class="chapter-nav__next">
         <span class="chapter-nav__label">NEXT ──</span>
@@ -1474,7 +1023,7 @@ img, svg {
 </section>
 
 <!-- ============================================
-     7. エピローグ
+     5. エピローグ
      ============================================ -->
 <section class="chapter" id="epilogue">
   <div class="chapter__inner">
@@ -1482,23 +1031,56 @@ img, svg {
       <span class="chapter__number">EPILOGUE</span>
       <h2 class="chapter__title">締めの章</h2>
       <div class="chapter__rule"></div>
-      <p class="chapter__intro">読み終えた読者への、最後のメッセージ</p>
+      <p class="chapter__intro">読者を送り出す最後の章</p>
     </header>
 
     <div class="prose">
-      <p>エピローグでは、ここまでの内容を改めて俯瞰し、読者を送り出す。</p>
+      <p>エピローグでは、ここまでの内容を改めて俯瞰し、読者を送り出す。引用ブロックで印象を残すと余韻になる:</p>
 
-      <blockquote>
-        印象に残したい言葉を、引用ブロックに置くと効果的。
-      </blockquote>
+      <blockquote>テンプレートは古びる。<br>でも、組版の規律は古びない。</blockquote>
 
-      <p>これで最小構成のサンプルは終わり。ここに本文を書き加えていけば、教科書ができる。</p>
+      <p>これで textbook-ds の主要コンポーネントは全部出てきた。新しい教科書はここから組み立てていく。</p>
     </div>
 
     <nav class="chapter-nav">
-      <a href="#ch1" class="chapter-nav__prev">
+      <a href="#ch2" class="chapter-nav__prev">
         <span class="chapter-nav__label">── PREV</span>
-        <span class="chapter-nav__title">第1章</span>
+        <span class="chapter-nav__title">第2章 図解</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参 ── 参考文献</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     6. 参考文献リスト (.bibliography)
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">REFERENCES</span>
+      <h2 class="chapter__title">参考文献</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">出典は <code>.bibliography</code> ulで一覧化</p>
+    </header>
+
+    <div class="prose">
+      <ul class="bibliography">
+        <li><span class="bib__title">出典タイトル その1</span> ── 著者名, 出版年. <a href="https://example.com/" target="_blank" rel="noopener">example.com/path</a></li>
+        <li><span class="bib__title">出典タイトル その2</span> ── 著者名, 出版年. <a href="https://example.com/" target="_blank" rel="noopener">example.com/path</a></li>
+        <li><span class="bib__title">関連: ほかの教科書への参照</span> ── 本サイト内 <a href="./docs/index.html">所蔵目録</a></li>
+      </ul>
+
+      <p style="margin-top: 3rem; font-size: 0.9rem; color: var(--color-ink-muted);">参考文献も独立した章として配置すると、目次から飛びやすい。注記は小さい灰文字で。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
       </a>
       <a href="#prologue" class="chapter-nav__next">
         <span class="chapter-nav__label">↑ TOP</span>
@@ -1508,101 +1090,87 @@ img, svg {
   </div>
 </section>
 
-<!-- ============================================
-     8. フッター
-     ============================================ -->
+<!-- フッター -->
 <footer class="footer">
-  <p>奥付や著者情報、ライセンスなど</p>
+  <p>奥付や著者情報、ライセンスなど。<br>
+  このデモは textbook-ds の全コンポーネントを 1 ファイルに収めた辞書。</p>
   <div class="footer__rule"></div>
-  <p class="footer__date">YEAR MONTH · A Field Guide</p>
+  <p class="footer__date">2026 · A textbook-ds Showcase</p>
 </footer>
 
-<!-- ============================================
-     9. JS は textbook.js 1つだけ
-     ============================================ -->
 <script>
-/* =============================================================
-   textbook.js — インタラクション層
-   
-   読み込んでおくと、以下の機能が自動で有効になる:
-   - 読了進捗バー (#progressFill)
-   - 目次ドロワー (#tocToggle / #tocClose / #tocBackdrop / #tocDrawer)
-   - フェードイン (.chapter__header / .key-concept / .summary)
-   
-   どの要素も「あれば動く、なくても黙る」設計。
-   ============================================================= */
+/* ============================================================
+   textbook.js ── text-books の共通スクリプト
+   ============================================================
+   担当:
+     - 読了進捗バー (.progress-bar__fill の幅をスクロール率に同期)
+     - 目次ドロワー (.toc-drawer の開閉)
+     - フェードイン (.fade-in を IntersectionObserver で is-visible 化)
+
+   いずれの動作も、対応する DOM 要素が存在しないページでは
+   何もしない。だから index.html / 教科書本体 / 単体デモ いずれも
+   この同じスクリプトを安全に読み込める。
+   ============================================================ */
 
 (function () {
-  'use strict';
-
-  // ── 読了進捗バー ──────────────────────────────
+  // ── 進捗バー ───────────────────────────
   const progressFill = document.getElementById('progressFill');
   if (progressFill) {
-    let ticking = false;
-    window.addEventListener('scroll', function () {
-      if (!ticking) {
-        window.requestAnimationFrame(function () {
-          const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-          const scrolled = (window.scrollY / scrollHeight) * 100;
-          progressFill.style.width = Math.min(scrolled, 100) + '%';
-          ticking = false;
-        });
-        ticking = true;
-      }
+    window.addEventListener('scroll', () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) return;
+      const scrolled = (window.scrollY / scrollHeight) * 100;
+      progressFill.style.width = Math.min(scrolled, 100) + '%';
     });
   }
 
-  // ── 目次ドロワー ──────────────────────────────
+  // ── 目次ドロワー ───────────────────────────
   const tocToggle = document.getElementById('tocToggle');
   const tocDrawer = document.getElementById('tocDrawer');
   const tocClose = document.getElementById('tocClose');
   const tocBackdrop = document.getElementById('tocBackdrop');
 
-  function openToc() {
-    if (tocDrawer) tocDrawer.classList.add('is-open');
-    if (tocBackdrop) tocBackdrop.classList.add('is-open');
-  }
-  function closeToc() {
-    if (tocDrawer) tocDrawer.classList.remove('is-open');
-    if (tocBackdrop) tocBackdrop.classList.remove('is-open');
-  }
+  if (tocToggle && tocDrawer && tocBackdrop) {
+    const openToc = () => {
+      tocDrawer.classList.add('is-open');
+      tocBackdrop.classList.add('is-open');
+    };
+    const closeToc = () => {
+      tocDrawer.classList.remove('is-open');
+      tocBackdrop.classList.remove('is-open');
+    };
 
-  if (tocToggle) tocToggle.addEventListener('click', openToc);
-  if (tocClose) tocClose.addEventListener('click', closeToc);
-  if (tocBackdrop) tocBackdrop.addEventListener('click', closeToc);
+    tocToggle.addEventListener('click', openToc);
+    if (tocClose) tocClose.addEventListener('click', closeToc);
+    tocBackdrop.addEventListener('click', closeToc);
 
-  // 目次内リンクをクリックしたら閉じる
-  if (tocDrawer) {
-    tocDrawer.querySelectorAll('a').forEach(function (link) {
+    document.querySelectorAll('.toc-drawer a').forEach((link) => {
       link.addEventListener('click', closeToc);
     });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeToc();
+    });
   }
 
-  // ESC で閉じる
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeToc();
-  });
+  // ── フェードイン (.chapter__header / .key-concept / .summary を対象) ──
+  const fadeTargets = document.querySelectorAll('.chapter__header, .key-concept, .summary');
+  if (fadeTargets.length > 0 && 'IntersectionObserver' in window) {
+    fadeTargets.forEach((el) => el.classList.add('fade-in'));
 
-  // ── フェードイン (Intersection Observer) ──────
-  if ('IntersectionObserver' in window) {
-    const fadeTargets = document.querySelectorAll(
-      '.chapter__header, .key-concept, .summary'
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
     );
-    fadeTargets.forEach(function (el) { el.classList.add('fade-in'); });
 
-    const observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.15,
-      rootMargin: '0px 0px -50px 0px'
-    });
-
-    fadeTargets.forEach(function (el) { observer.observe(el); });
+    fadeTargets.forEach((el) => observer.observe(el));
   }
 })();
 
