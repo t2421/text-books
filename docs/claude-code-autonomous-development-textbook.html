@@ -1,0 +1,1504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手を放す ── Claude Code で築く自律開発の工程</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">手を放す ── <em>Claude Code で築く自律開発の工程</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 監督から庭師へ</a></li>
+    <li><a href="#ch1">第1章 ── 自律性の三本柱</a></li>
+    <li><a href="#ch2">第2章 ── 場をつくる (settings.json と permissions)</a></li>
+    <li><a href="#ch3">第3章 ── 文脈を据える (CLAUDE.md / Memory / Skills)</a></li>
+    <li><a href="#ch4">第4章 ── 反応する仕組み (Hooks)</a></li>
+    <li><a href="#ch5">第5章 ── 起動する仕組み (Scheduled Agents)</a></li>
+    <li><a href="#ch6">第6章 ── 続ける仕組み (自律ループ)</a></li>
+    <li><a href="#ch7">第7章 ── 計画を委ねる (planner / RFC)</a></li>
+    <li><a href="#ch8">第8章 ── 編成する (サブエージェント・並列・worktree)</a></li>
+    <li><a href="#ch9">第9章 ── 検証を自動化する (TDD / レビュー / 品質ゲート)</a></li>
+    <li><a href="#ch10">第10章 ── 連携する (MCP で外部系を無人操作)</a></li>
+    <li><a href="#ch11">第11章 ── 学習する (Memory と Continuous Learning)</a></li>
+    <li><a href="#ch12">第12章 ── 観測する (暴走を止める設計)</a></li>
+    <li><a href="#epilogue">エピローグ ── 人に残す仕事</a></li>
+    <li><a href="#bibliography">参 ── 出典一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A FIELD GUIDE TO AUTONOMOUS DEVELOPMENT</div>
+  <h1 class="hero__title">Claude Code で築く自律開発の工程<em>手を放す</em></h1>
+  <p class="hero__subtitle">Hooks、Scheduled Agents、自律ループ ── 人がいなくても回る仕組みを、どう組み立てるか</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">55 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">12 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">AGENT POWER USERS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">監督から庭師へ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントが走る場所をどう設計するか</p>
+    </header>
+
+    <div class="prose">
+      <p>2026 年、開発者の仕事は静かに重心を移している。コードを書く時間が減り、<strong>エージェントが走る場を整える時間</strong>が増えている。Claude Code を一日中ターミナルに開いている人なら、その変化に既に気付いているはずだ ── 自分が書いた行数より、エージェントが書いた行数のほうが多くなった日があったことに。</p>
+
+      <p>本書はその先を扱う。「Claude Code をどう使うか」ではなく、<em>Claude Code を使わずに済む仕組みを Claude Code でどう作るか</em>。エージェントを起動するキーストロークすら省きたい ── そういう怠惰さこそが、自律開発の正しい入口だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この本の前提</span>
+        <p class="key-concept__text">優れた自律システムには、つねに三つの層がある ── <strong>反応 (Hooks)</strong>・<strong>起動 (Cron/Schedule)</strong>・<strong>継続 (Loops)</strong> だ。何かが起きたときに自動で動き、時刻が来たら自動で目覚め、終わるべき条件まで自動で回り続ける。本書はこの三本柱を中心軸として、開発工程の各段階から人を抜いていく十二章である。</p>
+      </div>
+
+      <p>各章は<em>「人が今どこに立っているか」</em>と<em>「そこから抜けるための仕組み」</em>の二段構えで書いた。月曜の朝にターミナルを開いたとき、すぐに <code>settings.json</code> や <code>.claude/hooks/</code> を編集できる形を目指した。コーヒーを淹れて、はじめよう。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>監督ではなく、庭師として</h3>
+
+      <p>従来のソフトウェア開発で人がやってきたのは「監督」だ ── タスクを切り、書き、レビューし、デプロイし、また次のタスクを切る。各工程で人間がボトルネックとして座っていた。Claude Code が変えるのは、その<em>座っている場所そのもの</em>だ。</p>
+
+      <p>新しい役回りは「庭師」に近い。土壌 (環境) を整え、水路 (フック) を引き、種 (計画) を撒く。芽 (エージェント) は自分で伸びる。庭師は毎日剪定するわけではなく、たまに見回って、邪魔な枝を切り、新しい区画を作る。本書はこの庭師の道具一式を扱う。</p>
+
+      <p>「監督」の語彙で本書を読まないでほしい。タスクを次々と振る話ではない。<em>振らなくていい状態をどう作るか</em>の話だ。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 自律性の三本柱</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章 自律性の三本柱
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">自律性の三本柱<br>── 反応・起動・継続</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Hooks・Schedule・Loop の地図を、最初に頭に入れる</p>
+    </header>
+
+    <div class="prose">
+      <p>本書の十二章を貫く骨格は、最初の三十分で押さえてしまうのがいい。Claude Code が「人を介さずに動く」道は、原理的にはたった三つしかない ── <strong>イベントに反応する</strong>か、<strong>時刻に起動される</strong>か、<strong>自分で回り続ける</strong>か。あらゆる自動化は、この三つの組み合わせに分解できる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>反応 (Reactive) ── Hooks</h3>
+
+      <p>第一の柱は <em>Hooks</em> だ。Claude Code には設定ファイル (<code>~/.claude/settings.json</code> あるいはプロジェクトの <code>.claude/settings.json</code>) で、特定のイベントに対してシェルコマンドを発火させる仕組みがある。種類は数えるほどしかない:</p>
+
+      <table>
+        <thead><tr><th>Hook</th><th>発火タイミング</th><th>典型用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>PreToolUse</code></td><td>ツール実行<em>直前</em></td><td>危険なコマンドのブロック、引数の検査</td></tr>
+          <tr><td><code>PostToolUse</code></td><td>ツール実行<em>直後</em></td><td>フォーマッタ・リンタの自動実行</td></tr>
+          <tr><td><code>UserPromptSubmit</code></td><td>ユーザー入力の<em>直後</em></td><td>文脈の自動付加、ガードレール</td></tr>
+          <tr><td><code>Stop</code></td><td>セッション終了時</td><td>ビルド検証、サマリ生成</td></tr>
+          <tr><td><code>SessionStart</code></td><td>セッション開始時</td><td>前回サマリの読み込み</td></tr>
+        </tbody>
+      </table>
+
+      <p>Hooks の本質は「<strong>イベント駆動</strong>」だ。ユーザーが何かをしたとき、エージェントが何かをしたとき、その瞬間に決められた手続きを差し込む。これによって「<code>tsc --noEmit</code> を手で叩く」「フォーマッタを思い出して走らせる」といった作業は、書いた瞬間から消える。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>起動 (Time-driven) ── Scheduled Agents</h3>
+
+      <p>第二の柱は <em>Scheduled Agents</em> ── 時刻ベースの起動だ。Claude Code には <code>CronCreate</code> 系のスケジューラがあり、リモートで定期的にエージェントを走らせることができる。<code>/schedule</code> スラッシュコマンドで対話的に登録できる。</p>
+
+      <p>朝 9 時に「昨日のオープン PR を確認して優先順位を Slack に投稿せよ」というルーチンを組んでおけば、出社前に一日の地図が出来上がっている。深夜 2 時に「依存パッケージの脆弱性スキャンを走らせ、CRITICAL があれば issue を起票せよ」と仕込んでおけば、朝には対応すべき issue だけが Linear に並んでいる。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: 一回限りの予約</span>
+        Cron だけでなく、「来週月曜の朝 9 時に一回だけ走らせる」という one-shot のスケジュールにも使える。リマインダとしての側面も持つ。
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>継続 (Self-driving) ── Loops</h3>
+
+      <p>第三の柱は <em>Loop</em> ── 自律的な反復実行だ。<code>/loop</code> スラッシュコマンドで起動でき、間隔を指定すれば「5分ごとにこの作業をやれ」、間隔を省けば「自分でペースを決めて続けろ」と命じられる。後者の場合、エージェント自身が <code>ScheduleWakeup</code> で次の起動時刻を決める。</p>
+
+      <p>典型的な使い道は「ある条件が満たされるまで何度でもトライする」開発タスクだ。失敗したテストが通るまで、ビルドが緑になるまで、評価スコアが閾値を超えるまで ── 人間が「もう一回」と言わなくても、エージェントが自分で勝手に再挑戦する。この継続性こそが、開発に本当の意味の「無人」を持ち込む。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>三本柱の組み合わせ方</h3>
+
+      <p>三つは独立ではなく、組み合わせて使う。実例で見せよう。</p>
+
+      <ul>
+        <li><strong>朝のレビュー</strong>: 9:00 にスケジュールで起動 (柱2) → オープン PR を一つずつレビュー (柱3 のループ) → レビューごとに <code>PostToolUse</code> でログを Slack に投稿 (柱1)</li>
+        <li><strong>テスト自動修復</strong>: ファイル保存の <code>PostToolUse</code> で <code>vitest</code> を起動 (柱1) → 失敗したら <code>/loop</code> でテスト修復ループを開始 (柱3) → 全て緑になったら停止</li>
+        <li><strong>夜のクリーンアップ</strong>: 深夜 2:00 起動 (柱2) → 古いブランチ削除、依存更新、CI 状態確認 (柱3 で順次) → 問題があれば翌朝向けに issue 起票 (柱1)</li>
+      </ul>
+
+      <p>この三本柱を頭に入れた上で、以降の章では「どの工程で、どの柱を、どう使うか」を順に見ていく。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>自律性の道は三つだけ ── 反応・起動・継続</li>
+          <li><b>反応</b>Hooks (Pre/Post/Stop/SessionStart) でイベント駆動</li>
+          <li><b>起動</b>Scheduled Agents (Cron) で時刻駆動</li>
+          <li><b>継続</b>Loops で自分で回り続ける</li>
+          <li><b>実務</b>三つを組み合わせて、人を呼ばずに完結する設計を作る</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 場をつくる</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章 場をつくる
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">場をつくる<br>── settings.json と permissions</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「いちいち聞かれない」を設計する</p>
+    </header>
+
+    <div class="prose">
+      <p>自律エージェントの最初の敵は<strong>権限プロンプト</strong>だ。実行のたびに「このコマンドを許可しますか?」と聞かれていては、人がいない時間にエージェントが止まってしまう。場づくりとは、つまり <em>「いちいち聞かない」を設計する</em>ことに他ならない。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>settings.json の三層</h3>
+
+      <p>Claude Code の設定は三層構造になっている ── 上から優先される:</p>
+
+      <table>
+        <thead><tr><th>ファイル</th><th>場所</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>.claude/settings.local.json</code></td><td>プロジェクト直下 (gitignore)</td><td>個人の上書き、秘密</td></tr>
+          <tr><td><code>.claude/settings.json</code></td><td>プロジェクト直下 (commit)</td><td>チーム共有の設定</td></tr>
+          <tr><td><code>~/.claude/settings.json</code></td><td>ユーザーホーム</td><td>個人グローバル設定</td></tr>
+        </tbody>
+      </table>
+
+      <p>原則は単純だ ── <em>個人のホームには「自分専用の癖」、プロジェクトの settings.json には「チームで共有すべき自律装置」を置く</em>。MCP サーバーの API キーや個人的なテーマは前者へ、PostToolUse のフォーマッタ起動やプロジェクト固有の許可コマンドは後者へ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>permissions で許可を前倒しする</h3>
+
+      <p>自律実行を阻む第一の壁は <code>permissions</code> だ。デフォルトでは Bash や Edit のたびに人が許可することになるが、これでは無人化はあり得ない。安全と利便のバランスを設計する。</p>
+
+<pre><code class="lang-json">{
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(npm run lint:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Read(//**)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(curl:*)"
+    ]
+  }
+}</code></pre>
+
+      <p>ポイントは <strong>「読み取り系・ローカル限定・冪等」の三条件を満たすコマンドだけを allow に入れる</strong>ことだ。<code>git status</code> や <code>npm test</code> は何度走らせても副作用がない (冪等) し、外部に影響しない (ローカル限定) し、状態を返すだけ (読み取り系)。これらは無人化しても安全だ。</p>
+
+      <p>逆に <code>curl</code>、<code>git push --force</code>、<code>rm -rf</code> のような「外に出る」「破壊的」「不可逆」なコマンドは <code>deny</code> に入れる。エージェントが間違って手を伸ばしても、deny は強い壁として働く。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>allow は「能力」ではなく「契約」</strong>だ。エージェントに何ができるかを定義するのではなく、人間がエージェントに対して何を保証するかを定義する。「これらのコマンドなら、起きた朝に結果を見るだけで済む」── そう言える範囲を allow に入れる。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>env と statusLine ── 場の調整</h3>
+
+      <p>settings.json には <code>env</code> でセッション全体の環境変数を、<code>statusLine</code> で常時表示する情報を仕込める。後者は<em>「人間が見にくる回数」を減らす</em>のに効く。</p>
+
+<pre><code class="lang-json">{
+  "env": {
+    "MAX_THINKING_TOKENS": "20000",
+    "BASH_DEFAULT_TIMEOUT_MS": "120000"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "echo \"$(git branch --show-current) | $(git status --porcelain | wc -l) files dirty\""
+  }
+}</code></pre>
+
+      <p>statusLine に「ブランチ名と未コミットのファイル数」を出しておけば、画面を切り替えなくても作業の安全度が分かる。「人に介入させない」自律設計は、同時に<em>「人が見にきたときに必要な情報がそこにある」</em>状態を作ることでもある。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: dangerously-skip-permissions</span>
+        起動オプションに <code>--dangerously-skip-permissions</code> がある。文字通り危険なので、開発用 sandbox / コンテナの中以外では使うべきでない。実機の自律ループでは <code>allow</code> を慎重に組むほうがよい。
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>構造</b>settings.json は三層 (local / project / home) で上から優先</li>
+          <li><b>原則</b>個人グローバル = 癖、プロジェクト = チーム共有の自律装置</li>
+          <li><b>permissions</b>「読み取り・ローカル・冪等」のコマンドだけ allow</li>
+          <li><b>permissions</b>「外に出る・破壊的・不可逆」は明示的に deny</li>
+          <li><b>statusLine</b>人が見にきたときの情報をそこに置く</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 自律性の三本柱</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 文脈を据える</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章 文脈を据える
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">文脈を据える<br>── CLAUDE.md / Memory / Skills</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「二度目の説明」をなくす</p>
+    </header>
+
+    <div class="prose">
+      <p>自律性を阻む第二の敵は<strong>文脈の喪失</strong>だ。エージェントは賢いが、毎回の起動時に「君はこの会社のこのプロジェクトで…」と説明されないと動けないなら、それは自律ではない。本章では、文脈を<em>言葉ではなく構造</em>として据える三つの仕組みを扱う。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>三層の文脈 ── 永続・記憶・専門知</h3>
+
+      <p>Claude Code が参照する文脈は、原則として三層ある:</p>
+
+      <table>
+        <thead><tr><th>層</th><th>仕組み</th><th>性質</th></tr></thead>
+        <tbody>
+          <tr><td><strong>永続的</strong></td><td><code>CLAUDE.md</code></td><td>セッション開始時に必ず読み込まれる</td></tr>
+          <tr><td><strong>連続的</strong></td><td>Memory システム</td><td>会話を跨いで蓄積される事実</td></tr>
+          <tr><td><strong>専門的</strong></td><td>Skills</td><td>必要なときだけ呼び出される</td></tr>
+        </tbody>
+      </table>
+
+      <p>この三層を意識的に分けることが、文脈管理の出発点だ。よく見るアンチパターンは、すべてを CLAUDE.md に詰め込んでしまうこと。CLAUDE.md は<em>毎回読み込まれる</em>ので、肥大化するとトークン予算を圧迫し、本来集中すべき内容が薄まる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>CLAUDE.md ── 「初日の上司」が言うこと</h3>
+
+      <p>CLAUDE.md には何を書くか。<strong>「新人エンジニアが入社初日に上司から言われそうな、しかし聞かないと分からないこと」</strong>だけを書く、と覚えるとよい。</p>
+
+      <ul>
+        <li>ディレクトリ構成 (見れば分かる以上の意味、例: 「<code>/docs</code> は GitHub Pages の公開ルートだから消すな」)</li>
+        <li>作業のフロー (新しい教科書を作るときの三ステップ、など)</li>
+        <li>絶対にやってはいけないこと (リネーム禁止のファイル、触れてはいけない設定)</li>
+        <li>共有された設計判断 (「テキストの色は <code>--color-ink</code> を使う、ハードコードしない」)</li>
+      </ul>
+
+      <p>逆に CLAUDE.md に<em>書かない</em>ものも明確だ ── ユーザー個人の癖、フィードバックの履歴、外部システムへのポインタ。これらは Memory に書く。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Memory ── 「二度言わせない」装置</h3>
+
+      <p>Memory は会話を跨いで保持される事実の倉庫だ。<code>~/.claude/projects/&lt;path&gt;/memory/</code> に Markdown ファイルとして保存される。種類はおよそ四つ:</p>
+
+      <table>
+        <thead><tr><th>種類</th><th>記録するもの</th><th>例</th></tr></thead>
+        <tbody>
+          <tr><td><code>user</code></td><td>ユーザーの役割・嗜好・知識</td><td>「Go 歴 10 年・React は初心者」</td></tr>
+          <tr><td><code>feedback</code></td><td>修正・確認された行動指針</td><td>「テストでモック禁止、本番 DB に当てる」</td></tr>
+          <tr><td><code>project</code></td><td>進行中の事情・締切・体制</td><td>「金曜まで feature freeze」</td></tr>
+          <tr><td><code>reference</code></td><td>外部システムへのポインタ</td><td>「バグは Linear の INGEST プロジェクト」</td></tr>
+        </tbody>
+      </table>
+
+      <p><code>feedback</code> 型は特に重要で、ユーザーが「いや、それは違う、こうしてくれ」と言った瞬間に保存する。<strong>同じ訂正を二度しなくて済む</strong>ことが、自律性の前提条件だ。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Memory の設計思想</span>
+        <span class="sidenote__original">"Memory is for what cannot be derived from current state."</span>
+        <span class="sidenote__attr">— git log で分かることは Memory に書かない</span>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Skills ── 必要なときだけ呼ぶ専門知</h3>
+
+      <p>Skills は「Django のセキュリティ実践」「Rust の所有権パターン」のように、<em>特定の状況でだけ参照すべき深い専門知識</em>を切り出した仕組みだ。<code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> に書く。常時読み込まれず、関連する作業のときだけ呼び出される。</p>
+
+      <p>Skill には「description」フィールドで「いつ呼び出すか」を書く。例えば <code>django-security</code> なら「Django プロジェクトの認証・認可・CSRF・SQL インジェクション対策が必要なとき」と書く。Claude Code はユーザーのプロンプトを見て、必要そうな Skill を自動で読み込む。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">CLAUDE.md・Memory・Skills の関係は <strong>「常識・履歴・専門書」</strong>に喩えると分かりやすい。会社の常識 (CLAUDE.md) は新人の初日に渡す。あなた個人の癖や過去の判断 (Memory) は人事ファイルとして溜まる。専門書 (Skills) は本棚に置いておき、必要な案件のときだけ取り出す。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>三層</b>永続 (CLAUDE.md) / 連続 (Memory) / 専門 (Skills)</li>
+          <li><b>CLAUDE.md</b>「初日の上司が言うこと」だけ。肥大化させない</li>
+          <li><b>Memory</b>feedback 型を最重視 ── 同じ訂正を二度させない</li>
+          <li><b>Skills</b>必要なときだけ呼ばれる本棚として設計する</li>
+          <li><b>結果</b>文脈を毎回口頭で渡さないで済む状態を作る</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 場をつくる</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 反応する仕組み</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章 反応する仕組み
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">反応する仕組み<br>── Hooks の全種を組み立てる</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">ファイルが変わったら走る、ツールが呼ばれたら止める</p>
+    </header>
+
+    <div class="prose">
+      <p>第1章で挙げた三本柱の最初、<em>反応</em>を支えるのが Hooks だ。本章ではその全種類を順に組み立て、開発工程から「人が思い出して叩くコマンド」を一つずつ消していく。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Hooks は副作用の置き場</h3>
+
+      <p>Hooks の基本形は次のような JSON だ。matcher (どのツールに反応するか) と command (何を実行するか) を組み合わせる。</p>
+
+<pre><code class="lang-json">{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "pnpm prettier --write \"$CLAUDE_FILE_PATHS\"" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <p>これだけで、Claude Code がファイルを書き換えるたびに Prettier が自動で整形する。あなたは「フォーマッタを忘れた」と二度と言わなくていい。<em>Hooks は副作用の置き場</em>であり、開発工程の脇に小さなスクリプトを並べていく作業だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>PostToolUse の三段重ね</h3>
+
+      <p>典型的なフロントエンドプロジェクトなら、PostToolUse は三段重ねがいい。<em>format → lint → typecheck</em> の順だ。</p>
+
+<pre><code class="lang-json">{
+  "hooks": {
+    "PostToolUse": [
+      { "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "pnpm prettier --write \"$CLAUDE_FILE_PATHS\"" },
+          { "type": "command", "command": "pnpm eslint --fix \"$CLAUDE_FILE_PATHS\"" },
+          { "type": "command", "command": "pnpm tsc --noEmit" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <p>この順序は無作為ではない ── 整形してからリンタが意味のあるエラーを出し、型チェックがその両方を前提に走る。順序を逆にすると、prettier の前に eslint が文句を言うようなノイズが増える。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>PreToolUse でガードレールを引く</h3>
+
+      <p>PreToolUse は<strong>実行を止める権限</strong>を持つ。終了コード 2 を返すとツール実行がブロックされる。これを使って、危険な行為を構造的に禁じる:</p>
+
+<pre><code class="lang-json">{
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash",
+        "hooks": [
+          { "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=&gt;d+=c);process.stdin.on('end',()=&gt;{const cmd=JSON.parse(d).tool_input?.command||'';if(/git\\s+push\\s+--force/.test(cmd)){console.error('[Hook] force push blocked');process.exit(2)}console.log(d)})\""
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <p>permissions の <code>deny</code> でも似たことはできるが、PreToolUse はもっと細かい判断 ── 「この時間帯は本番デプロイ禁止」「このブランチでは破壊的変更を許可しない」── を組み込める。<em>場のルールを動的に強制</em>する装置として使う。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>SessionStart と Stop で「区切り」を作る</h3>
+
+      <p>セッション境界に対する Hook はパワフルだ。<code>SessionStart</code> で前回のサマリを自動読み込みし、<code>Stop</code> で最終ビルドを走らせる ── これだけで、会話の連続性と最終品質の両方が無人で担保される。</p>
+
+<pre><code class="lang-json">{
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [
+          { "type": "command", "command": "cat .claude/last-session.md 2&gt;/dev/null || echo 'no prior session'" }
+        ]
+      }
+    ],
+    "Stop": [
+      { "hooks": [
+          { "type": "command", "command": "pnpm build && pnpm test --run" }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: 失敗時の振る舞い</span>
+        Stop hook が失敗すると、Claude Code は失敗内容をエージェントに渡して継続させる仕組みになっている。つまり「ビルドが壊れていたら勝手に直す」ループが、Stop hook と loop の組み合わせで作れる。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>UserPromptSubmit で文脈を自動付加</h3>
+
+      <p>ユーザーのプロンプトが送られた瞬間に介入できるのが <code>UserPromptSubmit</code> だ。例えば「Linear のチケット番号を含むプロンプトには、自動でそのチケットの詳細を文脈として付加する」といった補助が組める。</p>
+
+      <p>これは<em>「人が貼り付け作業をしなくて済む」</em>方向の自動化だ。プロンプトを書く側の手間を機械的に削っていくと、エージェントを使うコストが時間と意志の両面で下がっていく。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">Hooks の設計指針は <strong>「人間が思い出さなくていい仕事は機械が思い出す」</strong>に尽きる。フォーマッタ・リンタ・型チェック・テスト・ビルド ── これらは思い出す価値のない作業だ。エージェントが書いた行を、別の機構が自動で検査する。人間の脳は、より上のレイヤーの判断に使う。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>PostToolUse</b>format → lint → typecheck の三段重ねが基本</li>
+          <li><b>PreToolUse</b>終了コード 2 で実行をブロックできる</li>
+          <li><b>SessionStart / Stop</b>会話境界に区切りを作り、ビルド検証を仕込む</li>
+          <li><b>UserPromptSubmit</b>文脈の自動付加で「貼り付け作業」を消す</li>
+          <li><b>原則</b>思い出す価値のない作業は機械が思い出す</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 文脈を据える</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 起動する仕組み</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章 起動する仕組み
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">起動する仕組み<br>── Scheduled Agents と Cron</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">時刻という、もっとも原始的な無人化トリガ</p>
+    </header>
+
+    <div class="prose">
+      <p>Hooks は「何かが起きたら走る」装置だが、<em>何も起きていない夜中にも</em>走らせたい仕事がある。脆弱性スキャン、依存パッケージの更新確認、古いブランチの掃除、定期レポート ── これらは時刻ベースで起動するのが自然だ。三本柱の第二、<strong>Scheduled Agents</strong> を組む。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Cron の何が新しいか</h3>
+
+      <p>「Cron なんて 1975 年からある」── その通り。しかし Claude Code の Scheduled Agents は、cron の枠に<em>判断する主体</em>を載せたところが新しい。1975 年の cron は「決まった時刻に決まったスクリプトを動かす」だけだったが、いま cron がトリガするのは「状況を見て、何が必要か判断するエージェント」だ。</p>
+
+      <p>これによって、ルーチンと判断の境界が消える。「毎日 9 時に PR をレビューする」というルーチンは存在するが、何をどう優先するかはエージェントが当日に決める。<em>形式は cron、中身は判断</em>。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>/schedule で対話的に組む</h3>
+
+      <p>Claude Code には <code>/schedule</code> スラッシュコマンドがあり、対話的にルーチンを登録できる。中で問われるのは三点だけだ ── <strong>いつ走らせるか、何をさせるか、結果をどこに置くか</strong>。</p>
+
+      <p>典型的なものをいくつか挙げる:</p>
+
+      <ul>
+        <li><strong>朝の整列</strong> ── 平日 8:30 に「未マージの PR と Linear のオープン issue を確認し、優先順位を Slack の <code>#daily-standup</code> に投稿せよ」</li>
+        <li><strong>夜の掃除</strong> ── 毎晩 23:00 に「マージ済みのローカルブランチを削除、<code>node_modules</code> の使用量を確認、容量が閾値を超えたら通知」</li>
+        <li><strong>週の総括</strong> ── 毎週金曜 17:00 に「今週のコミット・PR・issue の数を集計、Notion の週報ページに追記」</li>
+        <li><strong>依存の点検</strong> ── 日曜 3:00 に「依存パッケージの脆弱性スキャン、CRITICAL があれば issue 起票」</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>「人が見にくる時間」に揃える</h3>
+
+      <p>スケジュールの設計で陥りやすい罠は、<em>機械の都合で時刻を選ぶ</em>ことだ。「リソースが空いている深夜 3 時」「CI が静かな日曜朝」── これは自動化の昔の発想だ。判断する主体としてのエージェントを使うなら、<strong>「人が結果を見にくる時間の少し前」</strong>に揃えるほうが圧倒的に価値が出る。</p>
+
+      <p>朝の整列は出社の 30 分前。夜の掃除は寝る前のレビューに間に合う時刻。週の総括は退勤前。エージェントは判断を済ませた状態で結果を置いておき、人間は出来上がりに目を通すだけになる。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: 一回だけの予約</span>
+        <code>/schedule</code> は cron だけでなく「来週月曜 9 時に一回だけ」という one-shot も扱える。リマインダとして自然に使える。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>RemoteTrigger ── スケジュール以外の起動</h3>
+
+      <p>時刻起動の親戚として <code>RemoteTrigger</code> がある。これは GitHub Webhook や外部システムからの信号でエージェントを起動する仕組みだ。「PR がマージされたら本番デプロイ前点検を走らせる」「Linear で特定のラベルが付いたら自動で着手する」といった連携が組める。</p>
+
+      <p>Scheduled と Remote を組み合わせると、エージェントは<em>カレンダーと外部イベントの両方から目を覚ます</em>存在になる。あなたが起動しなくても、世界の側が起こしてくれる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">Scheduled Agents の設計指針は <strong>「人が見にくる前に、すでに結果がある」</strong>。これを徹底すると、ミーティングの議題、レビューの優先順位、今日やるべきことの判断 ── これらが自分のトリガではなく、エージェントの出力として机に並ぶようになる。あなたは反応するだけでよくなる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>cron に判断する主体を載せたのが Scheduled Agents</li>
+          <li><b>登録</b><code>/schedule</code> で対話的に組める</li>
+          <li><b>時刻</b>機械の都合ではなく「人が見にくる時間の少し前」</li>
+          <li><b>連携</b>RemoteTrigger で外部イベント起動も組み合わせる</li>
+          <li><b>結果</b>世界の側が、あなたではなくエージェントを呼ぶ</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 反応する仕組み</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 続ける仕組み</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章 続ける仕組み
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">続ける仕組み<br>── 自律ループという作法</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">人が「もう一回」と言わなくていい設計</p>
+    </header>
+
+    <div class="prose">
+      <p>三本柱の最後、<em>継続</em>は最も強力で、最も危険でもある。一度動き出したエージェントが、終了条件を満たすまで自分で何度でも回り続ける ── これが自律ループだ。本章では <code>/loop</code> と <code>ScheduleWakeup</code> を使ったループ設計の作法を扱う。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Ralph パターン ── ループは思想である</h3>
+
+      <p>「Ralph」と呼ばれる設計パターンがある。Geoffrey Huntley が提唱したもので、要点は単純だ ── <strong>同じプロンプトを until ループで何度も走らせる</strong>。「テストが全部通るまで」「評価スコアが 8 を超えるまで」「TODO が空になるまで」。</p>
+
+      <p>これは奇妙に見えて、極めて強い。人間がやろうとすると「もう一回やってくれ」「あと少し」「次はこの観点で」と言い続ける必要がある作業を、ループに置き換えれば<em>一度の指示</em>で済む。終了条件さえ書ければ、その後は機械が回す。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">Huntley, 2025</span>
+        <span class="sidenote__original">"It's not a prompt. It's a loop."</span>
+        <span class="sidenote__attr">— Ralph パターンの核心は「賢い一回」ではなく「凡庸な何度も」</span>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>/loop の二つのモード</h3>
+
+      <p>Claude Code の <code>/loop</code> には二つのモードがある:</p>
+
+      <table>
+        <thead><tr><th>モード</th><th>指定</th><th>挙動</th></tr></thead>
+        <tbody>
+          <tr><td><strong>固定間隔</strong></td><td><code>/loop 5m &lt;task&gt;</code></td><td>5 分ごとに同じタスクを実行</td></tr>
+          <tr><td><strong>動的ペーシング</strong></td><td><code>/loop &lt;task&gt;</code></td><td>エージェント自身が次の起動時刻を決める</td></tr>
+        </tbody>
+      </table>
+
+      <p>動的モードでは、エージェントが <code>ScheduleWakeup</code> を呼んで「次は 20 分後に起きる」と自分で決める。プロンプトキャッシュの 5 分 TTL を意識して、CI を見張るような短時間ポーリングなら 270 秒、特に急がない定常監視なら 1200〜1800 秒、というのが定石だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>終了条件 ── ループは終わらせるために設計する</h3>
+
+      <p>ループを始めるのは簡単だが、<strong>終わらせる</strong>のが難しい。本書の最も重要な実務的助言を、太字で残しておく:</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>ループを書くときは、まず終了条件を書く</strong>。「テストが全部通ったら」「最大 20 回まで」「ファイル A が更新されたら」「24 時間経過したら」── どれかを明示する。これがないと、エージェントは満足することなく、トークンと API クレジットを溶かし続ける。「終わらない」は障害の中で最も静かで、最も高くつく。</p>
+      </div>
+
+      <p>典型的な終了条件は三種類:</p>
+
+      <ul>
+        <li><strong>達成条件</strong>: 目的が満たされた (テスト緑、評価閾値超え)</li>
+        <li><strong>反復上限</strong>: 最大 N 回のループで打ち切り</li>
+        <li><strong>時間制限</strong>: 最大 X 時間で打ち切り</li>
+      </ul>
+
+      <p>実務的にはこの三つを <em>OR で組み合わせる</em>のがいい。達成条件だけだと永遠に届かない可能性があり、反復上限だけだと「もう少しで届きそう」を取りこぼす。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>サーキットブレーカ ── 暴走を止める</h3>
+
+      <p>終了条件とは別に、<em>異常の検知</em>でループを止める仕組みが要る。これがサーキットブレーカだ。実装はシンプルでいい:</p>
+
+      <ul>
+        <li><strong>連続失敗</strong>: 同じエラーで 3 回連続失敗したら停止</li>
+        <li><strong>同じ差分</strong>: 直前の反復と全く同じ変更を提案したら停止 (進捗していない)</li>
+        <li><strong>外部信号</strong>: <code>.claude/STOP</code> のような halt ファイルが存在したら停止</li>
+      </ul>
+
+      <p><code>.claude/STOP</code> のような halt ファイルは特に便利だ。離れた場所からでも、<code>touch .claude/STOP</code> 一発でループを終わらせられる ── ループ自体に「次の起動前にこのファイルを見て、あったら終了」と命じておけば。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: ループの内省</span>
+        各反復の最後に「今のままで目的に近づいているか?」を自問させる小さなプロンプトを差し込むのも有効。3 回連続で「近づいていない」と回答したら止める、というルールにできる。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ループと Hooks の組み合わせ</h3>
+
+      <p>三本柱の威力は組み合わせで出る。例えば「失敗するテストを通すまで自動で修復する」ループは、こうなる:</p>
+
+      <ol>
+        <li>ファイル保存時の <code>PostToolUse</code> で <code>vitest</code> が起動する (柱1: 反応)</li>
+        <li>テストが失敗したら自動で <code>/loop fix-failing-tests</code> が始まる (柱3: 継続)</li>
+        <li>各反復で失敗テストを 1 つ修復、再実行</li>
+        <li>全テスト緑、または最大 10 反復で停止</li>
+        <li>結果を Slack に投稿 (Hooks で副作用)</li>
+      </ol>
+
+      <p>このセット一式が一度組まれれば、人間は「テストが失敗した」と気付くこと自体がなくなる。<em>失敗は気付かれる前に直っている</em>状態が常態になる。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>Ralph</b>「賢い一回」より「凡庸な何度も」── ループは思想</li>
+          <li><b>モード</b>固定間隔と動的ペーシング (ScheduleWakeup)</li>
+          <li><b>終了条件</b>達成・反復上限・時間制限を OR で組む</li>
+          <li><b>サーキットブレーカ</b>連続失敗・同じ差分・halt ファイルで止める</li>
+          <li><b>組み合わせ</b>Hooks + Loop で「失敗が直っている」を常態化</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 起動する仕組み</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 計画を委ねる</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章 計画を委ねる
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">計画を委ねる<br>── planner と RFC 駆動</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「人が計画書を書く」工程を消す</p>
+    </header>
+
+    <div class="prose">
+      <p>三本柱が場の話だとすれば、ここから先は<em>工程の話</em>だ。最初に手放すべきは <strong>計画工程</strong>。要件を聞いて、課題を分解して、タスクに落として、見積もる ── 従来は人間の中核的な仕事だったが、Claude Code はこのほとんどを引き受けられる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>計画は仕様の翻訳である</h3>
+
+      <p>「計画」というと創造的な響きがあるが、その実態は<em>仕様 (やりたいこと) を、工程 (やる順序) に翻訳する</em>作業だ。曖昧さは仕様の側に残しておくのが正解で、それを工程に変換するのは機械的な仕事に近い。だからこそ自動化に向く。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>planner agent と Plan Mode</h3>
+
+      <p>Claude Code には <code>planner</code> という専用エージェントがあり、複雑な要件を投げると以下を出力する:</p>
+
+      <ul>
+        <li>影響範囲の見立て (どのファイルが変わるか)</li>
+        <li>分解されたタスクリスト</li>
+        <li>各タスクの順序とブロッキング関係</li>
+        <li>リスクとトレードオフの整理</li>
+      </ul>
+
+      <p>これを単独で呼ぶこともできるが、より使いやすいのは <strong>Plan Mode</strong>だ。Shift+Tab で切り替えると、コードを書かずに計画だけを出してくれる。人間は計画に対して承認・修正をするだけでよくなる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>TodoWrite で進捗を見えるようにする</h3>
+
+      <p>計画が承認されたら、<code>TodoWrite</code> で実装フェーズに移る。これは「タスクの List/Update を Claude Code 側に管理させる」仕組みで、完了するごとに状態が更新される。</p>
+
+      <p>このとき重要なのは、<em>TodoWrite はユーザー向けの可視化でもあるが、エージェント向けの自己整理装置でもある</em>こと。長いタスクを抱えたエージェントは、TodoWrite を見ながら「次は何をすべきか」を自分で判断する。明示的なタスク分解は、エージェントの自律性そのものを高める。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: TaskCreate との違い</span>
+        <code>TodoWrite</code> はセッション内のチェックリスト、<code>TaskCreate</code> はバックグラウンドで動くサブエージェントの非同期タスク。前者は「今やる」、後者は「並列で走らせる」。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>RFC 駆動 ── 大きな仕事は仕様書から書かせる</h3>
+
+      <p>機能規模が大きくなると、Plan Mode だけでは足りない。<strong>RFC (Request for Comments) ドキュメント</strong>を起点にする方式が向いている。流れは概ねこうだ:</p>
+
+      <ol>
+        <li>一行の要件を投げる: 「ユーザー認証を Magic Link 対応にする」</li>
+        <li>エージェントが RFC を起草: 動機・現状・提案・代替案・移行手順・リスク</li>
+        <li>RFC をレビュー (人間が一度だけ介入)</li>
+        <li>RFC を入力として、別エージェントが実装計画を生成</li>
+        <li>実装計画を入力として、複数のサブエージェントが並列着手 (第8章で扱う)</li>
+      </ol>
+
+      <p>この方式の妙は、<em>仕様が文書として残る</em>ことだ。半年後に「なぜこう作ったのか」と聞かれても RFC を見れば分かる。AI 生成の活動を人間の組織が呑み込むには、こうした記録性が要る。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>計画と実装の境目を曖昧にしない</h3>
+
+      <p>もっとも避けたいアンチパターンは、「計画なしの実装ループ」だ。スピードが上がって見えるが、エージェントは方向を見失い、無駄な実装を積み重ねる。Plan Mode で必ず最初に止まる、というルールを <code>CLAUDE.md</code> に書いておくのは有効だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">人を抜くために、<strong>計画工程は人を抜かない</strong>──いや、<em>承認する人間だけは残す</em>。エージェントが書いた計画を見て、Yes / No / 修正 を返すのが人の仕事になる。これは「監督」ではなく「ゲートキーパー」だ。エージェントは計画を書き、人間は方向を確かめ、その後の実装は再びエージェントに戻る。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>思想</b>計画 = 仕様を工程に翻訳する作業 ── 機械的で自動化に向く</li>
+          <li><b>道具</b>planner agent と Plan Mode (Shift+Tab)</li>
+          <li><b>TodoWrite</b>進捗の可視化と、エージェント自身の自己整理</li>
+          <li><b>RFC 駆動</b>大規模仕事は仕様書から書かせる ── 記録性が残る</li>
+          <li><b>残す仕事</b>計画工程は自動化、ただし「承認」だけは人間に残す</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 続ける仕組み</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 編成する</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章 編成する
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">編成する<br>── サブエージェント・並列・worktree</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">一人で全部やらない設計</p>
+    </header>
+
+    <div class="prose">
+      <p>計画ができたら、実装。だが「一つの会話で全部書く」のは、現代の Claude Code 利用としては素朴すぎる。本章では<strong>並列実行</strong>と<strong>サブエージェント編成</strong>で、開発の時間軸そのものを圧縮する方法を扱う。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>主と従、context window の分業</h3>
+
+      <p>Claude Code の Agent ツールは、「サブエージェントを生やす」装置だ。主のエージェントが大局を見て、従のエージェントが特定の作業 (検索、実装、評価) を担当する。これは生産性のためだけではない ── <em>主の context window を汚さない</em>という重要な意味がある。</p>
+
+      <p>例えば「コードベース全体から認証ロジックを探す」作業は、主のエージェントが直接やると数百ファイルの中身が全部 context に流れ込んでしまう。サブエージェントに任せれば、主には「結果のサマリ」だけが返り、context は綺麗に保たれる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>並列起動の作法</h3>
+
+      <p>サブエージェントは並列に走らせられる。一つのメッセージの中で複数の Agent ツール呼び出しを並べると、それらは同時に実行される。独立して動ける作業 ── 別ファイルの実装、別ライブラリの調査、異なる観点からの評価 ── はすべて並列化の対象だ。</p>
+
+      <p>典型例として、ある機能を実装するときに以下を並列で走らせる:</p>
+
+      <ul>
+        <li>Agent A: バックエンド API のエンドポイント実装</li>
+        <li>Agent B: フロントエンドのコンポーネント実装</li>
+        <li>Agent C: テストケースの起草</li>
+        <li>Agent D: ドキュメントの下書き</li>
+      </ul>
+
+      <p>四つの作業が同時に進む。それぞれが終わって主のエージェントに戻ってきたところで、つなぎ合わせとレビューだけを主が担当する。<em>時間軸が一本から四本に分かれる</em>。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>worktree で物理的に隔離する</h3>
+
+      <p>並列実行で最大の問題は<strong>衝突</strong>だ。同じファイルを二つのエージェントが同時に編集すれば、片方の変更が消える。これを構造的に防ぐのが <em>git worktree</em>だ。Agent ツールには <code>isolation: "worktree"</code> オプションがあり、サブエージェントを別の worktree (別ディレクトリ、別ブランチ) で走らせられる。</p>
+
+      <p>結果としてサブエージェントの変更はメインの作業ディレクトリに混ざらず、後から git のマージで合流する。<em>並列化はマージで合流させる</em>のが基本フォームだ。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: 衝突しない並列</span>
+        ファイルを共有しない作業 (例: ドキュメント生成 vs テスト追加) なら worktree なしの並列でも安全。衝突可能性のあるコード変更だけが worktree 隔離の対象。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>専門エージェントの選び方</h3>
+
+      <p>Claude Code には用途別の<strong>サブエージェント型</strong>が用意されている。Agent ツールの <code>subagent_type</code> で指定する:</p>
+
+      <table>
+        <thead><tr><th>エージェント型</th><th>用途</th></tr></thead>
+        <tbody>
+          <tr><td><code>Explore</code></td><td>読み取り専用のコード探索</td></tr>
+          <tr><td><code>planner</code></td><td>実装計画の起草</td></tr>
+          <tr><td><code>code-reviewer</code></td><td>コード品質レビュー</td></tr>
+          <tr><td><code>security-reviewer</code></td><td>セキュリティ脆弱性検出</td></tr>
+          <tr><td><code>typescript-reviewer</code> 他</td><td>言語別の専門レビュー</td></tr>
+          <tr><td><code>build-error-resolver</code></td><td>ビルドエラーの最小修正</td></tr>
+          <tr><td><code>tdd-guide</code></td><td>テスト先行開発の指南</td></tr>
+          <tr><td><code>e2e-runner</code></td><td>E2E テストの生成と実行</td></tr>
+          <tr><td><code>doc-updater</code></td><td>ドキュメント更新</td></tr>
+        </tbody>
+      </table>
+
+      <p>これらは主エージェントを汎用的に保つための分業装置だ。主が「ビルドエラーを直そう」と試行錯誤するより、<code>build-error-resolver</code> に投げて結果だけ受け取るほうが、主の context も時間も節約できる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>DevFleet と DAG パイプライン</h3>
+
+      <p>並列度を上げると、いずれ <em>DAG (有向非巡回グラフ)</em> としての設計が必要になる。「A の完了を待って B と C を並列起動、両方終わったら D を起動」というパターンだ。</p>
+
+      <p>Claude DevFleet や Ralphinho RFC パイプラインといった仕組みは、この DAG 実行を専門に扱う。RFC を入力として、フェーズごとに並列化された複数のサブエージェントを順次走らせ、最後に結果を合流させる。<strong>人間が指揮棒を振らなくても、計画書が指揮棒を振る</strong>状態が作れる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">編成の本質は <strong>「主は薄く、従は厚く」</strong>だ。主のエージェントは context を綺麗に保ち、判断と統合に集中する。重い実装・重い検索・重い検証はすべて従に投げる。これによって、一回の作業セッションで扱える複雑さが一桁上がる ── と同時に、主の context window が破綻しなくなる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>分業</b>主は判断と統合、従は実装と検索 ── context window を保護</li>
+          <li><b>並列</b>独立した作業はサブエージェントで同時実行</li>
+          <li><b>worktree</b>衝突する変更は物理的に別ディレクトリで走らせる</li>
+          <li><b>専門</b>用途別のサブエージェント型 (planner/reviewer/resolver…) を選ぶ</li>
+          <li><b>DAG</b>大規模仕事は計画書を指揮棒として DevFleet 的に動かす</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 計画を委ねる</span>
+      </a>
+      <a href="#ch9" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第9章 検証を自動化する</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章 検証を自動化する
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER NINE</span>
+      <h2 class="chapter__title">検証を自動化する<br>── TDD・レビュー・品質ゲート</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">人間のレビューを呼ばずに済む層を厚くする</p>
+    </header>
+
+    <div class="prose">
+      <p>エージェントが実装するなら、検証もエージェントに任せたい。<strong>無人化されていない検証は、人間がボトルネックの一番大きな箇所</strong>になる。本章では検証の三層 ── テスト・コードレビュー・セキュリティ ── をすべて自動化する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「自分が書いて自分が見直す」のリスク</h3>
+
+      <p>素朴な自律実装は、同じエージェントが「実装」と「レビュー」を兼ねがちだ。これは AI の盲点を見落とす最悪のパターンになる。<em>生成と評価は別のエージェント、別のプロセス、別の観点で行う</em>── これが自律検証の鉄則だ。</p>
+
+      <p>具体的には三つの層を分けて持つ:</p>
+
+      <ol>
+        <li><strong>テスト層</strong>: 仕様レベルで「動くか」を機械的に検査</li>
+        <li><strong>レビュー層</strong>: コード品質・パターン・命名を別のエージェントが検査</li>
+        <li><strong>セキュリティ層</strong>: 脆弱性パターンを専門エージェントが検査</li>
+      </ol>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>TDD ループの自動化</h3>
+
+      <p><code>tdd-guide</code> エージェントは TDD の流儀を機械化したものだ。要件を入れると、まず失敗するテストを書き、それを通す実装を書き、リファクタする ── この赤緑赤緑のループを自分で回す。</p>
+
+      <p>これを <code>/loop</code> と組み合わせると、「テストが緑になるまで」を終了条件にした実装ループが作れる:</p>
+
+<pre><code class="lang-bash"># 動的ペーシングで、緑になるまで継続
+/loop tdd-guide で機能 X を実装し、すべてのテストが緑になるまで続けよ
+        ── 最大 15 反復で打ち切り、緑なら停止</code></pre>
+
+      <p>これが第6章のループ作法と直結する点だ。検証は<em>「緑」というクリアな終了条件</em>を持っているので、ループ化と最も相性がいい。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>code-reviewer の常時起動</h3>
+
+      <p><code>code-reviewer</code> はコード品質のレビュー専門エージェントで、書かれた直後に走らせるのが原則だ。これを Stop hook あるいは PostToolUse に仕込むと、人間が「あとでレビューしよう」と思う前にレビューが終わっている。</p>
+
+<pre><code class="lang-json">{
+  "hooks": {
+    "Stop": [
+      { "hooks": [
+          { "type": "command",
+            "command": "claude -p 'code-reviewer agent を起動し、今セッションの差分をレビューせよ' --output-format json &gt; .claude/last-review.json"
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+
+      <p>レビュー結果は <code>.claude/last-review.json</code> に置かれ、次のセッション開始時に <code>SessionStart</code> hook で読み込まれる ── 一連の輪が閉じる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>security-reviewer は早めに、何度も</h3>
+
+      <p>セキュリティレビューは「最後にやる」が最悪の流儀だ。実装が深まるほど、修正コストが上がる。<code>security-reviewer</code> は次のような場面で<em>能動的に</em>呼び出す:</p>
+
+      <ul>
+        <li>ユーザー入力を扱うコードを書いたとき</li>
+        <li>認証・認可を触ったとき</li>
+        <li>外部 API・ファイルシステム・DB へのアクセスを追加したとき</li>
+        <li>環境変数を新しく追加したとき</li>
+      </ul>
+
+      <p>PostToolUse で git diff のパターンを見て自動起動する、というルールにしておくと無人化できる。「auth.ts が変更されたら security-reviewer」「.env.* が変更されたら security-reviewer」── 単純なファイル名ベースのトリガで十分効く。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>品質ゲート ── マージ前の最後の壁</h3>
+
+      <p>無人化した検証の集大成が<strong>品質ゲート</strong>だ。マージ可能になるための条件を、機械検証可能な形で列挙する:</p>
+
+      <ul>
+        <li>すべてのテストが緑</li>
+        <li>カバレッジ 80% 以上</li>
+        <li>型エラーゼロ</li>
+        <li>code-reviewer が CRITICAL / HIGH を返していない</li>
+        <li>security-reviewer が CRITICAL を返していない</li>
+        <li>ビルドが成功</li>
+      </ul>
+
+      <p>これを <code>verification-loop</code> スキルや <code>/verify-all</code> コマンドにまとめると、一発で全てが走る。<em>人間のレビューに来る前に、機械が通せるものは機械が通す</em>。</p>
+
+      <div class="sidenote sidenote--quote">
+        <span class="sidenote__label">設計原則</span>
+        <span class="sidenote__original">"Machine-checkable should be machine-checked."</span>
+        <span class="sidenote__attr">— 機械で確かめられることは機械が確かめる</span>
+      </div>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">検証を無人化する目的は、<strong>「人間のレビューに上がってくる差分の質を上げる」</strong>こと。機械で防げる凡ミスを全部弾いた上で、人間には「設計判断としてこれは妥当か」という上流の問いだけが届く状態にする。レビュー作業の楽しさが、急に増す。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>原則</b>生成と評価は別エージェント・別観点で行う</li>
+          <li><b>TDD</b>tdd-guide + /loop で「緑まで」を機械化</li>
+          <li><b>レビュー</b>code-reviewer を Stop / PostToolUse で常時起動</li>
+          <li><b>セキュリティ</b>security-reviewer はファイル名ベースで自動トリガ</li>
+          <li><b>品質ゲート</b>verification-loop でマージ可能条件を機械検証</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 編成する</span>
+      </a>
+      <a href="#ch10" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第10章 連携する</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章 連携する
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TEN</span>
+      <h2 class="chapter__title">連携する<br>── MCP で外部系を無人操作</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">通知も起票も、エージェントが直接やる</p>
+    </header>
+
+    <div class="prose">
+      <p>無人化のもう一つの壁は<strong>外部システム</strong>だ。Slack に通知する、Linear に issue を起票する、Notion にドキュメントを残す ── これらが「人間が手でやる作業」として残っていると、自動化は中途半端で終わる。本章では <strong>MCP (Model Context Protocol)</strong> を使って、外部系を直接エージェントに操作させる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>MCP とは何か ── 道具を増やす規格</h3>
+
+      <p>MCP は Anthropic が公開した、エージェントに新しいツールを与えるためのオープンな規格だ。プロトコルは単純で、サーバ側が「使えるツール一覧」「使えるリソース一覧」「使えるプロンプト一覧」を提供し、Claude Code が必要に応じてそれらを呼ぶ。</p>
+
+      <p>2025〜2026 年で公式・サードパーティ製の MCP サーバが急増し、Gmail・Google Calendar・Slack・Notion・GitHub・Sentry・Stripe ── 普段使うサービスのほとんどに繋げられるようになった。これが意味するのは <em>「ブラウザを開かなくていい仕事」が一気に増えた</em>ことだ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>典型的な MCP の繋ぎ先</h3>
+
+      <table>
+        <thead><tr><th>MCP</th><th>無人化される作業</th></tr></thead>
+        <tbody>
+          <tr><td>Slack</td><td>定型通知、レポート投稿、チャネル要約</td></tr>
+          <tr><td>Gmail</td><td>受信トリアージ、下書き作成、定型返信</td></tr>
+          <tr><td>Google Calendar</td><td>予定確認、空き枠提案、ミーティング設定</td></tr>
+          <tr><td>Google Drive / Docs</td><td>ドキュメント生成・更新、共有設定</td></tr>
+          <tr><td>Notion</td><td>議事録、週報、ナレッジベース</td></tr>
+          <tr><td>Linear / Jira</td><td>issue 起票、ステータス更新、コメント</td></tr>
+          <tr><td>GitHub</td><td>PR・issue・レビュー (gh CLI でも代替可)</td></tr>
+          <tr><td>Sentry</td><td>エラー集計、トリアージ、関連 issue 検出</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>「ブラウザを開かない」基準</h3>
+
+      <p>MCP の使い方の指針は単純だ。<strong>「ブラウザを開いて手で操作している作業」を全部リストアップし、それぞれに MCP があるか調べる</strong>。あれば繋ぐ。なければ自作するか、当面は半自動 (CLI でラップ) で済ます。</p>
+
+      <p>典型的なオフィスワーカーの一日に出てくる作業をこの基準で見ると、半分以上は MCP 経由で消せる。Slack を開いてチャネルを巡回する作業、Linear を見て進捗を更新する作業、Calendar を開いて空きを探す作業 ── これらは全て、エージェントが直接やれる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>三本柱との掛け合わせ</h3>
+
+      <p>MCP は三本柱と組み合わせて初めて真価を発揮する:</p>
+
+      <ul>
+        <li><strong>Hooks × MCP</strong>: PR が作成されたら自動で Slack に通知 (PostToolUse + Slack MCP)</li>
+        <li><strong>Cron × MCP</strong>: 毎朝 Linear のオープン issue を集計し、Notion の週報に追記 (/schedule + Linear MCP + Notion MCP)</li>
+        <li><strong>Loop × MCP</strong>: Sentry のエラーを順に読み、再現可能なものだけ自動で issue 起票 (loop + Sentry MCP + GitHub MCP)</li>
+      </ul>
+
+      <p>三本柱はエージェントの行動原理、MCP はその行動範囲。両方が揃って初めて、本当の意味での「無人」が成立する。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>自作 MCP ── 内製システムを繋ぐ</h3>
+
+      <p>外部 SaaS は MCP 公式があるが、社内の内製システム (社内 API、独自 DB、ドメイン固有のサービス) は自分で MCP サーバを書くことになる。これは TypeScript SDK か Python SDK で書ける ── 数十行から始められる。</p>
+
+      <p>自作 MCP の典型用途:</p>
+
+      <ul>
+        <li>社内の顧客 DB を、エージェントから安全に検索可能にする</li>
+        <li>社内 KPI ダッシュボードの値を、エージェントが直接取得できるようにする</li>
+        <li>独自デプロイパイプラインを、エージェントがトリガできるようにする</li>
+      </ul>
+
+      <p>ここで重要なのは <em>権限境界</em>だ。MCP サーバは「エージェントが使える社内 API のゲートウェイ」になる。何を許し、何を禁じるかをサーバ側で設計する。エージェントは賢いが、悪意なく危険な操作に手を出すこともある。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">MCP の真価は <strong>「Claude Code を中央ハブにする」</strong>設計を可能にすることだ。通知も起票も予定もドキュメントも、すべてエージェントが直接触る。あなたのコンピュータの中で、エージェントが最も「世界に触れている」存在になる。あなたはエージェントに頼むだけ、結果を見るだけ、になっていく。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>MCP</b>エージェントに道具を与えるオープン規格</li>
+          <li><b>基準</b>「ブラウザを開いて手で操作している作業」を全部 MCP で消す</li>
+          <li><b>掛け合わせ</b>三本柱 × MCP で「行動原理 × 行動範囲」が揃う</li>
+          <li><b>自作</b>社内システムは自分で MCP サーバを書く ── 権限境界が設計対象</li>
+          <li><b>結果</b>Claude Code が中央ハブになり、人間は頼むだけになる</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch9" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第9章 検証を自動化する</span>
+      </a>
+      <a href="#ch11" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第11章 学習する</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第11章 学習する
+     ============================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ELEVEN</span>
+      <h2 class="chapter__title">学習する<br>── Memory と Continuous Learning</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">同じミスを二度させない仕組み</p>
+    </header>
+
+    <div class="prose">
+      <p>無人化された仕組みは、放っておくと<em>同じ失敗を繰り返す</em>。前回のセッションで学んだことが、次のセッションでは忘れられている ── これでは「監督」を呼び戻したくなる。本章では、エージェントが時間をまたいで賢くなる三つの仕掛けを扱う。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>記憶・instinct・skill の階段</h3>
+
+      <p>エージェントの学習は段階的に整理できる:</p>
+
+      <table>
+        <thead><tr><th>段</th><th>名前</th><th>性質</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Memory</strong></td><td>個別の事実・指示・好み</td></tr>
+          <tr><td>2</td><td><strong>Instinct</strong></td><td>確信度付きの行動傾向 (まだ仮説)</td></tr>
+          <tr><td>3</td><td><strong>Skill</strong></td><td>確立された再利用可能な手順</td></tr>
+        </tbody>
+      </table>
+
+      <p>低い段で発見されたことは、信頼度が上がるにつれて高い段へ昇格する。最初は単なる Memory だった「テストでモック使わない」が、何度も似た文脈で適用されて Instinct になり、ある日「<code>testing-no-mocks</code> という名前の Skill に昇格させる」と判断される ── これが Continuous Learning の根幹だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Memory の書き方</h3>
+
+      <p>第3章で扱った Memory システムは、自律性のためには<em>能動的に書く</em>必要がある。指示や訂正があったら、その瞬間に保存する。書き方の作法は単純だ:</p>
+
+      <ul>
+        <li><strong>feedback 型</strong>には Why と How to apply を必ず添える</li>
+        <li><strong>project 型</strong>には絶対日付を残す ("木曜まで" ではなく "2026-05-15 まで")</li>
+        <li><strong>user 型</strong>はネガティブ評価を書かない ── 役立てるための情報だけ</li>
+        <li><strong>reference 型</strong>は URL・チャネル・プロジェクト名のような<em>場所</em>を残す</li>
+      </ul>
+
+      <p>記憶の負債を作らないコツは <em>「コード/履歴から復元できる情報は書かない」</em>。アーキテクチャ・最近のコミット・ファイル構造は git や read で取れる。書くべきは取れない情報、つまり<em>判断の理由</em>と<em>外部の事情</em>だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Continuous Learning の自動抽出</h3>
+
+      <p>Memory をセッションごとに手で書くのは面倒だ。<code>continuous-learning</code> スキルや <code>continuous-learning-v2</code> は、これを自動化する仕組みだ。セッション終了時 (Stop hook) にエージェントが会話を振り返り、抽出可能な学びを Memory または Instinct として保存する。</p>
+
+      <p>v2 では確信度スコアが導入され、最初は Instinct (仮説) として保存され、同種の文脈で何度か再利用された後に Skill へ昇格する。<em>「一度起きたこと」と「繰り返し起きること」を分けて扱う</em>のがポイントだ。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: project-scoped instinct</span>
+        v2.1 では project ごとに instinct が隔離されるようになった。プロジェクト A での教訓がプロジェクト B に混入する事故が防げる。
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Skill の自作 ── 再利用可能な手順を残す</h3>
+
+      <p>Instinct が育って「これは何度も使う」となったら、Skill に昇格させる。Skill は <code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> に書く。description フィールドが「いつ呼び出すか」の判断材料になるので、ここを丁寧に書く。</p>
+
+      <p>Skill 化の判断基準は二つだ:</p>
+
+      <ul>
+        <li>同じパターンが少なくとも三回以上現れた</li>
+        <li>呼び出される文脈が明確に書ける</li>
+      </ul>
+
+      <p>逆に、特定プロジェクト固有の知識は <code>CLAUDE.md</code> に書くべきで、Skill にすべきでない。Skill は<em>プロジェクト横断で使える</em>専門知識の置き場であって、特定の場所の常識ではない。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>学習の負債を払う</h3>
+
+      <p>学習システムは、不要な記憶を<em>削除する</em>仕組みも必要だ。時間で陳腐化する事実 (締切、体制) は、定期的にスケジュールでレビューして消す。間違った Memory は積極的に上書きする。Skill は半年に一度棚卸しする (<code>skill-stocktake</code> スキルが助ける)。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">学習が機能している自律システムは、<strong>「同じ指示を二度させない」</strong>という単純な指標で判定できる。ある作業を二度頼んでみて、二度目に同じ説明が必要なら、それは学習が機能していない。Memory・Instinct・Skill のどこかに、その学びを置き忘れている。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>三段</b>Memory (事実) → Instinct (仮説) → Skill (定着)</li>
+          <li><b>Memory</b>feedback と project が要 ── Why と日付を残す</li>
+          <li><b>Continuous Learning</b>Stop hook で自動抽出、確信度で昇格</li>
+          <li><b>Skill 化基準</b>三回以上の再現 + 明確な呼出文脈</li>
+          <li><b>負債</b>古い記憶を消す ── 学習システムも棚卸しが要る</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch10" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第10章 連携する</span>
+      </a>
+      <a href="#ch12" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第12章 観測する</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第12章 観測する
+     ============================================ -->
+<section class="chapter" id="ch12">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWELVE</span>
+      <h2 class="chapter__title">観測する<br>── 暴走を止める設計</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">放っておくのではなく、見ないで済むようにする</p>
+    </header>
+
+    <div class="prose">
+      <p>無人化のもっとも誤解されやすい点は、<em>「無人」≠「無監視」</em>だ。エージェントが回り続けている以上、何が起きているかを常に観測可能にしておく必要がある。本章は自律システムの観測・介入設計を扱う ── 言い換えれば、<strong>庭師が見回りに使う道具</strong>の話だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「見ない」のは「見えない」とは違う</h3>
+
+      <p>自律化された仕組みは、通常は人間の目に触れない。しかし<em>必要なときに見られる</em>状態は維持しなければならない。これは銀行口座と似ている ── 毎日見るわけではないが、見たいときに残高が分かる必要がある。</p>
+
+      <p>観測の設計目標は三つだ:</p>
+
+      <ol>
+        <li><strong>気付ける</strong>: 異常が起きたら、人間が呼ばれる</li>
+        <li><strong>遡れる</strong>: 何が起きたか、後から追える</li>
+        <li><strong>止められる</strong>: 介入したいとき、安全に止められる</li>
+      </ol>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>気付ける ── 通知の設計</h3>
+
+      <p>気付くべき事象は限られている。<em>通知が多すぎる自律システムは、結局見られなくなる</em>。設計する観点は次のあたり:</p>
+
+      <ul>
+        <li><strong>失敗</strong>: ループが終了条件を満たさず最大反復で止まった</li>
+        <li><strong>停滞</strong>: 同じエラーが連続して出続けている</li>
+        <li><strong>逸脱</strong>: PreToolUse で想定外のコマンドがブロックされた</li>
+        <li><strong>異常コスト</strong>: 想定を大きく超えるトークン消費が発生した</li>
+        <li><strong>外部依存</strong>: MCP サーバや CI が落ちている</li>
+      </ul>
+
+      <p>これらだけを Slack や Push 通知に出す。<em>「成功した」は通知しない</em>。成功は静かに済むのが自律システムの美徳だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>遡れる ── ログとアーティファクト</h3>
+
+      <p>Claude Code のセッションは <code>~/.claude/projects/&lt;path&gt;/</code> 配下に保存される。会話ログ、ツール呼び出し、各種出力は復元可能な形で残る。さらに重要な作業 (大きな計画、レビュー結果、ループの集計) は明示的にアーティファクトとしてリポジトリ内に残しておく:</p>
+
+      <ul>
+        <li><code>.claude/plans/&lt;date&gt;-&lt;feature&gt;.md</code> ── 計画 RFC</li>
+        <li><code>.claude/reviews/&lt;date&gt;-&lt;pr&gt;.md</code> ── レビュー結果</li>
+        <li><code>.claude/loops/&lt;date&gt;-&lt;task&gt;.log</code> ── ループの反復履歴</li>
+      </ul>
+
+      <p>これらを <code>.gitignore</code> ではなくむしろ <em>git に含める</em>ほうが多くの場合いい。後から「なぜこう実装されているか」が追跡できる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>止められる ── サーキットブレーカと halt</h3>
+
+      <p>第6章のサーキットブレーカと連動する形で、観測側からループを止める手段を必ず用意する。シンプルで効果的なのは <code>.claude/STOP</code> ファイルだ:</p>
+
+<pre><code class="lang-bash"># 別ターミナルから一発で止める
+touch .claude/STOP</code></pre>
+
+      <p>各ループの先頭で <code>if [ -f .claude/STOP ]; then exit 0; fi</code> 相当を呼ぶようにしておけば、外部から強制終了できる。Claude Code そのものを <code>kill</code> するより、こちらのほうが安全に状態を残せる。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補足: 緊急停止の階層</span>
+        止め方は三段階で設計するとよい。<br>(1) STOP ファイルでの優雅な停止<br>(2) Claude Code プロセスの SIGTERM<br>(3) settings.json の <code>permissions.deny</code> 拡張で全 Bash を禁じる ── 最終手段
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Loop Operator パターン</h3>
+
+      <p>大規模な自律システムでは、ループそのものを監督する別エージェント (Loop Operator) を置く設計がある。Operator は数十分に一度、走っているループの状態を確認し、進捗のないループを止め、必要なら担当者に通知する。</p>
+
+      <p>これは観測の自動化そのものだ。<em>「人間が見回る」を「エージェントが見回り、必要なときだけ人間を呼ぶ」に置き換える</em>。最終層の人間は、Operator が起こしにきたときだけ動く。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>コスト観測 ── 静かに高くつく罠</h3>
+
+      <p>自律ループの最大のリスクは「終わらない」と書いたが、その双子に <em>「終わらないまま課金される」</em>がある。トークン消費は時間に比例するので、深夜にループが暴走すると朝には大きな請求になる。</p>
+
+      <p>コスト観測の最低限:</p>
+
+      <ul>
+        <li>セッション単位の入出力トークンを記録 (Claude Code は自動で記録する)</li>
+        <li>日次でトークン総量を集計し、閾値超過で通知</li>
+        <li>ループには必ず<strong>反復上限と時間上限を二重で設定</strong></li>
+      </ul>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text">観測の本質は <strong>「人が見ない時間に、何が起きていたかが分かる」</strong>こと。通知は最小限、ログは網羅的、停止は瞬時。この三つが揃って初めて、人は安心して庭から離れられる。離れていられる時間の長さが、自律システムの成熟度を測る指標になる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li><b>原則</b>無人化 ≠ 無監視 ── 見ないで済む状態を維持する</li>
+          <li><b>気付ける</b>失敗・停滞・逸脱・異常コスト・外部障害だけ通知</li>
+          <li><b>遡れる</b>計画・レビュー・ループ履歴をアーティファクトとして残す</li>
+          <li><b>止められる</b>STOP ファイル → SIGTERM → permissions.deny の三段</li>
+          <li><b>Operator</b>ループを監督するエージェントを別に置く設計</li>
+          <li><b>コスト</b>反復上限と時間上限を二重で設定</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch11" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第11章 学習する</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ 人に残す仕事</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">人に残す仕事</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">抜けないものを、抜こうとしない</p>
+    </header>
+
+    <div class="prose">
+      <p>十二章を辿ってきた。<strong>三本柱</strong>、<strong>場づくり</strong>、<strong>文脈設計</strong>、<strong>Hooks</strong>、<strong>Scheduled Agents</strong>、<strong>自律ループ</strong>、<strong>計画委譲</strong>、<strong>エージェント編成</strong>、<strong>検証自動化</strong>、<strong>MCP 連携</strong>、<strong>継続学習</strong>、<strong>観測と暴走対策</strong>。</p>
+
+      <p>これらを揃えると、開発の<em>実行時間</em>から人間はかなり姿を消す。コードはエージェントが書く。レビューもエージェントがする。デプロイはパイプラインが回す。通知はエージェントが送る。ドキュメントもエージェントが起こす。あなたが朝コーヒーを淹れている間に、夜のループが何かを直し終え、何かを記録し終え、何かを通知し終えている。</p>
+
+      <p>では、人間に何が残るのか。本書を通して何度か触れた答えを、ここでまとめておく。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>残るのは三つだけ</h3>
+
+      <p>無人化を突き詰めても、人間に残る仕事は三つある:</p>
+
+      <ol>
+        <li><strong>仕様策定</strong>: 何を作るか、なぜそれを作るか</li>
+        <li><strong>価値判断</strong>: 複数の選択肢のうちどれを選ぶか</li>
+        <li><strong>責任引受</strong>: 動いたものに対して責任を負う</li>
+      </ol>
+
+      <p>第一の<em>仕様策定</em>は、「顧客が何を望んでいるか」「組織が何を必要としているか」を聞き取り、言語化する作業だ。エージェントは仕様を翻訳できるが、<em>仕様そのものを発見</em>することはできない。新しい価値の輪郭を引くのは、まだ人間の仕事だ。</p>
+
+      <p>第二の<em>価値判断</em>は、トレードオフの中で何を優先するかの選択だ。「速度か安全か」「シンプルさか柔軟性か」「短期成果か長期投資か」 ── これらに正解はない。組織の文脈と歴史の中で、どう判断するかが残る。</p>
+
+      <p>第三の<em>責任引受</em>は最も重い。エージェントが書いたコードがバグを起こしても、最終的に責任を負うのは人間だ。自律システムを設計し、回し、結果を引き受けるのは、まだ人間にしかできない。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>監督ではなく、庭師として</h3>
+
+      <p>序章で「監督から庭師へ」と書いた。十二章を読んだいま、その意味は明確になっているはずだ。庭師は植物を一本一本世話しない。<em>土壌を整え、水路を引き、季節を読み、剪定の時期を見定める</em>。植物は自分で育つ。</p>
+
+      <p>Claude Code の自律的な使い方は、これに似ている。エージェントは自分で考え、書き、検証する。あなたは settings.json を整え、hooks を引き、scheduled agents を仕込み、ループの終了条件を設計する。エージェントは自分で動く。あなたは庭を歩き、新しい区画を作り、枯れた枝を剪定する。</p>
+
+      <blockquote>エージェントは書く。<br>あなたは、書く場所を作る。</blockquote>
+
+      <p>本書を読み終えて、いますぐ <code>~/.claude/settings.json</code> を開きたくなったなら、それがこの本の目的だ。最初の一行のフックを書いてみる。最初のスケジュールを登録してみる。最初の小さなループを回してみる。庭はそこから広がっていく。</p>
+
+      <p>あなたの開発工程から、人の手が少しでも抜けますように。<br>あなたが、もっと上の仕事をできますように。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch12" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第12章 観測する</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参 ── 出典一覧</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">REFERENCES</span>
+      <h2 class="chapter__title">出典一覧</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">本書がよりかかった、Claude Code と自律エージェント設計の一次資料</p>
+    </header>
+
+    <div class="prose">
+      <ul class="bibliography">
+        <li><span class="bib__title">Claude Code Documentation</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/overview" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code</a></li>
+        <li><span class="bib__title">Claude Code: Hooks Reference</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/hooks" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code/hooks</a></li>
+        <li><span class="bib__title">Claude Code: Settings & Permissions</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/settings" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code/settings</a></li>
+        <li><span class="bib__title">Claude Code: Subagents</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/sub-agents" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code/sub-agents</a></li>
+        <li><span class="bib__title">Claude Code: Memory</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/memory" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code/memory</a></li>
+        <li><span class="bib__title">Claude Code: Skills</span> ── Anthropic 公式. <a href="https://docs.claude.com/en/docs/claude-code/skills" target="_blank" rel="noopener">docs.claude.com/en/docs/claude-code/skills</a></li>
+        <li><span class="bib__title">Model Context Protocol (MCP) Specification</span> ── Anthropic / Open Spec. <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener">modelcontextprotocol.io</a></li>
+        <li><span class="bib__title">MCP Server SDKs (TypeScript / Python)</span> ── GitHub. <a href="https://github.com/modelcontextprotocol" target="_blank" rel="noopener">github.com/modelcontextprotocol</a></li>
+        <li><span class="bib__title">Ralph: Loop-Driven Coding with Claude</span> ── Geoffrey Huntley, 2025. <a href="https://ghuntley.com/ralph/" target="_blank" rel="noopener">ghuntley.com/ralph</a></li>
+        <li><span class="bib__title">Claude Code Best Practices</span> ── Anthropic Blog, 2025. <a href="https://www.anthropic.com/engineering/claude-code-best-practices" target="_blank" rel="noopener">anthropic.com/engineering/claude-code-best-practices</a></li>
+        <li><span class="bib__title">Building Effective Agents</span> ── Anthropic, 2024-2025. <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener">anthropic.com/engineering/building-effective-agents</a></li>
+        <li><span class="bib__title">関連: Vol.II 「AI時代の開発手法 ── Karpathy の地図」</span> ── Software 3.0 とエージェント時代の整理は本書の思想的下敷きとして機能する. <a href="./karpathy-ai-era-development-textbook.html" target="_blank">本サイト内</a></li>
+      </ul>
+
+      <p style="margin-top: 3rem; font-size: 0.9rem; color: var(--color-ink-muted);">本書は 2026 年 5 月時点の Claude Code (Opus 4.7 系) の挙動と公開仕様に準拠しています。Hooks の matcher 構文、MCP サーバ群、サブエージェント型はバージョンで動くので、自分の環境で <code>/help</code> を当てつつ参照してください。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+      <a href="#prologue" class="chapter-nav__next">
+        <span class="chapter-nav__label">↑ TOP</span>
+        <span class="chapter-nav__title">最初に戻る</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <p>この教科書は 2026 年 5 月時点の Claude Code の機能と、自律エージェント設計の慣行に基づく。<br>
+  三本柱 (反応・起動・継続) という骨格はおそらく長く有効。<br>
+  ツール名や個々の hook 仕様は半年で動くので、公式ドキュメントも当たること。</p>
+  <div class="footer__rule"></div>
+  <p class="footer__date">May 2026 · A Field Guide to Autonomous Development</p>
+</footer>
+
+<script src="./textbook.js" defer></script>
+
+</body>
+</html>
