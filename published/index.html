@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Textbooks ── A Collection</title>
+<meta name="description" content="長文教科書のコレクション。古典書の佇まいに、現代的な読書体験を組み合わせて。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Noto+Serif+JP:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  /* 教科書本体と同じパレット */
+  --color-paper: #faf7f2;
+  --color-paper-deep: #f3ede2;
+  --color-ink: #1c1917;
+  --color-ink-soft: #3f3a35;
+  --color-ink-muted: #6b6359;
+  --color-rule: #d6cfc1;
+  --color-rule-soft: #e8e2d4;
+  --color-accent: #a01c1c;
+  --color-indigo: #1a3a5c;
+  --color-gold: #8b6914;
+  --color-highlight: #f4e8c1;
+
+  --font-serif-jp: 'Noto Serif JP', 'YuMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-display: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+
+  --measure: 38rem;
+  --measure-wide: 56rem;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-serif-jp);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.85;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(180, 160, 120, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(160, 28, 28, 0.02) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(140, 120, 90, 0.012) 2px, rgba(140, 120, 90, 0.012) 3px);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================================================
+   表紙 (Cover)
+   ========================================================= */
+.cover {
+  padding: clamp(5rem, 10vw, 9rem) 1.5rem clamp(3rem, 6vw, 5rem);
+  text-align: center;
+  position: relative;
+}
+
+.cover__ornament {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.55em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.cover__ornament::before,
+.cover__ornament::after {
+  content: '';
+  display: block;
+  width: clamp(2.5rem, 8vw, 5rem);
+  height: 1px;
+  background: var(--color-rule);
+}
+
+.cover__title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(3.2rem, 9vw, 6rem);
+  line-height: 1;
+  letter-spacing: 0.32em;
+  color: var(--color-ink);
+  margin-left: 0.32em; /* レターースペーシング分の視覚的中央寄せ */
+  margin-bottom: 1.4rem;
+  text-wrap: balance;
+}
+
+.cover__diamond {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin: 1.5rem 0 1.75rem;
+  color: var(--color-accent);
+  font-size: 0.9rem;
+}
+.cover__diamond::before,
+.cover__diamond::after {
+  content: '';
+  display: block;
+  width: clamp(3rem, 10vw, 6rem);
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.5;
+}
+
+.cover__subtitle {
+  font-family: var(--font-serif-jp);
+  font-weight: 300;
+  font-size: clamp(0.95rem, 1.6vw, 1.05rem);
+  line-height: 1.9;
+  color: var(--color-ink-soft);
+  max-width: 30rem;
+  margin: 0 auto;
+  text-wrap: balance;
+}
+
+.cover__meta {
+  margin-top: 2.75rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--color-ink-muted);
+}
+.cover__meta strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* =========================================================
+   コレクション本体
+   ========================================================= */
+.catalog {
+  flex: 1;
+  max-width: var(--measure-wide);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 4rem) 1.5rem clamp(4rem, 8vw, 7rem);
+  width: 100%;
+}
+
+.catalog__header {
+  text-align: center;
+  margin-bottom: clamp(3rem, 6vw, 5rem);
+}
+.catalog__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  display: block;
+  margin-bottom: 1rem;
+}
+.catalog__heading {
+  font-family: var(--font-serif-jp);
+  font-weight: 500;
+  font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+  letter-spacing: 0.06em;
+  color: var(--color-ink);
+}
+.catalog__rule {
+  width: 4rem;
+  height: 1px;
+  background: var(--color-rule);
+  margin: 1.4rem auto 0;
+}
+
+/* 個々のエントリ (1冊) */
+.entry {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0;
+  border-top: 1px solid var(--color-rule-soft);
+  position: relative;
+}
+.entry:first-of-type {
+  border-top: 2px solid var(--color-ink);
+  padding-top: clamp(2.5rem, 5vw, 3.5rem);
+}
+.entry:last-of-type {
+  border-bottom: 1px solid var(--color-rule-soft);
+}
+
+.entry__volume {
+  text-align: right;
+  padding-top: 0.4rem;
+  border-right: 1px solid var(--color-rule-soft);
+  padding-right: clamp(1rem, 2.5vw, 1.75rem);
+}
+.entry__volume-roman {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(2.4rem, 5vw, 3.2rem);
+  line-height: 1;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+}
+.entry__volume-label {
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin-top: 0.6rem;
+}
+
+.entry__body {
+  padding-top: 0.2rem;
+}
+.entry__title {
+  font-family: var(--font-serif-jp);
+  font-weight: 500;
+  font-size: clamp(1.45rem, 2.6vw, 1.85rem);
+  line-height: 1.45;
+  color: var(--color-ink);
+  margin-bottom: 0.85rem;
+  text-wrap: balance;
+}
+.entry__title a {
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(transparent 92%, var(--color-accent) 92%, var(--color-accent) 96%, transparent 96%);
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s ease;
+}
+.entry__title a:hover {
+  background-size: 100% 100%;
+}
+.entry__subtitle {
+  font-family: var(--font-serif-jp);
+  font-weight: 300;
+  font-size: 0.98rem;
+  line-height: 1.85;
+  color: var(--color-ink-soft);
+  margin-bottom: 1.5rem;
+  max-width: var(--measure);
+  text-wrap: balance;
+}
+
+.entry__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-muted);
+}
+.entry__meta-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+.entry__meta-item + .entry__meta-item::before {
+  content: '·';
+  color: var(--color-rule);
+  margin-right: 0.95rem;
+  margin-left: -0.4rem;
+  font-style: normal;
+}
+.entry__meta-value {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: 0.12em;
+}
+
+.entry__cta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  text-decoration: none;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--color-accent);
+  transition: gap 0.25s ease, color 0.25s ease;
+}
+.entry__cta:hover {
+  gap: 1.25rem;
+  color: var(--color-ink);
+  border-bottom-color: var(--color-ink);
+}
+.entry__cta::after {
+  content: '→';
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+/* 「執筆中」プレースホルダ */
+.entry--upcoming .entry__volume-roman { color: var(--color-ink-muted); }
+.entry--upcoming .entry__title,
+.entry--upcoming .entry__subtitle { color: var(--color-ink-muted); }
+.entry--upcoming .entry__cta {
+  color: var(--color-ink-muted);
+  border-bottom-color: var(--color-rule);
+  pointer-events: none;
+}
+
+/* =========================================================
+   フッター
+   ========================================================= */
+.footer {
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+  border-top: 1px solid var(--color-rule-soft);
+  background: var(--color-paper-deep);
+}
+.footer__ornament {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 1rem;
+}
+.footer__text {
+  font-family: var(--font-serif-jp);
+  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+  line-height: 1.8;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   レスポンシブ
+   ========================================================= */
+@media (max-width: 640px) {
+  .entry {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .entry__volume {
+    text-align: left;
+    border-right: none;
+    border-bottom: 1px solid var(--color-rule-soft);
+    padding-right: 0;
+    padding-bottom: 0.75rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .entry__volume-roman { font-size: 2rem; }
+  .entry__volume-label { margin-top: 0; }
+}
+
+@media print {
+  body { background: white; }
+  .entry__cta { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="cover">
+  <div class="cover__ornament">A Collection</div>
+  <h1 class="cover__title">TEXTBOOKS</h1>
+  <div class="cover__diamond">◆</div>
+  <p class="cover__subtitle">
+    古典書の佇まいに、現代の読書体験を組み合わせて。<br>
+    長い文章を、最後まで読みたくさせる装置として。
+  </p>
+  <div class="cover__meta">
+    Curated by <strong>t2421</strong> ── Anno 2026
+  </div>
+</header>
+
+<main class="catalog">
+  <div class="catalog__header">
+    <span class="catalog__label">Library</span>
+    <h2 class="catalog__heading">所蔵目録</h2>
+    <div class="catalog__rule"></div>
+  </div>
+
+  <!-- ↓ ここに新しい教科書を追加していく (新しいものほど上) -->
+
+  <article class="entry">
+    <div class="entry__volume">
+      <span class="entry__volume-roman">I</span>
+      <span class="entry__volume-label">Vol.</span>
+    </div>
+    <div class="entry__body">
+      <h3 class="entry__title">
+        <a href="./web-service-defacto-standard-textbook.html">フロントから来たあなたのための、フルスタック越境地図</a>
+      </h3>
+      <p class="entry__subtitle">2026年、Webサービスのデファクト・スタンダードを歴史と力学から読み解く。</p>
+      <div class="entry__meta">
+        <span class="entry__meta-item">読了 <span class="entry__meta-value">30 MIN</span></span>
+        <span class="entry__meta-item">構成 <span class="entry__meta-value">12 CHAPTERS</span></span>
+        <span class="entry__meta-item">想定 <span class="entry__meta-value">MID-LEVEL FE</span></span>
+      </div>
+      <a class="entry__cta" href="./web-service-defacto-standard-textbook.html">Read</a>
+    </div>
+  </article>
+
+  <!-- 新しい教科書を追加するときは、上のブロックをコピーして、Vol番号と各値を更新する -->
+
+</main>
+
+<footer class="footer">
+  <div class="footer__ornament">◆ Finis ◆</div>
+  <p class="footer__text">
+    これらの教科書はすべて、<a href="https://github.com/" style="color: var(--color-ink-soft);">textbook-ds</a> デザインシステムの上に書かれている。
+  </p>
+</footer>
+
+</body>
+</html>

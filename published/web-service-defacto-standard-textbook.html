@@ -1,0 +1,3300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>フロントから来たあなたのための、フルスタック越境地図</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================================================
+   設計思想:
+   - 学習科学の知見に基づく可読性最優先のレイアウト
+   - Edward Tufte風の知的な余白の使い方
+   - 日本語の縦組み感覚を持つ横組み (Noto Serif JP)
+   - 読了進捗の可視化で見通しを確保
+   - サイドノートで本文を切らずに補足
+   =========================================================== */
+
+:root {
+  /* カラーパレット: 古典的な書籍に着想 ── 鉄紺、墨、辰砂、雁皮 */
+  --color-paper: #faf7f2;
+  --color-paper-deep: #f3ede2;
+  --color-ink: #1c1917;
+  --color-ink-soft: #3f3a35;
+  --color-ink-muted: #6b6359;
+  --color-rule: #d6cfc1;
+  --color-rule-soft: #e8e2d4;
+  --color-accent: #a01c1c;       /* 朱・辰砂 ── 強調用 */
+  --color-accent-soft: #c46868;
+  --color-indigo: #1a3a5c;       /* 鉄紺 ── 副次強調 */
+  --color-gold: #8b6914;         /* 黄土 ── 章番号などに */
+  --color-highlight: #f4e8c1;    /* 雁皮 ── ハイライト背景 */
+
+  /* タイポグラフィ */
+  --font-serif-jp: 'Noto Serif JP', 'YuMincho', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-display: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --font-ui: 'Inter', system-ui, sans-serif;
+
+  /* 寸法 */
+  --measure: 38rem;              /* 本文の最適行幅 (約 60-70字) */
+  --measure-wide: 56rem;
+  --side-width: 14rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-serif-jp);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  /* 紙の質感 */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(180, 160, 120, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(160, 28, 28, 0.02) 0%, transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(140, 120, 90, 0.012) 2px, rgba(140, 120, 90, 0.012) 3px);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   読了進捗バー (固定上部)
+   ============================================ */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  z-index: 1000;
+}
+.progress-bar__fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-gold) 100%);
+  transition: width 0.1s ease-out;
+}
+
+/* ============================================
+   ヘッダーナビゲーション (固定)
+   ============================================ */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(250, 247, 242, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-rule-soft);
+  z-index: 100;
+  padding: 0.875rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+}
+.top-nav__title {
+  color: var(--color-ink-soft);
+  font-weight: 500;
+}
+.top-nav__title em {
+  font-style: italic;
+  color: var(--color-accent);
+}
+.top-nav__toc-toggle {
+  background: none;
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink-soft);
+  padding: 0.35rem 0.875rem;
+  border-radius: 2px;
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.2s;
+}
+.top-nav__toc-toggle:hover {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: var(--color-ink);
+}
+
+/* ============================================
+   目次ドロワー (右側スライドイン)
+   ============================================ */
+.toc-drawer {
+  position: fixed;
+  top: 0;
+  right: -380px;
+  width: 360px;
+  height: 100vh;
+  background: var(--color-paper-deep);
+  border-left: 1px solid var(--color-rule);
+  z-index: 200;
+  padding: 5rem 2.5rem 2rem;
+  overflow-y: auto;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.08);
+}
+.toc-drawer.is-open {
+  right: 0;
+}
+.toc-drawer__close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  font-family: var(--font-serif-jp);
+}
+.toc-drawer h3 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+.toc-drawer ol {
+  list-style: none;
+  counter-reset: toc-counter;
+}
+.toc-drawer li {
+  margin-bottom: 0.875rem;
+  padding-left: 2.5rem;
+  position: relative;
+  counter-increment: toc-counter;
+  line-height: 1.5;
+}
+.toc-drawer li::before {
+  content: counter(toc-counter, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--color-gold);
+  letter-spacing: 0.1em;
+  font-style: italic;
+}
+.toc-drawer a {
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  font-size: 0.92rem;
+  display: block;
+  padding: 0.2rem 0;
+  border-left: 2px solid transparent;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  transition: all 0.2s;
+}
+.toc-drawer a:hover {
+  color: var(--color-accent);
+  border-left-color: var(--color-accent);
+  background: rgba(160, 28, 28, 0.03);
+}
+
+/* バックドロップ */
+.toc-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.4);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.toc-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================================
+   ヒーローセクション
+   ============================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 6rem 2rem 4rem;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.hero__ornament {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.4em;
+  color: var(--color-gold);
+  margin-bottom: 3rem;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+.hero__ornament::before,
+.hero__ornament::after {
+  content: '';
+  width: 3rem;
+  height: 1px;
+  background: var(--color-gold);
+}
+
+.hero__title {
+  font-family: var(--font-serif-jp);
+  font-weight: 600;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+  max-width: 22ch;
+  margin-bottom: 2.5rem;
+}
+.hero__title em {
+  font-style: normal;
+  color: var(--color-accent);
+  position: relative;
+}
+.hero__title em::after {
+  content: '';
+  position: absolute;
+  bottom: -0.15em;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--color-highlight);
+  z-index: -1;
+}
+
+.hero__subtitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+  color: var(--color-ink-soft);
+  max-width: 38rem;
+  margin-bottom: 4rem;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.hero__meta {
+  display: flex;
+  gap: 2.5rem;
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.hero__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+}
+.hero__meta-label {
+  color: var(--color-gold);
+  font-style: italic;
+  font-family: var(--font-display);
+  text-transform: none;
+  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+}
+.hero__meta-value {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.hero__scroll-cue {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-ink-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero__scroll-cue::after {
+  content: '';
+  width: 1px;
+  height: 2rem;
+  background: var(--color-ink-muted);
+  animation: scroll-cue 2s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes scroll-cue {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+/* ============================================
+   章コンテナ
+   ============================================ */
+.chapter {
+  padding: 6rem 0 4rem;
+  position: relative;
+}
+.chapter:not(:last-child) {
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.chapter__inner {
+  max-width: var(--measure-wide);
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+}
+
+/* 章タイトル */
+.chapter__header {
+  margin-bottom: 4rem;
+  max-width: var(--measure);
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.chapter__number {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.5em;
+  color: var(--color-gold);
+  font-style: italic;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.chapter__title {
+  font-family: var(--font-serif-jp);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--color-ink);
+}
+
+.chapter__rule {
+  width: 4rem;
+  height: 2px;
+  background: var(--color-accent);
+  margin: 2rem auto;
+}
+
+.chapter__intro {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.2rem;
+  line-height: 1.7;
+  color: var(--color-ink-soft);
+  text-align: center;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+/* ============================================
+   本文 (テキストブロック)
+   ============================================ */
+.prose {
+  max-width: var(--measure);
+  margin: 0 auto;
+}
+
+.prose p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+  text-justify: inter-character;
+}
+
+/* リード段落 (各章冒頭) */
+.prose > p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 500;
+  float: left;
+  line-height: 0.9;
+  padding-right: 0.5rem;
+  padding-top: 0.4rem;
+  color: var(--color-accent);
+}
+
+/* セクション見出し (h3) */
+.prose h3 {
+  font-family: var(--font-serif-jp);
+  font-weight: 600;
+  font-size: 1.35rem;
+  line-height: 1.5;
+  margin-top: 3.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-ink);
+  letter-spacing: 0.02em;
+  position: relative;
+  padding-left: 1.25rem;
+}
+.prose h3::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--color-accent);
+  transform: rotate(45deg);
+}
+
+/* 強調 */
+.prose strong {
+  font-weight: 700;
+  color: var(--color-ink);
+  background: linear-gradient(transparent 65%, var(--color-highlight) 65%);
+  padding: 0 0.1em;
+}
+
+.prose em {
+  font-style: italic;
+  color: var(--color-indigo);
+}
+
+/* リンク */
+.prose a {
+  color: var(--color-accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-accent-soft);
+  transition: all 0.2s;
+}
+.prose a:hover {
+  background: var(--color-highlight);
+}
+
+/* リスト */
+.prose ul, .prose ol {
+  margin: 1.5rem 0;
+  padding-left: 2rem;
+}
+.prose li {
+  margin-bottom: 0.6rem;
+  line-height: 1.85;
+}
+.prose ul li {
+  list-style: none;
+  position: relative;
+}
+.prose ul li::before {
+  content: '•';
+  position: absolute;
+  left: -1.25rem;
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
+/* インラインコード */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-paper-deep);
+  color: var(--color-indigo);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  border: 1px solid var(--color-rule-soft);
+}
+
+/* コードブロック */
+.prose pre {
+  font-family: var(--font-mono);
+  background: #1c1917;
+  color: #f4e8c1;
+  padding: 1.5rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 2rem 0;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  border-left: 3px solid var(--color-accent);
+  position: relative;
+}
+.prose pre::before {
+  content: 'code';
+  position: absolute;
+  top: 0.5rem;
+  right: 0.875rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--color-gold);
+  letter-spacing: 0.2em;
+}
+.prose pre code {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* テーブル */
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-size: 0.95rem;
+}
+.prose th, .prose td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-rule);
+  line-height: 1.6;
+}
+.prose th {
+  font-weight: 600;
+  background: var(--color-paper-deep);
+  font-family: var(--font-serif-jp);
+  color: var(--color-ink);
+  border-bottom: 2px solid var(--color-ink);
+  letter-spacing: 0.03em;
+}
+.prose tbody tr:hover {
+  background: rgba(244, 232, 193, 0.3);
+}
+
+/* 引用 */
+.prose blockquote {
+  margin: 2rem -2rem;
+  padding: 1.5rem 2rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--color-ink-soft);
+  border-left: 3px solid var(--color-accent);
+  background: var(--color-paper-deep);
+}
+
+/* ============================================
+   サイドノート / マージナリア
+   学習効果: 本文を切らずに補足情報を提供
+   ============================================ */
+.sidenote {
+  background: linear-gradient(180deg, var(--color-paper-deep) 0%, var(--color-paper) 100%);
+  border-left: 3px solid var(--color-gold);
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0;
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--color-ink-soft);
+  position: relative;
+}
+.sidenote__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   KEY CONCEPT (要点強調ボックス)
+   学習効果: チャンキング、視覚的階層
+   ============================================ */
+.key-concept {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: 2rem 2.25rem;
+  margin: 3rem 0;
+  position: relative;
+  border-radius: 2px;
+}
+.key-concept::before {
+  content: '✦';
+  position: absolute;
+  top: -0.6rem;
+  left: 1.5rem;
+  background: var(--color-paper);
+  color: var(--color-accent);
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+.key-concept__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  display: block;
+  margin-bottom: 0.875rem;
+}
+.key-concept__text {
+  font-family: var(--font-serif-jp);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-paper);
+  font-weight: 400;
+}
+.key-concept__text strong {
+  color: #f4e8c1;
+  background: none;
+  font-weight: 600;
+}
+
+/* ============================================
+   章末まとめ
+   学習効果: 復習・記憶定着 (Spaced repetition の補助)
+   ============================================ */
+.summary {
+  background: var(--color-paper-deep);
+  border-top: 2px solid var(--color-ink);
+  padding: 2rem 2.5rem;
+  margin: 4rem 0 0;
+  position: relative;
+}
+.summary__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: 1rem;
+}
+.summary__title {
+  font-family: var(--font-serif-jp);
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: 1.25rem;
+  color: var(--color-ink);
+}
+.summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.summary li {
+  padding: 0.4rem 0 0.4rem 1.75rem;
+  position: relative;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+.summary li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+  font-weight: bold;
+}
+
+/* ============================================
+   章間ナビゲーション
+   ============================================ */
+.chapter-nav {
+  max-width: var(--measure);
+  margin: 4rem auto 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--color-rule);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+}
+.chapter-nav a {
+  color: var(--color-ink-soft);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  transition: all 0.2s;
+  max-width: 45%;
+}
+.chapter-nav a:hover {
+  border-color: var(--color-ink);
+  background: var(--color-paper-deep);
+}
+.chapter-nav__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.72rem;
+  color: var(--color-gold);
+  letter-spacing: 0.15em;
+}
+.chapter-nav__title {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+.chapter-nav__prev { text-align: left; }
+.chapter-nav__next { text-align: right; margin-left: auto; }
+
+/* ============================================
+   フッター
+   ============================================ */
+.footer {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: rgba(250, 247, 242, 0.7);
+}
+.footer__rule {
+  width: 3rem;
+  height: 1px;
+  background: var(--color-gold);
+  margin: 2rem auto;
+}
+.footer__date {
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+/* ============================================
+   レスポンシブ
+   ============================================ */
+@media (max-width: 768px) {
+  body { font-size: 16px; line-height: 1.85; }
+  .top-nav { padding: 0.75rem 1rem; }
+  .top-nav__title { font-size: 0.7rem; max-width: 60%; }
+  .chapter { padding: 4rem 0 3rem; }
+  .chapter__inner { padding: 0 1.5rem; }
+  .hero__meta { flex-direction: column; gap: 1.25rem; }
+  .prose blockquote { margin: 2rem 0; }
+  .toc-drawer { width: 90%; right: -100%; }
+  .summary, .key-concept { padding: 1.5rem; }
+  .chapter-nav { flex-direction: column; }
+  .chapter-nav a { max-width: 100%; }
+  .prose > p:first-of-type::first-letter { font-size: 3rem; }
+}
+
+/* ============================================
+   印刷スタイル
+   ============================================ */
+@media print {
+  .top-nav, .progress-bar, .toc-drawer, .toc-backdrop, .hero__scroll-cue { display: none; }
+  body { background: white; color: black; font-size: 11pt; }
+  .chapter { page-break-before: always; padding: 1rem 0; }
+}
+
+/* ============================================
+   フェードイン (intersection observer)
+   ============================================ */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-in.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================
+   図解 (Figure) のスタイル
+   ============================================ */
+.figure {
+  margin: 3rem -2rem;
+  padding: 2rem 0;
+  background: var(--color-paper-deep);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.figure__inner {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+.figure__label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  text-align: center;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.figure__title {
+  font-family: var(--font-serif-jp);
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-align: center;
+  color: var(--color-ink);
+  margin-bottom: 1.75rem;
+  letter-spacing: 0.03em;
+}
+.figure__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.figure__caption {
+  font-family: var(--font-serif-jp);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--color-ink-muted);
+  text-align: center;
+  margin-top: 1.5rem;
+  padding: 0 2rem;
+  font-style: italic;
+}
+@media (max-width: 768px) {
+  .figure { margin: 2rem -1.5rem; }
+  .figure__inner { padding: 0 1rem; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- 読了進捗バー -->
+<div class="progress-bar">
+  <div class="progress-bar__fill" id="progressFill"></div>
+</div>
+
+<!-- トップナビ -->
+<nav class="top-nav">
+  <div class="top-nav__title">フロントから来たあなたのための、<em>フルスタック越境地図</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<!-- 目次ドロワー -->
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 「フルスタック」という言葉が意味を変えた</a></li>
+    <li><a href="#ch1">第1章 ── 振り子の歴史</a></li>
+    <li><a href="#ch2">第2章 ── メタフレームワークが「正解」になった理由</a></li>
+    <li><a href="#ch3">第3章 ── フロントエンドの新常識</a></li>
+    <li><a href="#ch4">第4章 ── バックエンドという「もう一つの世界」</a></li>
+    <li><a href="#ch5">第5章 ── データという永続性の問題</a></li>
+    <li><a href="#ch6">第6章 ── スキーマ設計の作法</a></li>
+    <li><a href="#ch7">第7章 ── 認証・決済・通知</a></li>
+    <li><a href="#ch8">第8章 ── インフラ</a></li>
+    <li><a href="#ch9">第9章 ── 観測可能性</a></li>
+    <li><a href="#ch10">第10章 ── AIを前提にした設計</a></li>
+    <li><a href="#ch11">第11章 ── 何を選ばないか</a></li>
+    <li><a href="#epilogue">エピローグ ── あなたの最初の一歩</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A FIELD GUIDE FOR ENGINEERS</div>
+  <h1 class="hero__title">フロントから来た<br>あなたのための、<br><em>フルスタック越境地図</em></h1>
+  <p class="hero__subtitle">2026年、Webサービスのデファクト・スタンダードを<br>歴史と力学から読み解く</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">30 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">12 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">MID-LEVEL FE</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">「フルスタック」という言葉が意味を変えた</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">この本が前提にしている、ひとつの変化について</p>
+    </header>
+
+    <div class="prose">
+      <p>数年前まで、「フルスタックエンジニア」という肩書きには、どこか胡散臭さがあった。</p>
+
+      <p>何でもやれる人。逆に言えば、何かに突出していない人。フロントエンドの専門家からすれば、サーバーサイドのデータベース設計やネットワーク、デプロイの細部まで本当にわかっているのか怪しいし、バックエンドの専門家からすれば、CSSやアクセシビリティをどこまで真剣にやれるのか疑わしい。両方を中途半端にやる人、というニュアンスがつきまとっていた。</p>
+
+      <p>ところが2026年のいま、「フルスタック」が意味するものは静かに変わってきている。</p>
+
+      <p>理由はシンプルだ。フロントエンドのフレームワークが、サーバーサイドの仕事を吸収してしまったからである。Next.jsのApp RouterとReact Server Componentsの組み合わせを使ったことがある人なら、もう半ば気づいているはずだ ── あなたが書いているコードは、もはやブラウザだけで動いているのではない。データベースに直接アクセスし、認証トークンを検証し、リクエストの裏でメールを送るところまで、同じファイルの中に書ける。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この本の前提</span>
+        <p class="key-concept__text">「フロントエンドエンジニア」と「バックエンドエンジニア」という<strong>分業を支えていた壁</strong>が、ツールチェーンのレベルで溶けはじめている。フルスタックへの越境は、もはや別世界へジャンプすることではなく、いま使っているフレームワークの、まだ触っていない機能を使い始めるだけのこと。</p>
+      </div>
+
+      <p>この記事は、フロントエンドを軸足にしてきた中堅エンジニアが、フルスタックの全景を一度見渡すための地図である。技術カタログではない。むしろ逆で、「なぜいまこの構成が標準になっているのか」を歴史と力学から辿り直し、自分が次にどこへ足を伸ばすかを判断できるようにすることを狙っている。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 0 ── Conceptual Diagram</span>
+    <h4 class="figure__title">境界線の融解 ── 2026年に起きていること</h4>
+    <svg class="figure__svg" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <defs>
+        <linearGradient id="fadeWall" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#a01c1c" stop-opacity="0.6"/>
+          <stop offset="50%" stop-color="#a01c1c" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#a01c1c" stop-opacity="0.6"/>
+        </linearGradient>
+      </defs>
+      
+      <!-- PAST 見出し -->
+      <text x="200" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#6b6359" letter-spacing="4">— PAST —</text>
+      <text x="200" y="58" text-anchor="middle" font-size="11" fill="#6b6359">2010年代</text>
+      
+      <!-- Frontend ボックス -->
+      <rect x="60" y="80" width="130" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+      <text x="125" y="115" text-anchor="middle" font-size="15" font-weight="600" fill="#1c1917">Frontend</text>
+      <text x="125" y="138" text-anchor="middle" font-size="11" fill="#6b6359">React / Vue</text>
+      <text x="125" y="155" text-anchor="middle" font-size="11" fill="#6b6359">CSS / Browser</text>
+      
+      <!-- 厚い壁 -->
+      <rect x="195" y="80" width="20" height="100" fill="#a01c1c"/>
+      <text x="205" y="200" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#a01c1c">wall</text>
+      
+      <!-- Backend ボックス -->
+      <rect x="220" y="80" width="130" height="100" fill="#faf7f2" stroke="#1c1917" stroke-width="1.5"/>
+      <text x="285" y="115" text-anchor="middle" font-size="15" font-weight="600" fill="#1c1917">Backend</text>
+      <text x="285" y="138" text-anchor="middle" font-size="11" fill="#6b6359">Rails / Java</text>
+      <text x="285" y="155" text-anchor="middle" font-size="11" fill="#6b6359">PHP / Python</text>
+
+      <text x="205" y="225" text-anchor="middle" font-size="10" fill="#6b6359" font-style="italic">言語が違う・人が違う・ファイルが違う</text>
+
+      <!-- 中央: 矢印 + 年 -->
+      <text x="400" y="115" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914">2026</text>
+      <line x1="375" y1="130" x2="425" y2="130" stroke="#8b6914" stroke-width="1.5"/>
+      <polygon points="425,130 415,125 415,135" fill="#8b6914"/>
+
+      <!-- NOW 見出し -->
+      <text x="600" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#a01c1c" letter-spacing="4">— NOW —</text>
+      <text x="600" y="58" text-anchor="middle" font-size="11" fill="#6b6359">2026年</text>
+
+      <!-- 統合ボックス -->
+      <rect x="450" y="80" width="300" height="100" fill="#1c1917"/>
+      <text x="600" y="115" text-anchor="middle" font-size="15" font-weight="600" fill="#faf7f2">Full-Stack Framework</text>
+      <text x="600" y="138" text-anchor="middle" font-size="11" fill="#d6cfc1">Next.js + React Server Components</text>
+      <text x="600" y="158" text-anchor="middle" font-size="11" fill="#d6cfc1">同じファイル・同じ文法・同じ型システム</text>
+
+      <text x="600" y="200" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">境界はもう存在しない</text>
+      
+      <!-- 下部: 結論 -->
+      <line x1="100" y1="265" x2="700" y2="265" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="400" y="295" text-anchor="middle" font-size="12" fill="#3f3a35">
+        2010年代を支えた「言語の壁」「ファイルの壁」「APIの壁」は、
+      </text>
+      <text x="400" y="315" text-anchor="middle" font-size="12" fill="#3f3a35">
+        いまフレームワークのレベルで溶解しつつある
+      </text>
+      <text x="400" y="345" text-anchor="middle" font-size="13" fill="#a01c1c" font-style="italic" font-weight="600">
+        越境は、別世界へジャンプすることではない
+      </text>
+    </svg>
+    <p class="figure__caption">かつての「フロント／バック」の役割分担は、フレームワークのレベルで境界が溶けてきている。</p>
+  </div>
+</figure>
+
+
+      <p>通読には30分ほどかかる。コーヒーを淹れて、はじめよう。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 振り子の歴史</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章: 振り子の歴史
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">振り子の歴史<br>── なぜサーバーに戻ってきたのか</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">流行り廃りに見えるものの多くは、ひとつの振り子運動として説明がつく</p>
+    </header>
+
+    <div class="prose">
+      <p>いまのWebの設計を理解するうえで、いちばん効率のいい近道は、「Webアプリの処理は、過去20年でサーバーとクライアントのあいだを大きく振り子のように揺れ動いてきた」という事実から出発することだ。流行り廃りに見えるものの多くは、この振り子の運動として説明がつく。</p>
+
+      <h3>サーバーがすべてを返していた時代</h3>
+
+      <p>最初期のWebは、純粋なサーバーレンダリングだった。PHPでもPerlでも、Ruby on RailsでもDjangoでもいい。ブラウザがリクエストを送る、サーバーがHTMLを返す、ユーザーがリンクをクリックする、また新しいHTMLが返ってくる。これだけだ。JavaScriptはあくまでフォーム検証やちょっとしたアニメーションのためのスパイスにすぎなかった。</p>
+
+      <p>このモデルは美しいほど単純だった。状態はサーバー側にしかなく、画面遷移はページ全体の再読み込みで起きる。バグの再現も簡単で、SEOも勝手にうまくいく。</p>
+
+      <p>問題は、ユーザー体験の地味さだった。クリックするたびに白い画面が一瞬挟まる。動的な操作をやろうとすると、ページ全体を再生成するしかない。これではデスクトップアプリのような滑らかさは出せない。</p>
+
+      <h3>クライアントへの大移動</h3>
+
+      <p>2010年代に入ると、ブラウザの性能が上がり、JavaScriptで本格的にアプリケーションを書くことが現実的になった。AngularJSが先陣を切り、Backbone、Ember、そして決定打となったReact。これらが切り開いたのが、Single Page Application(SPA)というパラダイムだ。</p>
+
+      <p>考え方は鮮やかだった。最初に空のHTMLとJavaScriptのバンドルを送り、あとはブラウザ側で全部やる。画面遷移はURLを書き換えてDOMを差し替えるだけ。サーバーは、状態を持たないAPIサーバーとしてJSONを返すだけの存在になる。</p>
+
+      <p>これは衝撃的な進歩で、いっとき業界全体がSPAに向かって走った。フロントエンドという職種が独立した専門領域として確立したのも、この時期だ。バックエンドが「データを返すだけ」になったことで、フロントエンドが「アプリケーションの全部」を担うようになった。</p>
+
+      <p>ところが、振り子は行きすぎた。</p>
+
+      <h3>SPAが抱え込んだ代償</h3>
+
+      <p>数年もしないうちに、SPA一辺倒の弊害が見えてきた。</p>
+
+      <p>第一に、<strong>初期表示の遅さ</strong>。空のHTMLを受け取ったあと、巨大なJavaScriptバンドルをダウンロードし、パースし、実行し、それからやっとデータをフェッチしに行く。最初の画面が出るまで何秒もかかるサイトが量産された。</p>
+
+      <p>第二に、<strong>SEOの困難さ</strong>。検索エンジンのクローラーはJavaScript実行が苦手なため、コンテンツが空のままインデックスされる問題が起きた。これはECサイトやメディアサイトには致命的だった。</p>
+
+      <p>第三に、<strong>状態管理の地獄</strong>。サーバーが全部やっていた頃は意識しなくてよかった「データの取得・キャッシュ・無効化」のすべてが、クライアントに乗ってきた。Reduxの登場と、それに伴うボイラープレートの肥大化を覚えている人も多いだろう。</p>
+
+      <p>第四に、<strong>バンドルサイズの肥大化</strong>。アプリが成長するほどJavaScriptが膨らみ、モバイルユーザーが特に苦しんだ。</p>
+
+      <p>これらは小さなプロジェクトなら無視できる問題だった。しかし、「ちゃんとしたWebサービス」を作ろうとすると必ず突き当たる壁になった。</p>
+
+      <h3>Jamstackという中継ぎ</h3>
+
+      <p>2010年代後半、ひとつの折衷案が広まる。Jamstackと呼ばれる発想だ。ビルド時に静的HTMLを大量生成し、CDNから配信する。動的な部分だけJavaScriptで補う。Gatsby、Next.jsの初期(SSG中心)、Hugo、Eleventyなどがこの潮流の代表だ。</p>
+
+      <p>これは賢い解決策だった。事前にHTMLを生成しておけば初期表示は速いし、SEOも問題ない。ただし、本当に動的なコンテンツ ── ユーザーごとに異なる情報、リアルタイムに更新される情報 ── を扱うのは苦手だった。</p>
+
+      <h3>そして、サーバーへの回帰</h3>
+
+      <p>2020年代に入って、流れは決定的に変わった。</p>
+
+      <p>Next.jsはSSR(Server-Side Rendering)を中心に据え直し、Vercelをはじめとするインフラはサーバー実行を当たり前のものにした。そして2023年にReact Server Components(RSC)がNext.js App Routerで実用段階に入ると、振り子は完全にサーバー側へ戻りはじめた。</p>
+
+      <p>RSCの発想はこうだ。「データベースアクセスや重い処理は、もともとサーバーでやればよかった。クライアントに送る必要があるのは、ユーザーの操作に反応する部分だけだ」。コンポーネントごとに、どこで実行するかを宣言できるようになった。サーバーで動くコンポーネントはJavaScriptバンドルに含まれない。</p>
+
+      <p>なにが起きたか。バンドルサイズは劇的に小さくなり、初期表示は速くなり、データ取得は素直に書けるようになった。クライアントには、本当にインタラクティブな部分だけが残った。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── SSR と RSC の違い</span>
+        SSRはサーバーでHTMLを生成しつつ、クライアントで再度すべてのコンポーネントをハイドレートする(JSバンドルは全部送る)。RSCはサーバーでしか動かないコンポーネントを区別し、それらのJSはバンドルに含めない。バンドル削減の効果はRSCのほうがはるかに大きい。
+      </div>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 1 ── Timeline</span>
+    <h4 class="figure__title">振り子の歴史 ── Webアプリ処理の所在</h4>
+    <svg class="figure__svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- 領域ラベル -->
+      <rect x="40" y="60" width="80" height="120" fill="#1c1917" opacity="0.05"/>
+      <text x="80" y="80" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#1c1917" letter-spacing="2">SERVER</text>
+      <text x="80" y="98" text-anchor="middle" font-size="9" fill="#6b6359">処理がサーバー側</text>
+
+      <rect x="40" y="240" width="80" height="120" fill="#1c1917" opacity="0.05"/>
+      <text x="80" y="260" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#1c1917" letter-spacing="2">CLIENT</text>
+      <text x="80" y="278" text-anchor="middle" font-size="9" fill="#6b6359">処理がクライアント側</text>
+
+      <!-- 中央の点線 (境界) -->
+      <line x1="140" y1="210" x2="780" y2="210" stroke="#d6cfc1" stroke-width="0.5" stroke-dasharray="4,3"/>
+      
+      <!-- 上下境界線 -->
+      <line x1="140" y1="100" x2="780" y2="100" stroke="#e8e2d4" stroke-width="0.5"/>
+      <line x1="140" y1="320" x2="780" y2="320" stroke="#e8e2d4" stroke-width="0.5"/>
+
+      <!-- 振り子の軌跡 (滑らかな波線) -->
+      <path d="M 160 110 
+               C 240 110, 240 320, 350 320
+               C 430 320, 440 210, 500 210
+               C 540 210, 560 130, 640 130
+               C 700 130, 720 110, 760 105"
+            fill="none" stroke="#a01c1c" stroke-width="2.5" opacity="0.75"/>
+
+      <!-- マイルストーン -->
+      <!-- 2000s LAMP/Rails -->
+      <circle cx="160" cy="110" r="6" fill="#1c1917"/>
+      <text x="160" y="60" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">2000年代</text>
+      <text x="160" y="140" text-anchor="middle" font-size="10" fill="#3f3a35">LAMP / Rails</text>
+      <text x="160" y="156" text-anchor="middle" font-size="9" fill="#6b6359">サーバーが全部返す</text>
+
+      <!-- 2014 SPA -->
+      <circle cx="350" cy="320" r="6" fill="#1c1917"/>
+      <text x="350" y="380" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">2014年頃</text>
+      <text x="350" y="350" text-anchor="middle" font-size="10" fill="#3f3a35">SPA全盛期</text>
+      <text x="350" y="395" text-anchor="middle" font-size="9" fill="#6b6359">React / Angular / Vue</text>
+
+      <!-- Jamstack -->
+      <circle cx="500" cy="210" r="5" fill="#8b6914"/>
+      <text x="500" y="195" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">2017〜</text>
+      <text x="500" y="245" text-anchor="middle" font-size="10" fill="#3f3a35">Jamstack</text>
+      <text x="500" y="260" text-anchor="middle" font-size="9" fill="#6b6359">折衷案</text>
+
+      <!-- SSR回帰 -->
+      <circle cx="640" cy="130" r="6" fill="#1c1917"/>
+      <text x="640" y="60" text-anchor="middle" font-size="11" font-weight="600" fill="#1c1917">2020年頃</text>
+      <text x="640" y="160" text-anchor="middle" font-size="10" fill="#3f3a35">SSR本格化</text>
+      <text x="640" y="176" text-anchor="middle" font-size="9" fill="#6b6359">Next.js 13</text>
+
+      <!-- RSC -->
+      <circle cx="760" cy="105" r="7" fill="#a01c1c"/>
+      <text x="755" y="60" text-anchor="end" font-size="11" font-weight="600" fill="#a01c1c">2023〜</text>
+      <text x="755" y="90" text-anchor="end" font-size="10" fill="#a01c1c" font-style="italic">RSC</text>
+      
+      <!-- 中央の白丸装飾 (Jamstack) -->
+      <circle cx="500" cy="210" r="3" fill="#faf7f2"/>
+    </svg>
+    <p class="figure__caption">処理がサーバー側にあるか、クライアント側にあるか。Webアプリの設計はこの軸を振り子のように行き来してきた ── 同じ場所には戻らない、らせん状の進化として。</p>
+  </div>
+</figure>
+
+
+      <h3>振り子の意味を読む</h3>
+
+      <p>ここで重要なのは、いまのサーバー回帰が「昔に戻った」のではないという点だ。私たちは、サーバーレンダリングの素朴さと、SPAのリッチさを、ようやく統合する道を見つけはじめている。コンポーネント単位でサーバーとクライアントの境界を引けるという発想は、過去の二択ではどちらにも到達できなかった地点だ。</p>
+
+      <p>振り子は揺れているが、揺れるたびに少しずつ前に進んでいる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この章の核心</span>
+        <p class="key-concept__text">2026年のWebサービス開発を理解するには、<strong>「処理はサーバーとクライアントのどちらに置くべきか」</strong>という問いが、いまや設計の中心にあることを認識すること。これがすべての出発点になる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>Webは「サーバー → クライアント → サーバー」の振り子運動を辿ってきた</li>
+          <li>SPAの代償(初期表示遅延・SEO・状態管理・バンドル肥大)が回帰の動機</li>
+          <li>RSCはコンポーネント単位でサーバー/クライアント境界を引く設計</li>
+          <li>いまのサーバー回帰は「昔への退行」ではなく、過去の長所を統合する進化</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 メタフレームワーク</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章: メタフレームワーク
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">メタフレームワークが<br>「正解」になった理由</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">なぜ素のReactで作る人がいなくなったのか</p>
+    </header>
+
+    <div class="prose">
+      <p>振り子の歴史を踏まえたうえで、次の問いに進もう。なぜ2026年のいま、誰もが Next.js のようなメタフレームワークから始めるのか。素のReactで作る人を、もう見かけないのはなぜか。</p>
+
+      <h3>かつてあった「自由」と、その代償</h3>
+
+      <p>少し時間を巻き戻す。SPAが全盛だった頃、Reactでアプリを作るとは、概ねこういうことだった。</p>
+
+      <p>まずCreate React Appか、もう少し凝るならwebpackを自分で設定する。ルーティングはReact Routerを入れる。データフェッチはfetchをそのまま使うか、ReduxにThunkかSagaを足す。スタイリングはCSS ModulesかStyled Components。フォームは react-hook-form か Formik。テストはJestとReact Testing Library。デプロイはAWSのS3にビルド成果物を上げて、CloudFrontで配信する。</p>
+
+      <p>それぞれの選択に正解はなく、チームごと、プロジェクトごとに微妙に違うスタックが組まれていた。コミュニティで議論が絶えなかった ── どのルーターが最良か、どの状態管理が最良か、どのスタイリングが最良か。</p>
+
+      <p>これは「自由」だった。しかし、その自由には代償があった。</p>
+
+      <p>新しいプロジェクトを始めるたびに、技術選定の長い会議が必要だった。新しくチームに入った人は、その会社独自のスタック構成を理解するのに数週間かかった。webpack の設定地獄、Babel のプラグイン地獄、TypeScript の tsconfig.json 調整 ── 本来やりたいプロダクト開発に入る前の「セットアップ」に、信じられないほどの時間が吸われていた。</p>
+
+      <p>しかも、各部品の選択は独立していなかった。ルーターをこれにすると、データフェッチはこれと相性が悪い、SSRするにはこの設定が必要、デプロイ先によっては動かない、といった組み合わせ問題が無限に発生した。</p>
+
+      <h3>Next.js が示した「全部入り」の答え</h3>
+
+      <p>Next.js が広めたのは、「これらを全部、一つのフレームワークが面倒を見る」という発想だ。</p>
+
+      <p>ルーティング、データフェッチ、レンダリング戦略(SSR、SSG、ISR、CSR)、画像最適化、フォント最適化、APIエンドポイント、ミドルウェア、認証フロー、デプロイ最適化 ── 個別に選んでいたものを、すべてフレームワークが一貫した思想で提供する。</p>
+
+      <p>これは思想の転換だった。「ライブラリを組み合わせる」のではなく、「フレームワークの上で書く」。後者はかつてのRuby on RailsやLaravelが標榜してきた「Convention over Configuration(設定より規約)」の思想そのものだ。意外なことに、Webフロントエンドの世界は20年遅れて同じ答えにたどり着いた。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── Convention over Configuration</span>
+        Ruby on Rails が広めた設計哲学。「設定を書かなくても、規約に従えば動く」ことを優先する。フレームワークの選択肢を制約することで、開発者が本質的な仕事に集中できるようにする発想。
+      </div>
+
+      <p>そしてApp RouterとReact Server Componentsが加わったことで、Next.jsは「フロントエンドフレームワーク」を完全に超えた。サーバーで動く処理、データベース直結のコンポーネント、フォーム送信を受け取るServer Actions ── これらはすべて、かつてバックエンドのPHPやRailsが担っていた領域だ。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 2 ── Before / After</span>
+    <h4 class="figure__title">かつての「組み立て」と、いまの「統合」</h4>
+    <svg class="figure__svg" viewBox="0 0 800 440" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- 左: BEFORE -->
+      <text x="180" y="35" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="15" fill="#a01c1c" letter-spacing="5">BEFORE</text>
+      <text x="180" y="55" text-anchor="middle" font-size="11" fill="#6b6359">ライブラリの組み合わせ</text>
+
+      <!-- 散らばったブロック -->
+      <g font-size="10.5" fill="#1c1917">
+        <rect x="40" y="80" width="100" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="90" y="101" text-anchor="middle">webpack</text>
+        
+        <rect x="150" y="92" width="105" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="202" y="113" text-anchor="middle">React Router</text>
+        
+        <rect x="265" y="78" width="65" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="297" y="99" text-anchor="middle">Redux</text>
+        
+        <rect x="55" y="135" width="75" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="92" y="156" text-anchor="middle">Babel</text>
+        
+        <rect x="140" y="148" width="80" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="180" y="169" text-anchor="middle">Axios</text>
+        
+        <rect x="230" y="135" width="100" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="280" y="156" text-anchor="middle">Jest + RTL</text>
+        
+        <rect x="40" y="190" width="125" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="103" y="211" text-anchor="middle">styled-components</text>
+        
+        <rect x="175" y="202" width="75" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="213" y="223" text-anchor="middle">Formik</text>
+        
+        <rect x="260" y="190" width="90" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="305" y="211" text-anchor="middle">CloudFront</text>
+
+        <rect x="60" y="245" width="105" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="113" y="266" text-anchor="middle">React Query</text>
+
+        <rect x="175" y="257" width="60" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="205" y="278" text-anchor="middle">SWR</text>
+
+        <rect x="245" y="245" width="85" height="34" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+        <text x="287" y="266" text-anchor="middle">CRA / Vite</text>
+      </g>
+      
+      <text x="180" y="320" text-anchor="middle" font-size="11" fill="#a01c1c" font-style="italic">"自由"の代償</text>
+      <text x="180" y="340" text-anchor="middle" font-size="10" fill="#6b6359">選定地獄 · 設定地獄 · 組み合わせ問題</text>
+      <text x="180" y="356" text-anchor="middle" font-size="10" fill="#6b6359">学習に数週間 · プロジェクトごとに違うスタック</text>
+
+      <!-- 矢印 -->
+      <line x1="380" y1="180" x2="430" y2="180" stroke="#8b6914" stroke-width="2"/>
+      <polygon points="430,180 420,174 420,186" fill="#8b6914"/>
+      <text x="405" y="170" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914">統合</text>
+
+      <!-- 右: AFTER -->
+      <text x="615" y="35" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="15" fill="#a01c1c" letter-spacing="5">AFTER</text>
+      <text x="615" y="55" text-anchor="middle" font-size="11" fill="#6b6359">フレームワークによる統合</text>
+
+      <!-- 統合ブロック -->
+      <rect x="455" y="80" width="320" height="210" fill="#1c1917"/>
+      <text x="615" y="115" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#f4e8c1">Next.js</text>
+      <line x1="540" y1="130" x2="690" y2="130" stroke="#8b6914" stroke-width="0.6"/>
+      
+      <g font-size="10.5" fill="#faf7f2">
+        <text x="615" y="155" text-anchor="middle">ルーティング</text>
+        <text x="615" y="175" text-anchor="middle">データフェッチ・キャッシュ</text>
+        <text x="615" y="195" text-anchor="middle">SSR / SSG / ISR / CSR</text>
+        <text x="615" y="215" text-anchor="middle">画像・フォント最適化</text>
+        <text x="615" y="235" text-anchor="middle">Server Components</text>
+        <text x="615" y="255" text-anchor="middle">Server Actions</text>
+        <text x="615" y="275" text-anchor="middle">デプロイ最適化</text>
+      </g>
+
+      <text x="615" y="320" text-anchor="middle" font-size="11" fill="#1c1917" font-style="italic">Convention over Configuration</text>
+      <text x="615" y="340" text-anchor="middle" font-size="10" fill="#6b6359">規約に従えば、設定はいらない</text>
+      <text x="615" y="356" text-anchor="middle" font-size="10" fill="#6b6359">学習コスト最小化 · チーム間で統一</text>
+
+      <!-- 下部 -->
+      <line x1="40" y1="395" x2="775" y2="395" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="407" y="422" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359" letter-spacing="2">RAILS が20年前に示した思想に、Webフロントがようやく追いついた</text>
+    </svg>
+    <p class="figure__caption">技術選定の自由は、その代償も大きかった。メタフレームワークは、それらを一つの思想で統合する。</p>
+  </div>
+</figure>
+
+
+      <h3>現代のメタフレームワーク地図</h3>
+
+      <p>Next.js だけがメタフレームワークではない。それぞれが少しずつ違う思想で、しかし共通の方向を向いている。</p>
+
+      <table>
+        <thead>
+          <tr><th>フレームワーク</th><th>ベース</th><th>立ち位置</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Next.js</td><td>React</td><td>デファクト。フルスタックの第一選択</td></tr>
+          <tr><td>Nuxt</td><td>Vue</td><td>Vue陣営の標準。Next.jsと思想は近い</td></tr>
+          <tr><td>SvelteKit</td><td>Svelte</td><td>より軽量、より「Webらしい」</td></tr>
+          <tr><td>Remix</td><td>React</td><td>データローディングとWeb標準への忠実さに特化</td></tr>
+          <tr><td>Astro</td><td>何でも</td><td>コンテンツ中心サイト向け。Islands Architecture</td></tr>
+          <tr><td>TanStack Start</td><td>React</td><td>型安全とDXに極振り、新興</td></tr>
+          <tr><td>Qwik</td><td>独自</td><td>Resumability。ハイドレーション不要を志向</td></tr>
+        </tbody>
+      </table>
+
+      <p>それぞれ強みは違うが、共通しているのは「ルーティング・データフェッチ・サーバー処理・ビルド・デプロイまで一気通貫」という設計思想だ。</p>
+
+      <h3>フロントから来た人にとっての意味</h3>
+
+      <p>この章の主題は、フロントエンドエンジニアにとっての朗報だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">フロントエンジニアへの福音</span>
+        <p class="key-concept__text">あなたがNext.jsでアプリを書いているなら、<strong>もうあなたは「サーバーサイドの世界」に半分足を踏み入れている</strong>。Server Componentでデータベースに直接クエリを書く。Server Actionでフォーム送信を受ける。これらは数年前なら「バックエンドエンジニアの仕事」だった領域だ。</p>
+      </div>
+
+      <p>つまり、「フロントエンドからフルスタックへの越境」は、もはや別世界へジャンプすることではない。いま使っているフレームワークの、まだ触っていない機能を使い始めるだけのことだ。心理的なハードルが、こんなにも低くなった時代はかつてなかった。</p>
+
+      <p>ただし、フレームワークが面倒を見てくれる範囲には限界がある。データベース設計の良し悪し、認証の安全な実装、本番環境での障害対応 ── このあたりはフレームワークが助けてくれない。第4章以降で、それらを順に見ていく。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>かつての「ライブラリ組み合わせ」の自由は、選定地獄と設定地獄を生んだ</li>
+          <li>メタフレームワークは「Convention over Configuration」を再発明した</li>
+          <li>Next.js / Nuxt / SvelteKit などは設計思想を共有している</li>
+          <li>App Router + Server Components により、フロントとバックの境界が溶けた</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 振り子の歴史</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 フロントの新常識</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章: フロントの新常識
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">フロントエンドの新常識<br>── 既知の整理と再確認</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">未知の領域に降りていく前に、足場を確認する</p>
+    </header>
+
+    <div class="prose">
+      <p>第4章でバックエンドの世界に降りていく前に、現在のフロントエンドの「標準的な構成」を一度確認しておく。読者であるあなたにはほぼ既知の内容のはずなので、ここは答え合わせとアップデートのつもりで読んでほしい。</p>
+
+      <h3>TypeScriptは前提</h3>
+
+      <p>2026年のプロのプロジェクトで素のJavaScriptを書くことは、ほぼ「レガシー」と同義になった。新規プロジェクトはTypeScriptで始める。strictモード推奨。これは議論の余地がない。</p>
+
+      <p>なぜか。クライアントとサーバーの境界が溶けたいま、両者で型を共有することの利益が桁違いになったからだ。Server ComponentがDBから取ってきたデータをClient Componentにpropsで渡す。tRPCやServer Functionでクライアントからサーバー関数を呼ぶ。これらが型安全に貫通することの開発体験は、一度味わうと戻れない。</p>
+
+      <h3>スタイリング ── Tailwind と shadcn/ui の連合</h3>
+
+      <p>Tailwind CSSがフロントエンドのスタイリングを実質的に制圧した。CSS-in-JS陣営(styled-components, Emotion)はランタイムオーバーヘッドとサーバーコンポーネントとの相性問題で勢いを失い、CSS Modules派は静かに残っているが、新規プロジェクトの第一選択はほぼTailwindだ。</p>
+
+      <p>そこに、新しい配布形態を持ち込んだのが shadcn/ui である。これは「ライブラリではない」。npmからインストールするのではなく、CLIでコードを自分のリポジトリにコピーして、自分で所有して書き換える。Radix UI(ヘッドレスUI)とTailwindの組み合わせのレシピ集だと思えばいい。</p>
+
+      <p>この「npmで配らない、ソースコードを所有させる」というアプローチは思想的に新しく、UIライブラリの未来を変えつつある。バージョンアップに振り回されず、必要な改変が自由にでき、依存関係が増えない。</p>
+
+      <h3>状態管理の二層化</h3>
+
+      <p>かつてはReduxが何でも管理していた。いまは違う。</p>
+
+      <ul>
+        <li><strong>サーバー状態</strong>(APIから取ってくるデータ): TanStack Query(旧React Query)、SWR</li>
+        <li><strong>クライアント状態</strong>(UIの一時的な状態): Zustand、Jotai、稀にRedux Toolkit</li>
+      </ul>
+
+      <p>サーバー状態には独自のライフサイクルがある ── フェッチ、キャッシュ、再検証、楽観的更新、エラー処理。これらをまとめて面倒を見てくれるのがTanStack Queryで、これは Redux Saga やThunkで書いていた処理の大半を不要にする。</p>
+
+      <p>クライアント状態(モーダルの開閉、フォームの一時値、UIのトグル)はZustandやJotaiのような軽量ライブラリで十分。Reduxの大規模なボイラープレートを正当化できるケースは、もうほとんどない。</p>
+
+      <p>そしてフォーム状態は React Hook Form + Zod(バリデーション)の組み合わせがほぼ標準になっている。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 3 ── Architecture</span>
+    <h4 class="figure__title">状態管理の二層化 ── サーバー状態とクライアント状態</h4>
+    <svg class="figure__svg" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- 上層: クライアント状態 -->
+      <rect x="60" y="50" width="680" height="120" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="85" y="78" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#8b6914" letter-spacing="4">CLIENT STATE</text>
+      <text x="85" y="105" font-size="15" font-weight="600" fill="#1c1917">クライアント状態</text>
+      <text x="85" y="125" font-size="11" fill="#6b6359">UIの一時的な状態</text>
+      <text x="85" y="142" font-size="10" fill="#6b6359">モーダルの開閉 · フォーム入力中 · タブのアクティブ状態 · トグル</text>
+      
+      <!-- ツールカード -->
+      <rect x="490" y="75" width="100" height="32" fill="#1c1917"/>
+      <text x="540" y="96" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#f4e8c1">Zustand</text>
+      
+      <rect x="600" y="75" width="100" height="32" fill="#1c1917"/>
+      <text x="650" y="96" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#f4e8c1">Jotai</text>
+
+      <rect x="490" y="115" width="210" height="30" fill="none" stroke="#6b6359" stroke-width="1" stroke-dasharray="3,2"/>
+      <text x="595" y="135" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b6359">Redux Toolkit (重い用途のみ)</text>
+
+      <!-- 下層: サーバー状態 -->
+      <rect x="60" y="200" width="680" height="120" fill="#1c1917"/>
+      <text x="85" y="228" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#8b6914" letter-spacing="4">SERVER STATE</text>
+      <text x="85" y="255" font-size="15" font-weight="600" fill="#faf7f2">サーバー状態</text>
+      <text x="85" y="275" font-size="11" fill="#d6cfc1">APIから取得するデータ</text>
+      <text x="85" y="292" font-size="10" fill="#d6cfc1">フェッチ · キャッシュ · 再検証 · 楽観的更新 · エラー処理</text>
+      
+      <rect x="460" y="225" width="140" height="32" fill="#a01c1c"/>
+      <text x="530" y="246" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#faf7f2">TanStack Query</text>
+      
+      <rect x="610" y="225" width="90" height="32" fill="#a01c1c"/>
+      <text x="655" y="246" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#faf7f2">SWR</text>
+
+      <text x="85" y="312" font-family="Cormorant Garamond, serif" font-style="italic" font-size="10" fill="#8b6914">← かつてReduxが全部抱え込んでいた領域</text>
+
+      <!-- フォーム (独立) -->
+      <line x1="60" y1="350" x2="740" y2="350" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="85" y="378" font-size="12" fill="#3f3a35"><tspan font-weight="600">フォーム状態:</tspan>&#x3000;React Hook Form + Zod (バリデーション)</text>
+    </svg>
+    <p class="figure__caption">Reduxが全てを抱え込んでいた時代は終わった。サーバーから来るデータと、UIの一時的な状態は、別の道具で扱う。</p>
+  </div>
+</figure>
+
+
+      <h3>React Compilerによる最適化の自動化</h3>
+
+      <p>長らくReact開発者を悩ませてきた「<code>useMemo</code>と<code>useCallback</code>をどこまで貼るか問題」は、React Compilerによって過去のものになりつつある。コンパイル時に依存関係を解析し、必要なメモ化を自動で挿入する。</p>
+
+      <p>これは設計思想にも影響を与える。「パフォーマンスのために汚いコードを書く」ことが減り、「読みやすく書いて、最適化はコンパイラに任せる」という方向に進む。フロントエンドが、ようやく他の言語のコンパイラの恩恵を享受しはじめている。</p>
+
+      <h3>ディレクトリ設計の流行 ── Feature-Sliced と Colocation</h3>
+
+      <p>プロジェクトが大きくなったとき、どうフォルダを切るか。これは長らく各社各様だったが、いくつかの収束が見える。</p>
+
+      <p>ひとつは <strong>Colocation</strong>。コンポーネント、そのテスト、スタイル、フックを同じフォルダにまとめる。<code>Button/Button.tsx</code>、<code>Button/Button.test.tsx</code>、<code>Button/index.ts</code>という形だ。「機能ごとにファイルがバラバラのフォルダにある」よりも、「関連するものは近くに置く」ほうが認知負荷が低い。</p>
+
+      <p>もうひとつは、より大きな単位での <strong>Feature-Sliced Design(FSD)</strong>的な構成。<code>features/</code>、<code>entities/</code>、<code>widgets/</code>、<code>shared/</code> といったレイヤーで責務を分けるアプローチで、特に大規模プロジェクトで採用が増えている。中小規模ならここまで厳密にしなくても、<code>src/features/{機能名}/</code>に閉じ込めるだけでも効果は大きい。</p>
+
+      <p>「コンポーネント単位」だけでは構造化が足りない、というのが大規模アプリの教訓だった。ビジネスロジックや機能の単位で、横断的に括れる構造を持つこと ── これは2026年のフロントエンドの新常識として定着した。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">フロントエンドの現在地</h4>
+        <ul>
+          <li>言語: <strong>TypeScript</strong>(strict)</li>
+          <li>フレームワーク: <strong>Next.js / Nuxt / SvelteKit</strong>(Server Components前提)</li>
+          <li>スタイリング: <strong>Tailwind + shadcn/ui + Radix</strong></li>
+          <li>状態管理: <strong>サーバー状態(TanStack Query)+ クライアント状態(Zustand)</strong></li>
+          <li>フォーム: <strong>React Hook Form + Zod</strong></li>
+          <li>最適化: <strong>React Compiler</strong> に任せる</li>
+          <li>ディレクトリ: <strong>機能単位 + Colocation</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 メタフレームワーク</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 バックエンド入門</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章: バックエンド
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">バックエンドという<br>「もう一つの世界」への入り口</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">境界線は、ファイルの場所では決まらない</p>
+    </header>
+
+    <div class="prose">
+      <p>ここからが本題だ。</p>
+
+      <p>フロントエンドエンジニアがフルスタックを目指すとき、最初に戸惑うのは「バックエンドとは結局なんなのか」がぼんやりしていることだ。ReactのServer Componentでデータベースに繋ぐコードを書いたとき、それはバックエンドなのか、それともまだフロントエンドなのか。答えを先に言ってしまうと ── <strong>境界線は、もはやファイルの場所では決まらない。実行環境とライフサイクルで決まる</strong>。</p>
+
+      <h3>Node.jsという橋渡し</h3>
+
+      <p>歴史を巻き戻して整理しよう。バックエンドの世界は長らく、PHP、Java、Python、Ruby、C#、Goといった「フロントエンドとは別の言語」で書かれてきた。フロントエンドエンジニアが越境しようとすると、まず言語を覚え直すところから始める必要があった。これは大きな心理的ハードルだった。</p>
+
+      <p>Node.jsの登場(2009年)が、この壁を最初に壊した。JavaScriptで書けるバックエンド。当初は懐疑的な目で見られたが、いまや本流の一つだ。そしてTypeScriptの普及によって、Node.jsはエンタープライズ用途でも信頼に足る選択肢になった。</p>
+
+      <p>つまり、いまフロントエンドエンジニアがバックエンドに踏み込むとき、<strong>言語の壁は基本的にない</strong>。これは2010年代には考えられなかった幸運だ。Next.jsのServer Componentsで書いているコードは、すでにNode.js上で動くサーバーサイドコードである。</p>
+
+      <h3>それでも残る、バックエンド言語の選択肢</h3>
+
+      <p>ただし、現実のWebサービス開発では、Node.js一択にならない場面もある。用途別に簡単に整理しておく。</p>
+
+      <table>
+        <thead>
+          <tr><th>言語</th><th>代表フレームワーク</th><th>こういう時に選ばれる</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>TypeScript</strong> (Node.js)</td><td>Next.js, Hono, Elysia, NestJS</td><td>フロントと統一、フルスタック型安全</td></tr>
+          <tr><td><strong>Go</strong></td><td>標準ライブラリ、Echo、Gin</td><td>高並行・低レイテンシ・シンプル</td></tr>
+          <tr><td><strong>Python</strong></td><td>FastAPI、Django</td><td>AI/ML統合、データ処理</td></tr>
+          <tr><td><strong>Ruby</strong></td><td>Rails</td><td>高速プロトタイピング、スタートアップ</td></tr>
+          <tr><td><strong>Java/Kotlin</strong></td><td>Spring Boot</td><td>大規模エンタープライズ、堅牢性重視</td></tr>
+          <tr><td><strong>PHP</strong></td><td>Laravel</td><td>既存PHP資産、共有ホスティング</td></tr>
+          <tr><td><strong>Rust</strong></td><td>Axum</td><td>高性能・メモリ安全が必須、システム寄り</td></tr>
+        </tbody>
+      </table>
+
+      <p>フロントエンドエンジニアがフルスタック化するとき、最初はTypeScriptで統一するのが圧倒的に楽だ。同じ言語、同じパッケージマネージャ、同じ型システム。学習コストが最小化される。</p>
+
+      <p>GoやPythonに踏み出すのは、特定の理由(性能、AI連携、既存資産)があるときでいい。「バックエンド = TypeScript以外の言語」という思い込みは捨てていい。</p>
+
+      <h3>BFFという概念 ── あなたが書いているのは何者か</h3>
+
+      <p>ここで、ひとつ重要な概念を紹介する。<strong>BFF(Backend for Frontend)</strong> だ。</p>
+
+      <p>BFFというのは、「フロントエンドのために専用に作られたバックエンド」のことだ。汎用的なAPI(マイクロサービス的なもの)とは別に、特定のフロントエンドアプリケーション(Webサイト、モバイルアプリ)のために設計されたサーバーを置く。データの集約、認証、画面ごとに必要な情報の整形などをやる。</p>
+
+      <p>なぜこんなものが必要になったか。クライアントから複数のマイクロサービスを直接叩くのは、ネットワーク的に非効率だし、認証情報の管理も面倒だ。間に「自分専用のサーバー」を一枚挟むほうが、全部きれいに収まる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">越境はすでに始まっている</span>
+        <p class="key-concept__text">Next.jsのApp Router + Server Componentsで書いているコードは、<strong>実質的にBFFそのもの</strong>だ。あなたはすでに、フロントエンドのためのバックエンドを書いている。「バックエンドへの越境」は、もう始まっている。</p>
+      </div>
+
+      <h3>「APIを書かない」という新しい選択肢</h3>
+
+      <p>数年前まで、バックエンドの主な仕事は「REST APIを設計し、実装すること」だった。エンドポイントを切り、リクエスト・レスポンスのスキーマを決め、ドキュメントを書き、クライアントから呼ぶ。</p>
+
+      <p>この作業を不要にしたのが、Server Actions と tRPC だ。</p>
+
+      <p><strong>Server Actions</strong> はReactとNext.jsの機能で、サーバーで動く関数を、まるでクライアントの関数のように呼べる。<code>'use server'</code> ディレクティブをつけた関数は、フレームワークが裏でHTTP通信に変換してくれる。フォームの送信先に直接Server Actionを指定することもできる。</p>
+
+<pre><code>// app/actions.ts
+'use server';
+
+export async function createPost(formData: FormData) {
+  const title = formData.get('title') as string;
+  await db.posts.create({ title });
+}</code></pre>
+
+<pre><code>// app/page.tsx
+import { createPost } from './actions';
+
+export default function Page() {
+  return (
+    &lt;form action={createPost}&gt;
+      &lt;input name="title" /&gt;
+      &lt;button type="submit"&gt;作成&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+      <p>「APIエンドポイントを切る」「fetchで呼ぶ」「レスポンスを処理する」 ── これらの作業がまるごと消える。これがフロントから見たときの衝撃だ。</p>
+
+      <p><strong>tRPC</strong> は別系統だが、思想は近い。サーバー側で定義した関数を、クライアントから型安全に呼び出せる。OpenAPIスキーマを書かなくても、TypeScriptの型がそのまま通信を貫通する。</p>
+
+      <p>これらの仕組みが、「フロントエンドとバックエンドのあいだの面倒な接続作業」を消し去った。フロント中心のエンジニアにとっては福音だ。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 4 ── Data Flow</span>
+    <h4 class="figure__title">Server Actions ── APIエンドポイントが消える</h4>
+    <svg class="figure__svg" viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- 左: TRADITIONAL -->
+      <text x="200" y="35" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#6b6359" letter-spacing="3">TRADITIONAL</text>
+      <text x="200" y="55" text-anchor="middle" font-size="10" fill="#6b6359">APIを設計し、クライアントから呼ぶ</text>
+
+      <!-- Client -->
+      <rect x="40" y="85" width="140" height="55" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="110" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Client</text>
+      <text x="110" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6359">fetch('/api/posts')</text>
+
+      <!-- 矢印 -->
+      <line x1="180" y1="112" x2="220" y2="112" stroke="#1c1917" stroke-width="1"/>
+      <polygon points="220,112 212,108 212,116" fill="#1c1917"/>
+
+      <!-- API Endpoint -->
+      <rect x="220" y="85" width="140" height="55" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="290" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">API Endpoint</text>
+      <text x="290" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6359">POST /api/posts</text>
+
+      <!-- 必要な作業リスト -->
+      <text x="200" y="170" text-anchor="middle" font-size="11" fill="#a01c1c" font-weight="600">必要な作業:</text>
+      <g font-size="10.5" fill="#3f3a35">
+        <text x="55" y="195">・エンドポイントを設計</text>
+        <text x="55" y="213">・request / response の型定義</text>
+        <text x="55" y="231">・OpenAPIドキュメント</text>
+        <text x="55" y="249">・fetchするクライアントコード</text>
+        <text x="55" y="267">・エラーハンドリング</text>
+        <text x="55" y="285">・ローディング状態管理</text>
+      </g>
+      <line x1="55" y1="298" x2="345" y2="298" stroke="#a01c1c" stroke-width="0.5"/>
+      <text x="200" y="320" text-anchor="middle" font-size="11" fill="#a01c1c" font-style="italic">= 5ステップ以上</text>
+
+      <!-- 中央の境界 -->
+      <line x1="400" y1="70" x2="400" y2="370" stroke="#d6cfc1" stroke-width="0.5" stroke-dasharray="4,4"/>
+
+      <!-- 右: SERVER ACTIONS -->
+      <text x="600" y="35" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#a01c1c" letter-spacing="3">SERVER ACTIONS</text>
+      <text x="600" y="55" text-anchor="middle" font-size="10" fill="#6b6359">サーバー関数を直接呼ぶ</text>
+
+      <!-- Client -->
+      <rect x="440" y="85" width="140" height="55" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="510" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Client</text>
+      <text x="510" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6359">form action={fn}</text>
+
+      <line x1="580" y1="112" x2="620" y2="112" stroke="#a01c1c" stroke-width="2"/>
+      <polygon points="620,112 612,108 612,116" fill="#a01c1c"/>
+
+      <!-- Server Function -->
+      <rect x="620" y="85" width="140" height="55" fill="#1c1917"/>
+      <text x="690" y="110" text-anchor="middle" font-size="12" font-weight="600" fill="#faf7f2">Server Function</text>
+      <text x="690" y="128" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#8b6914">'use server'</text>
+
+      <!-- 必要な作業 -->
+      <text x="600" y="170" text-anchor="middle" font-size="11" fill="#a01c1c" font-weight="600">必要な作業:</text>
+      <text x="600" y="195" text-anchor="middle" font-size="10.5" fill="#3f3a35">・関数を書く &#x3000;以上</text>
+
+      <!-- コード -->
+      <rect x="440" y="215" width="320" height="105" fill="#1c1917" rx="2"/>
+      <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="#f4e8c1">
+        <text x="455" y="240"><tspan fill="#8b6914">'use server'</tspan></text>
+        <text x="455" y="262">async function createPost(data) {</text>
+        <text x="475" y="280">  await db.posts.create(data);</text>
+        <text x="455" y="298">}</text>
+      </g>
+
+      <line x1="440" y1="335" x2="760" y2="335" stroke="#a01c1c" stroke-width="0.5"/>
+      <text x="600" y="357" text-anchor="middle" font-size="11" fill="#a01c1c" font-style="italic">= 1ステップ</text>
+
+      <!-- 下部結論 -->
+      <line x1="40" y1="385" x2="760" y2="385" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="400" y="410" text-anchor="middle" font-size="12" fill="#a01c1c" font-style="italic" font-weight="600">「APIエンドポイントを設計する仕事」が、丸ごと消える</text>
+    </svg>
+    <p class="figure__caption">「サーバー関数を、まるでクライアントの関数のように呼べる」 ── これがフロント開発者がフルスタックに近づく最大の梯子。</p>
+  </div>
+</figure>
+
+
+      <h3>それでも REST API は消えない</h3>
+
+      <p>ただし、REST API(あるいはOpenAPIに準拠したAPI)が消えたわけではない。むしろ、用途が明確になっただけだ。</p>
+
+      <p>REST APIが今でも必要なのは、こういう場面だ。</p>
+
+      <ul>
+        <li><strong>外部公開するAPI</strong>(サードパーティ開発者向け)</li>
+        <li><strong>モバイルアプリ向けのAPI</strong>(WebとiOS/Androidで共有する)</li>
+        <li><strong>組織境界をまたぐ通信</strong>(別チーム、別会社の連携)</li>
+        <li><strong>言語の異なるサービス間通信</strong></li>
+      </ul>
+
+      <p>つまり、「同じチームが書くWebアプリ内部」では Server Actions / tRPC で済むが、「外と通信する」場合はやはりRESTが必要、という棲み分けだ。OpenAPI仕様を書くことは、いまも基本スキルとして必要である。</p>
+
+      <h3>GraphQL の現在地</h3>
+
+      <p>ついでに、GraphQLについても触れておく。2015年にFacebookが発表してから一気に流行ったが、2026年現在、勢いは落ち着いている。</p>
+
+      <p>GraphQLが本当に活きるのは、「クライアントが取得したいデータを柔軟に指定したい」場面 ── たとえば、複雑なダッシュボードや、複数のフロントエンドが同じAPIを共有する場面だ。GitHubやShopifyのような巨大プラットフォームでは今も中心的な技術である。</p>
+
+      <p>一方、シンプルなWebアプリで導入するには、サーバー側の実装が重く、N+1問題などのパフォーマンス管理が難しい。Server Actions / tRPC のほうが軽量で、多くのケースで十分という認識になった。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>バックエンドはもはやフロントから断絶した別世界ではない</li>
+          <li>言語の壁はTypeScriptで統一すれば乗り越えられる</li>
+          <li>Next.jsで書いているコードは実質的にBFF</li>
+          <li>Server Actions / tRPC は「APIを書かない」選択肢を生んだ</li>
+          <li>外部公開・モバイル連携・組織境界ではRESTがいまも必要</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 フロントの新常識</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 データの永続性</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+</body>
+</html>
+<!-- ============================================
+     第5章: データ
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">データという永続性の問題</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">スキーマ設計こそ、フルスタックの分水嶺</p>
+    </header>
+
+    <div class="prose">
+      <p>フロントエンドの仕事は、極論すれば「状態の表示」である。ユーザーの操作で状態が変わり、それを画面に反映する。状態はメモリ上にあり、ページを閉じれば消える。</p>
+
+      <p>バックエンドが扱うのは、消えない状態だ。データベースに書き込まれ、何年も保持され、何百万人ものユーザー間で共有される。これは根本的に別の問題系であり、フロントエンドの感覚だけでは対処できない。「データを持つ」とはどういうことか、ここで腰を据えて理解しておく必要がある。</p>
+
+      <h3>PostgreSQLという「ほぼ唯一の正解」</h3>
+
+      <p>2026年現在、新規プロジェクトで使うリレーショナルデータベースは、PostgreSQL でほぼ間違いない。</p>
+
+      <p>数年前まで、選択肢はもっと多様だった。MySQL(およびその派生のMariaDB)が長らくシェアを持っていたし、MongoDBに代表されるドキュメント型DBが「スキーマレスの自由」を売りに台頭した時期もあった。</p>
+
+      <p>しかし、流れは大きく変わった。MongoDBブームは収束した。理由は単純で、「スキーマレスのほうが楽」というのは初期の幻想で、規模が大きくなるとデータの整合性が取れなくなり、結局アプリケーション側でスキーマを管理することになる。それなら最初からスキーマがあるRDBのほうが堅実だ、と業界が学んだ。</p>
+
+      <p>MySQLは今も健在だが、PostgreSQLの機能の豊かさが圧倒的に有利になった。JSONB型でドキュメント的な使い方もできる、全文検索もできる、地理情報も扱える、pgvectorでベクトル検索もできる ── 「足りないもの」を探すほうが難しい。</p>
+
+      <p>そして決定的なのは、サーバーレスPostgresの登場だ。</p>
+
+      <h3>サーバーレスPostgresが変えたこと</h3>
+
+      <p>従来、データベースを持つということは、サーバーを建てて、バックアップを取って、レプリケーションを設定して、というインフラ管理の重い仕事を意味した。フロントエンドエンジニアにとっては大きな心理的障壁だった。</p>
+
+      <p>Neon、Supabase、PlanetScaleといった<strong>サーバーレスPostgres</strong>サービスがこれを変えた。Webのダッシュボードから数クリックでDBが立ち上がる。接続文字列をコピーして環境変数に貼れば、すぐに使える。スケーリングもバックアップも勝手にやってくれる。</p>
+
+      <p>特にSupabaseは、PostgreSQL + 認証 + ストレージ + リアルタイム機能を一つのバックエンドとして提供することで、「フロントエンドエンジニアが一人でフルスタックを完結させる」ことを劇的に簡単にした。FirebaseのオープンソースかつPostgreSQL版、と思えばイメージしやすい。</p>
+
+      <p>これらのサービスのおかげで、「データベースを持つ」というハードルは、もはやフロント感覚で乗り越えられる高さになった。</p>
+
+      <h3>ORM ── Prisma と Drizzle の思想の違い</h3>
+
+      <p>データベースとアプリケーションを繋ぐとき、生のSQLを書いてもいいが、いまの主流は <strong>ORM(Object-Relational Mapping)</strong> または類似のクエリビルダーを使うことだ。TypeScriptの世界では2つの選択肢が拮抗している。</p>
+
+      <p><strong>Prisma</strong> は「スキーマ定義ファイルからすべてを生成する」というアプローチを取る。<code>schema.prisma</code>という独自の文法でDBスキーマを書くと、それに対応した型安全なクライアントが自動生成される。学習しやすく、ドキュメントも充実していて、初心者にも優しい。</p>
+
+<pre><code>// Prismaの例
+const users = await prisma.user.findMany({
+  where: { active: true },
+  include: { posts: true },
+});</code></pre>
+
+      <p>一方、<strong>Drizzle</strong> は「SQLに近い、薄いラッパー」を目指している。スキーマもTypeScriptで定義し、クエリもSQLライクに書く。Prismaに比べてパフォーマンスが良く、Edge環境(Cloudflare Workersなど)でも動く。</p>
+
+<pre><code>// Drizzleの例
+const users = await db
+  .select()
+  .from(usersTable)
+  .where(eq(usersTable.active, true));</code></pre>
+
+      <p>どちらを選ぶかは思想の問題だ。Prismaは「DBをアプリの裏方として隠蔽したい」人向け、Drizzleは「SQLの力を素直に使いたい」人向け。最近の流れとしては、Edge対応とパフォーマンスを重視する場面ではDrizzleが選ばれる傾向にある。</p>
+
+      <h3>マイグレーションという文化</h3>
+
+      <p>データベースを使うとき、フロントエンド出身者がしばしばつまずくのが<strong>マイグレーション</strong>だ。</p>
+
+      <p>マイグレーションとは、データベースのスキーマ変更を、時系列で記録された一連のスクリプトとして管理する仕組みだ。「テーブルを追加した」「カラムの型を変えた」「インデックスを張った」 ── これらを順序付きのファイルとして残し、本番DBに段階的に適用していく。</p>
+
+      <p>なぜこれが大事か。本番のデータベースは、勝手にリセットできない。10万人のユーザーデータが入った状態のまま、スキーマだけを安全に変える必要がある。マイグレーションファイルが、その変更の歴史と、巻き戻し方法を保証する。</p>
+
+      <p>PrismaにもDrizzleにもマイグレーション機能がついていて、これを使いこなすのがバックエンド開発の基本動作になる。これを軽視すると、「本番に流したマイグレーションで途中失敗してデータが半壊」という悪夢に直面する。</p>
+
+      <h3>キャッシュ ── Redisが要るタイミング</h3>
+
+      <p>データベースは強力だが、毎回クエリを投げると遅い。よく読まれるデータは、もっと速い場所に置いておきたい。これが<strong>キャッシュ</strong>の発想だ。</p>
+
+      <p>最も標準的なキャッシュサーバーは<strong>Redis</strong>だ。インメモリ(メモリ上に置かれる)Key-Valueストアで、ミリ秒単位でアクセスできる。セッション情報、API応答のキャッシュ、レートリミットのカウンター、簡易なキューなど、多用途に使える。</p>
+
+      <p>Upstashのようなサーバーレス版Redisも普及していて、これも導入のハードルは低い。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">注意 ── 早すぎる最適化</span>
+        キャッシュは初期から入れるべきではない。「PostgreSQLだけで遅くなってきた」「同じクエリが毎秒何百回も走っている」となって初めて検討する。「キャッシュの無効化」はコンピュータサイエンスの二大難問の一つだ、という有名な格言を思い出してほしい。
+      </div>
+
+      <h3>検索とベクトルDB</h3>
+
+      <p>PostgreSQLには全文検索機能があるが、本格的な検索を作るなら専用のサービスを使うことが多い。</p>
+
+      <ul>
+        <li><strong>Algolia</strong>: 商用、品質が高い、導入が簡単</li>
+        <li><strong>Meilisearch</strong>: OSS、自前ホスト可能、開発体験が良い</li>
+        <li><strong>Elasticsearch / OpenSearch</strong>: 大規模・複雑な検索、ログ分析</li>
+      </ul>
+
+      <p>そして、AI時代の新しいレイヤーがある。<strong>ベクトルデータベース</strong>だ。</p>
+
+      <p>文書を埋め込み(embedding)というベクトルに変換すると、「意味の近さ」で検索できる。これがRAG(Retrieval-Augmented Generation)などのAI機能の基盤になる。</p>
+
+      <p>選択肢としては、PostgreSQLの拡張である<strong>pgvector</strong>が最も手軽で、多くのケースで十分だ。本格運用するなら専用の<strong>Pinecone</strong>、<strong>Qdrant</strong>、<strong>Weaviate</strong>などが候補になる。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 5 ── Stack Map</span>
+    <h4 class="figure__title">データレイヤーの全景</h4>
+    <svg class="figure__svg" viewBox="0 0 800 440" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- App -->
+      <rect x="60" y="40" width="680" height="60" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="85" y="65" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">APPLICATION</text>
+      <text x="85" y="88" font-size="14" font-weight="600" fill="#1c1917">Next.js / Server Components / Server Actions</text>
+
+      <!-- 矢印 -->
+      <line x1="400" y1="105" x2="400" y2="125" stroke="#1c1917" stroke-width="1"/>
+      <polygon points="400,125 395,118 405,118" fill="#1c1917"/>
+
+      <!-- ORM -->
+      <rect x="60" y="130" width="680" height="60" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="85" y="155" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">ORM / QUERY BUILDER</text>
+      <text x="85" y="178" font-size="13" fill="#3f3a35">スキーマと型から自動生成</text>
+      
+      <rect x="540" y="148" width="85" height="28" fill="#1c1917"/>
+      <text x="582" y="167" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#f4e8c1">Prisma</text>
+      <rect x="635" y="148" width="85" height="28" fill="#1c1917"/>
+      <text x="677" y="167" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="#f4e8c1">Drizzle</text>
+
+      <!-- 矢印 -->
+      <line x1="400" y1="195" x2="400" y2="215" stroke="#1c1917" stroke-width="1"/>
+      <polygon points="400,215 395,208 405,208" fill="#1c1917"/>
+
+      <!-- Primary DB -->
+      <rect x="60" y="220" width="430" height="80" fill="#1c1917"/>
+      <text x="85" y="248" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">PRIMARY DATABASE</text>
+      <text x="85" y="273" font-size="16" font-weight="700" fill="#faf7f2">PostgreSQL</text>
+      <text x="85" y="293" font-size="11" fill="#d6cfc1">Neon · Supabase · Planetscale (サーバーレス版)</text>
+
+      <!-- Cache -->
+      <rect x="500" y="220" width="240" height="80" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="520" y="248" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">CACHE</text>
+      <text x="520" y="273" font-size="14" font-weight="600" fill="#1c1917">Redis</text>
+      <text x="520" y="293" font-size="11" fill="#6b6359">Upstash (サーバーレス)</text>
+
+      <!-- Search -->
+      <rect x="60" y="320" width="340" height="80" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="85" y="348" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#8b6914" letter-spacing="3">SEARCH</text>
+      <text x="85" y="373" font-size="14" font-weight="600" fill="#1c1917">Algolia · Meilisearch</text>
+      <text x="85" y="393" font-size="11" fill="#6b6359">Elasticsearch (大規模・ログ分析)</text>
+
+      <!-- Vector DB -->
+      <rect x="410" y="320" width="330" height="80" fill="#faf7f2" stroke="#a01c1c" stroke-width="1.5"/>
+      <text x="430" y="348" font-family="Cormorant Garamond, serif" font-style="italic" font-size="12" fill="#a01c1c" letter-spacing="3">VECTOR DB (AI時代)</text>
+      <text x="430" y="373" font-size="14" font-weight="600" fill="#1c1917">pgvector (PostgreSQL拡張)</text>
+      <text x="430" y="393" font-size="11" fill="#6b6359">Pinecone · Qdrant (本格運用)</text>
+
+      <!-- 下部注釈 -->
+      <text x="400" y="430" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359" letter-spacing="2">必要になってから加える&#x3000;·&#x3000;最初はDB と ORM だけで足りる</text>
+    </svg>
+    <p class="figure__caption">最初はPostgreSQL + ORM だけで始める。キャッシュ・検索・ベクトルDBは必要性が見えてから足す ── これが2026年の標準的な順序。</p>
+  </div>
+</figure>
+
+
+      <h3>スキーマ設計こそ、フルスタックの分水嶺</h3>
+
+      <p>この章で最も伝えたいことは、技術選定の話ではない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">本当の越境ポイント</span>
+        <p class="key-concept__text">データベースのスキーマをどう設計するか ── これが<strong>フルスタックエンジニアとしての真価が問われる場所</strong>だ。フロントエンドの世界では、データ構造は「APIが返してきた形をそのまま受け取る」ものだった。フルスタックになるということは、その<strong>データ構造を自分で設計する側に立つ</strong>ということだ。</p>
+      </div>
+
+      <p>正規化はどこまでやるか。複合インデックスはどう張るか。外部キー制約は付けるか。論理削除か物理削除か。タイムスタンプはどう持つか。ユーザーとマルチテナントの境界はどう引くか。</p>
+
+      <p>これらの判断は、後からの修正コストが極めて高い。間違えると、何年も付き合うことになる。フロントエンドの「とりあえず動かして、後で直す」というアジリティが効きにくい領域だ。</p>
+
+      <p>ここがフルスタック越境の本当のハードルであり、同時に、ここを乗り越えることが越境の意味だ。</p>
+
+      <p>そして、ここを乗り越えるには、もう少し具体的な「作法」を知っておく必要がある。次章では、そのスキーマ設計の地形を、実際に歩いて見ていく。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>RDBの選択は <strong>PostgreSQL</strong> でほぼ間違いない</li>
+          <li>Neon・Supabase・Planetscale でサーバー管理は不要に</li>
+          <li>ORMは <strong>Prisma</strong>(隠蔽)か <strong>Drizzle</strong>(SQL素直)の選択</li>
+          <li>マイグレーションは本番DBを安全に変える唯一の方法</li>
+          <li>キャッシュ・検索・ベクトルDBは必要になってから追加する</li>
+          <li>スキーマ設計こそ、フルスタックの本当の越境点</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 バックエンド入門</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 スキーマ設計の作法</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章: スキーマ設計の作法 (新章)
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">スキーマ設計の作法<br>── 後戻りできない決定たち</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">フロントエンドの直感が通じない、唯一の領域</p>
+    </header>
+
+    <div class="prose">
+      <p>前章で、データベースのスキーマ設計こそがフルスタックの分水嶺だと述べた。この章では、その分水嶺の地形を実際に歩いて見せる。</p>
+
+      <p>注意してほしいのは、ここから先はフロントエンドの感覚が一番通じない領域だということだ。フロントエンドの世界では、「とりあえず動かして、後で直す」が許される。コンポーネントの構造を変えても、影響範囲はだいたい局所的だ。最悪、書き直せばいい。</p>
+
+      <p>データベースのスキーマは違う。一度本番に流したスキーマは、そこに既に蓄積されたデータと一緒に動き続ける。間違いに気づいた頃には、10万件のレコードが入っていて、変更には移行スクリプトを書く必要があり、ダウンタイムを覚悟する必要が出てくる。これは数ヶ月から数年にわたって付き合うことになる、重い負債だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">この章の前提</span>
+        <p class="key-concept__text">スキーマ設計とは、<strong>「未来の自分(やチーム)に手紙を書く」</strong>ような行為だ。いま下す判断が、3年後にも残っている。だから慎重に、そして経験者の蓄積に学んで、決めるべきところがある。</p>
+      </div>
+
+      <h3>主キーをどう設計するか ── 最初の分岐点</h3>
+
+      <p>すべてのテーブルには、各行を一意に識別するための「主キー(Primary Key)」を置く。これがスキーマ設計の出発点だが、選択肢がいくつかある。</p>
+
+      <p><strong>連番ID (Auto-increment)</strong></p>
+
+<pre><code>id  INT  PRIMARY KEY  AUTO_INCREMENT
+-- 1, 2, 3, 4, 5...</code></pre>
+
+      <p>もっとも素直な選択肢。整数で、人間にも読みやすい。性能も良い。長らくRDBの標準だった。</p>
+
+      <p>欠点は、推測可能性。URLに <code>/users/123</code> と出れば、隣の <code>/users/124</code> も存在することがバレる。<code>/orders/1000</code> なら、「ああ、まだ1000件しか注文がないんだな」と競合に推測される。プロダクトの内部情報が漏れる。</p>
+
+      <p>もう一つの問題は、複数のサーバーやマイクロサービスで採番する場合に競合する。分散システムには向かない。</p>
+
+      <p><strong>UUID v4</strong></p>
+
+<pre><code>id  UUID  PRIMARY KEY  DEFAULT gen_random_uuid()
+-- 550e8400-e29b-41d4-a716-446655440000</code></pre>
+
+      <p>ランダムな128ビット値。推測不可能で、分散環境でも衝突しない。これだけ聞くと万能に思えるが、欠点もある。</p>
+
+      <p>第一に、ランダムであるがゆえに、Bツリーインデックスのページがバラバラに更新される。データが大量に書き込まれるとパフォーマンスが落ちる。第二に、ソートしても挿入順にはならない。「最新の10件を取得」のような操作にひと工夫いる。第三に、URLが長く、人間に読みにくい。</p>
+
+      <p><strong>ULID または UUID v7</strong></p>
+
+<pre><code>id  CHAR(26)  PRIMARY KEY
+-- 01ARZ3NDEKTSV4RRFFQ69G5FAV
+-- 時刻順にソート可能なランダムID</code></pre>
+
+      <p>近年の解決策。時刻情報を含んだランダムID。挿入順にだいたいソートされるので、Bツリーに優しく、「最新順」も自然に取れる。UUID v7はRFC 9562で標準化された。新規プロジェクトではこちらが推奨されることが多い。</p>
+
+      <p><strong>2026年の実用的な判断</strong></p>
+
+      <p>シンプルなプロジェクトなら連番でも構わない。ただし、URLに露出させない設計にする(別途、公開用の短いランダムIDを `slug` として持つ)。中規模以上、特にAPI公開やマルチテナントを見込むなら、最初からULIDかUUID v7を選ぶ。後から変えるのは難しい。</p>
+
+      <h3>リレーション設計 ── 1対多、多対多、そして外部キー</h3>
+
+      <p>テーブル間の関係を表現するのが、リレーショナルデータベースの本質だ。</p>
+
+      <p><strong>1対多 (one-to-many)</strong> ── 最も基本的な関係。「ユーザーは複数の投稿を持つ」。</p>
+
+<pre><code>-- users テーブル
+id, name, email
+
+-- posts テーブル
+id, user_id, title, body
+                      ↑
+              FOREIGN KEY references users(id)</code></pre>
+
+      <p>「多」の側に、「1」の側のIDを持たせる(<code>user_id</code>)。これに外部キー制約を張る。</p>
+
+      <p><strong>多対多 (many-to-many)</strong> ── 「投稿は複数のタグを持ち、タグは複数の投稿に紐づく」。中間テーブルを置く。</p>
+
+<pre><code>-- posts テーブル
+id, title
+
+-- tags テーブル
+id, name
+
+-- post_tags テーブル (中間テーブル)
+post_id, tag_id   ← 複合主キー</code></pre>
+
+      <p>多対多の中間テーブルの命名は <code>{単数A}_{単数B}</code> または <code>{複数A}_{複数B}</code> のように。チーム内で統一すること。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">補 ── 外部キー制約を張るべきか</span>
+        外部キー制約は「参照先が必ず存在する」ことを保証する。データの整合性は守られるが、書き込みパフォーマンスを少し落とす。さらに、削除や巨大なバッチ処理で煩雑さが出ることもある。<br>原則は「張る」。一貫性が壊れたデータの修正コストは、書き込み性能のわずかな低下よりはるかに高い。Shopifyのように制約を意図的に外す大規模システムもあるが、その判断には相応の運用力が必要。
+      </div>
+
+      <h3>正規化と、現実的な非正規化</h3>
+
+      <p>データベース理論には「正規化」という規範がある。同じ情報を複数の場所に書かない、各テーブルは一つの主題だけを扱う、というルールだ。第三正規形(3NF)あたりまでは、ほぼすべての設計で守るべき指針になる。</p>
+
+      <p>例: ユーザーのメールアドレスは <code>users</code> テーブルにだけ書く。<code>orders</code> テーブルに「注文者のメールアドレス」をコピーして持たない。<code>users</code> 側の <code>user_id</code> を持って、必要なときに結合する。</p>
+
+      <p>ただし、現実には「あえて非正規化する」場面もある。</p>
+
+      <ul>
+        <li><strong>履歴系データ</strong>: 「注文時点での価格」「注文時点での住所」は、その時点でコピーして保存する。後から商品の価格が変わっても、過去の注文の値段は変わってはいけない</li>
+        <li><strong>集計値のキャッシュ</strong>: 「投稿のいいね数」を毎回COUNT(*)で計算すると重い。<code>posts.like_count</code> として保持し、いいねの追加・削除時に更新する</li>
+        <li><strong>検索性能のため</strong>: 頻繁にJOINするカラムを冗長に持つ</li>
+      </ul>
+
+      <p>非正規化は「整合性のリスク」と「性能の利益」のトレードオフだ。最初は正規化に徹し、本当に必要になったときだけ非正規化する。これが鉄則。</p>
+
+      <h3>インデックス ── 検索性能の生命線</h3>
+
+      <p>テーブルが大きくなると、「WHEREでフィルタするカラム」が遅くなる。インデックスを張ることで、これを高速化する。</p>
+
+      <p>基本的な原則はシンプルだ。</p>
+
+      <ul>
+        <li><strong>主キー</strong>には自動でインデックスが張られる</li>
+        <li><strong>外部キー</strong>(<code>user_id</code> など)には必ずインデックスを張る ── JOINの性能を決める</li>
+        <li><strong>頻繁にWHEREに使うカラム</strong>(<code>status</code>、<code>created_at</code> など)にも張る</li>
+        <li><strong>UNIQUE制約</strong>を必要とするカラム(<code>email</code> など)にはUNIQUEインデックスを張る</li>
+      </ul>
+
+      <p>そして、複数カラムを組み合わせて検索することが多いなら、<strong>複合インデックス</strong>を考える。</p>
+
+<pre><code>-- 「特定ユーザーの、特定期間の投稿を最新順」をよく取得するなら
+CREATE INDEX idx_posts_user_created
+ON posts (user_id, created_at DESC);</code></pre>
+
+      <p>複合インデックスはカラムの順序が重要で、左から使われる。<code>(user_id, created_at)</code> は「user_idだけ」「user_idとcreated_atの両方」のクエリには効くが、「created_atだけ」のクエリには効かない。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">注意 ── インデックスは無料ではない</span>
+        インデックスは書き込み性能を落とす(挿入・更新時にインデックスも更新するため)。また、ディスク容量を食う。「とりあえず全カラムにインデックス」は逆効果。実際のクエリパターンに合わせて、必要なものだけ張ること。
+      </div>
+
+      <h3>論理削除か、物理削除か</h3>
+
+      <p>レコードを「削除」するとき、二つのやり方がある。</p>
+
+      <p><strong>物理削除</strong>: <code>DELETE FROM users WHERE id = 123</code>。レコードがDBから消える。シンプル。</p>
+
+      <p><strong>論理削除</strong>: <code>deleted_at</code> カラムを置き、削除時にタイムスタンプを入れる。レコードは残るが、アプリ側で「<code>deleted_at IS NULL</code> のものだけ表示」とフィルタする。</p>
+
+      <p>どちらを選ぶかは、要件次第だ。</p>
+
+      <ul>
+        <li><strong>誤削除からの復元が必要</strong>(ユーザー操作で消せるもの)→ 論理削除</li>
+        <li><strong>監査ログが必要</strong>(誰が何を消したかの履歴)→ 論理削除</li>
+        <li><strong>個人情報を含む</strong>(GDPRなど削除権の要求)→ 物理削除(あるいは完全な匿名化)</li>
+        <li><strong>大量データの定期削除</strong>(ログなど)→ 物理削除</li>
+      </ul>
+
+      <p>論理削除を選んだ場合、すべてのクエリで <code>deleted_at IS NULL</code> を忘れないようにする必要がある ── これはORMのスコープ機能や、PostgreSQL のRow-Level Security で強制するとよい。クエリで一つ忘れると、削除済みデータが見えるバグになる。</p>
+
+      <h3>タイムスタンプの作法</h3>
+
+      <p>すべてのテーブルに、最低限これを置く ── <code>created_at</code> と <code>updated_at</code>。</p>
+
+<pre><code>created_at  TIMESTAMPTZ  NOT NULL  DEFAULT NOW()
+updated_at  TIMESTAMPTZ  NOT NULL  DEFAULT NOW()</code></pre>
+
+      <p>これは「ボーイスカウト・ルール」のようなもので、付けない理由がないなら必ず付ける。後から「いつ作成されたかわからない」「いつ更新されたかわからない」というデータは、デバッグも分析もできない。</p>
+
+      <p>重要なポイントが2つある。</p>
+
+      <p>第一に、<strong>必ずタイムゾーン付きの型 (TIMESTAMPTZ in PostgreSQL)</strong> を使う。タイムゾーンなしの型 (TIMESTAMP) を使うと、後でグローバル展開する際に地獄を見る。日本時間とUTCとで、データが混在する。これは取り返しがつかないバグの温床になる。</p>
+
+      <p>第二に、<code>updated_at</code> はトリガーやORMの機能で自動更新する。アプリケーションコードで毎回書き換えるのは、忘れがちでバグを生む。Prismaなら<code>@updatedAt</code>、Drizzleなら<code>$onUpdate</code>のようなメカニズムがある。</p>
+
+      <h3>マルチテナント設計 ── SaaSを作るなら避けて通れない</h3>
+
+      <p>もしあなたが作ろうとしているのがB2B SaaS なら、ここは特に重要だ。<strong>マルチテナンシー</strong>の設計判断は、サービスの寿命に渡って影響する。</p>
+
+      <p>マルチテナントとは「一つのアプリケーションで、複数の顧客組織のデータを扱う」設計のことだ。たとえば、Slackは何百万もの組織が同じインフラ上で動いている。Notion、Linear、Figmaも同様だ。</p>
+
+      <p>このとき、各組織(テナント)のデータをどう分離するかには、主に3つの方式がある。</p>
+
+      <p><strong>① Shared Schema (共有スキーマ)</strong></p>
+
+      <p>すべてのテーブルに <code>tenant_id</code> カラムを置き、すべてのクエリでフィルタする。物理的にデータは混ざっているが、論理的に分離される。</p>
+
+<pre><code>-- すべてのテーブルに tenant_id
+posts (id, tenant_id, title, body)
+users (id, tenant_id, name, email)
+
+-- クエリでは必ずフィルタ
+SELECT * FROM posts WHERE tenant_id = $current_tenant;</code></pre>
+
+      <p>もっとも安価で、運用がシンプル。早期スタートアップの大半はこれで始める。PostgreSQLの<strong>Row-Level Security (RLS)</strong>を使うと、データベース側で強制できる ── アプリのバグで他テナントのデータが見えるリスクを大幅に減らせる。</p>
+
+      <p><strong>② Schema per Tenant (テナントごとにスキーマ)</strong></p>
+
+      <p>同じデータベースの中に、テナントごとに別のスキーマを作る。<code>tenant_a.posts</code>、<code>tenant_b.posts</code> のように。中規模の中間解。</p>
+
+      <p><strong>③ Database per Tenant (テナントごとにDB)</strong></p>
+
+      <p>テナント一つにつき、データベースインスタンスを一つ用意する。最も強い分離。エンタープライズや、規制(医療、金融)対応には必須になることがある。コストも運用負荷も最大。</p>
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 7 ── Multi-tenancy Patterns</span>
+    <h4 class="figure__title">マルチテナント分離の3パターン</h4>
+    <svg class="figure__svg" viewBox="0 0 800 440" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- Pattern 1: Shared Schema -->
+      <text x="135" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#a01c1c" letter-spacing="3">PATTERN ①</text>
+      <text x="135" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Shared Schema</text>
+      <text x="135" y="76" text-anchor="middle" font-size="10" fill="#6b6359">共有スキーマ + RLS</text>
+
+      <!-- 大きな箱 (1つのDB) -->
+      <rect x="40" y="95" width="190" height="220" fill="#1c1917"/>
+      <text x="135" y="115" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">single database</text>
+      
+      <!-- 1つのテーブル -->
+      <rect x="55" y="130" width="160" height="170" fill="#faf7f2" stroke="#8b6914" stroke-width="1"/>
+      <text x="135" y="148" text-anchor="middle" font-size="10" font-weight="600" fill="#1c1917">posts</text>
+      <line x1="60" y1="155" x2="210" y2="155" stroke="#d6cfc1" stroke-width="0.5"/>
+      
+      <g font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">
+        <text x="64" y="170">tenant_id=A, post1</text>
+        <text x="64" y="186">tenant_id=B, post2</text>
+        <text x="64" y="202">tenant_id=A, post3</text>
+        <text x="64" y="218">tenant_id=C, post4</text>
+        <text x="64" y="234">tenant_id=B, post5</text>
+        <text x="64" y="250">tenant_id=A, post6</text>
+        <text x="64" y="266">tenant_id=C, post7</text>
+        <text x="64" y="282">tenant_id=B, post8</text>
+      </g>
+      
+      <text x="135" y="335" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">tenant_idで論理分離</text>
+      <text x="135" y="350" text-anchor="middle" font-size="10" fill="#3f3a35">PostgreSQL RLS で強制</text>
+      
+      <text x="135" y="380" text-anchor="middle" font-size="11" fill="#a01c1c" font-weight="600">最も安価</text>
+      <text x="135" y="397" text-anchor="middle" font-size="9.5" fill="#6b6359">数千テナント以下</text>
+      <text x="135" y="412" text-anchor="middle" font-size="9.5" fill="#6b6359">SOC 2 まで対応可</text>
+
+      <!-- Pattern 2: Schema per Tenant -->
+      <text x="400" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#8b6914" letter-spacing="3">PATTERN ②</text>
+      <text x="400" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">Schema per Tenant</text>
+      <text x="400" y="76" text-anchor="middle" font-size="10" fill="#6b6359">テナント別スキーマ</text>
+
+      <rect x="300" y="95" width="200" height="220" fill="#1c1917"/>
+      <text x="400" y="115" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">single database</text>
+
+      <!-- 3つのスキーマ -->
+      <rect x="315" y="130" width="170" height="55" fill="#faf7f2" stroke="#8b6914" stroke-width="1"/>
+      <text x="400" y="148" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1c1917">schema: tenant_a</text>
+      <text x="400" y="166" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">tenant_a.posts</text>
+      <text x="400" y="180" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">tenant_a.users</text>
+
+      <rect x="315" y="195" width="170" height="55" fill="#faf7f2" stroke="#8b6914" stroke-width="1"/>
+      <text x="400" y="213" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1c1917">schema: tenant_b</text>
+      <text x="400" y="231" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">tenant_b.posts</text>
+      <text x="400" y="245" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">tenant_b.users</text>
+
+      <rect x="315" y="260" width="170" height="45" fill="#faf7f2" stroke="#8b6914" stroke-width="1"/>
+      <text x="400" y="278" text-anchor="middle" font-size="9.5" font-weight="600" fill="#1c1917">schema: tenant_c</text>
+      <text x="400" y="295" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">tenant_c.posts ...</text>
+
+      <text x="400" y="335" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">スキーマ単位で分離</text>
+      <text x="400" y="350" text-anchor="middle" font-size="10" fill="#3f3a35">RLS不要、カスタマイズ容易</text>
+
+      <text x="400" y="380" text-anchor="middle" font-size="11" fill="#8b6914" font-weight="600">中間解</text>
+      <text x="400" y="397" text-anchor="middle" font-size="9.5" fill="#6b6359">中規模・テナント別カスタマイズ</text>
+      <text x="400" y="412" text-anchor="middle" font-size="9.5" fill="#6b6359">マイグレーション運用に注意</text>
+
+      <!-- Pattern 3: DB per Tenant -->
+      <text x="665" y="40" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="13" fill="#6b6359" letter-spacing="3">PATTERN ③</text>
+      <text x="665" y="60" text-anchor="middle" font-size="12" font-weight="600" fill="#1c1917">DB per Tenant</text>
+      <text x="665" y="76" text-anchor="middle" font-size="10" fill="#6b6359">テナント別DB</text>
+
+      <!-- 3つの独立DB -->
+      <rect x="565" y="95" width="200" height="70" fill="#1c1917"/>
+      <text x="665" y="115" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">database: tenant_a</text>
+      <rect x="585" y="125" width="160" height="30" fill="#faf7f2" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="665" y="144" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">posts, users, orders</text>
+
+      <rect x="565" y="175" width="200" height="70" fill="#1c1917"/>
+      <text x="665" y="195" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">database: tenant_b</text>
+      <rect x="585" y="205" width="160" height="30" fill="#faf7f2" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="665" y="224" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">posts, users, orders</text>
+
+      <rect x="565" y="255" width="200" height="60" fill="#1c1917"/>
+      <text x="665" y="275" text-anchor="middle" font-size="10" fill="#8b6914" font-style="italic">database: tenant_c</text>
+      <rect x="585" y="285" width="160" height="20" fill="#faf7f2" stroke="#d6cfc1" stroke-width="0.5"/>
+      <text x="665" y="299" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" fill="#3f3a35">...</text>
+
+      <text x="665" y="335" text-anchor="middle" font-size="10" fill="#3f3a35" font-style="italic">物理的に完全分離</text>
+      <text x="665" y="350" text-anchor="middle" font-size="10" fill="#3f3a35">最も強い isolation</text>
+
+      <text x="665" y="380" text-anchor="middle" font-size="11" fill="#6b6359" font-weight="600">最も高価</text>
+      <text x="665" y="397" text-anchor="middle" font-size="9.5" fill="#6b6359">HIPAA / FedRAMP 対応</text>
+      <text x="665" y="412" text-anchor="middle" font-size="9.5" fill="#6b6359">3-5倍のコスト</text>
+    </svg>
+    <p class="figure__caption">早期スタートアップは ① で始める。テナント要件が増えたら ② や ③ へ進む ── あるいは併用する。最初から ③ を選ぶことはほぼ間違い。</p>
+  </div>
+</figure>
+
+      <p>判断の指針は、最近の業界のコンセンサスとして整理されつつある:</p>
+
+      <ul>
+        <li>初期〜中規模(数千テナント以下、SOC 2程度の要件)→ <strong>Shared Schema + RLS</strong></li>
+        <li>テナントごとにカスタマイズが必要 → <strong>Schema per Tenant</strong></li>
+        <li>HIPAA / FedRAMP などの厳しい規制 → <strong>Database per Tenant</strong></li>
+      </ul>
+
+      <p>「いつかエンタープライズに対応するから、最初からDB分離にしておこう」は、たいてい誤りだ。コストと複雑性が事業を圧迫する。Shared Schemaで始めて、必要になった顧客にだけ分離プランを提供する「ハイブリッド」が、成熟したSaaSが行き着く形だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">tenant_idは最初から</span>
+        <p class="key-concept__text">マルチテナントを将来見込むなら、<strong>最初のテーブル設計から <code>tenant_id</code> を入れておく</strong>。後から追加するのは死ぬほど大変だ。逆に、最初から入れておけば、後でRLSやスキーマ分離に進む道筋が開ける。</p>
+      </div>
+
+      <h3>マイグレーションの実務</h3>
+
+      <p>スキーマは生き物だ。最初に完璧に設計することはできない。プロダクトが進化するにつれて、テーブルは追加され、カラムは変わり、インデックスは見直される。これを安全に行うのが<strong>マイグレーション</strong>だ。</p>
+
+      <p>マイグレーションファイルは、時系列で並んだスキーマ変更スクリプトの集まりだ。PrismaやDrizzleが自動で生成してくれる。だが、自動生成された内容を確認せずに本番に流すのは危険だ。中堅エンジニアとして守るべき原則がいくつかある。</p>
+
+      <p><strong>原則1: 後方互換を保つ多段階リリース</strong></p>
+
+      <p>カラムをリネームしたい、カラムの型を変えたい ── これらはアプリの新旧バージョンが共存する瞬間があるので、一気にやってはいけない。たとえば「<code>name</code> を <code>full_name</code> にリネームしたい」場合:</p>
+
+      <ol>
+        <li><code>full_name</code> カラムを追加し、<code>name</code>と二重書き込みするコードをデプロイ</li>
+        <li>既存データを <code>full_name</code> にコピー</li>
+        <li>アプリを <code>full_name</code> 読み取りに切り替えてデプロイ</li>
+        <li>しばらく安定運用してから、<code>name</code> カラムを削除</li>
+      </ol>
+
+      <p>これを「Expand and Contract」パターンと呼ぶ。覚えておくとよい。</p>
+
+      <p><strong>原則2: 大きなテーブルへのカラム追加は注意</strong></p>
+
+      <p>数百万行のテーブルに「<code>NOT NULL</code> + デフォルト値」のカラムを追加すると、PostgreSQLのバージョンによっては全行スキャンが起きてテーブルがロックされる。短時間でも、本番が止まる。最新のPostgreSQLは多くの場合これを最適化しているが、念のため事前に検証する。</p>
+
+      <p><strong>原則3: マイグレーションは戻せるように書く</strong></p>
+
+      <p>本番にマイグレーションを流して、何かおかしいと気づいたとき。「ロールバックできるか」が運命の分かれ目になる。新しいテーブルやカラムを追加するマイグレーションは戻しやすい。逆に、データを変換したり削除したりするマイグレーションは戻しにくい。後者は特に慎重に。</p>
+
+      <p><strong>原則4: マイグレーションは小さく、頻繁に</strong></p>
+
+      <p>「来週まとめて10個のマイグレーションを流す」は危険だ。一つ一つ、本番に流して、問題ないことを確認する。何か起きたとき、原因の切り分けが楽になる。</p>
+
+      <h3>命名規約の話</h3>
+
+      <p>地味だが、長い目で見ると大きな差を生むのが命名規約だ。</p>
+
+      <ul>
+        <li>テーブル名は<strong>複数形・スネークケース</strong>(<code>users</code>、<code>order_items</code>)。Railsの規約が広く採用されている</li>
+        <li>カラム名はスネークケース(<code>created_at</code>、<code>user_id</code>)</li>
+        <li>外部キーは <code>{単数名}_id</code>(<code>user_id</code>、<code>post_id</code>)</li>
+        <li>真偽値は <code>is_</code> または <code>has_</code> 接頭辞(<code>is_active</code>、<code>has_verified_email</code>)</li>
+        <li>タイムスタンプは <code>_at</code> 接尾辞(<code>created_at</code>、<code>deleted_at</code>、<code>published_at</code>)</li>
+        <li>列挙型はカラム名を単数形(<code>status</code>)、値はスネークケース小文字(<code>'in_progress'</code>)</li>
+      </ul>
+
+      <p>大事なのは「自分の好み」ではなく「チームでの統一」だ。命名は思想であり、混在しているとレビューが消耗する。最初に決めて、ドキュメント化しておく。</p>
+
+      <h3>最後に ── スキーマ設計の心構え</h3>
+
+      <p>この章を通じて、いくつもの「決め事」を見てきた。すべてを完璧にやろうとする必要はない。だが、知っていることと知らないことには大きな差がある。</p>
+
+      <p>知っていれば、最初の設計で致命的な間違いを避けられる。知っていれば、ベテランの設計レビューを受けて理解できる。知っていれば、後から見直すべき場所がどこかを判断できる。</p>
+
+      <p>そして、スキーマ設計の上達には近道がない。実際に設計し、運用し、間違えて、学ぶことの繰り返ししかない。だからこそ、フルスタックの分水嶺なのだ。フロントエンドの世界では味わえなかった「決定の重さ」を、ここで体験することになる。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>主キーは ULID / UUID v7 が新規プロジェクトの安全な選択</li>
+          <li>外部キー制約は原則張る ── 整合性のコストは性能より安い</li>
+          <li>正規化を基本に、必要なときだけ非正規化(履歴・集計値)</li>
+          <li>外部キーと頻用WHERE列にインデックス、複合インデックスは順序が肝</li>
+          <li>論理削除/物理削除は要件で選ぶ、論理削除はクエリ漏れに注意</li>
+          <li>タイムスタンプは TIMESTAMPTZ で、自動更新で</li>
+          <li>マルチテナントは Shared Schema + RLS から始める、tenant_id は最初から</li>
+          <li>マイグレーションは小さく頻繁に、Expand-and-Contract で安全に</li>
+          <li>命名規約はチームで統一して文書化</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 データの永続性</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 認証・決済・通知</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+
+<!-- ============================================
+     第7章: 認証・決済・通知
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">認証・決済・通知<br>── 「自分で作らない」の作法</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">車輪の再発明をしない判断こそ、プロの腕の見せ所</p>
+    </header>
+
+    <div class="prose">
+      <p>データを持つことと、それを正しく設計することの重さを見てきた。次は、視点を変えて「自分で書かないほうがいいもの」の話に移る。</p>
+
+      <p>フルスタックを志すフロントエンドエンジニアが、最初に陥りがちな罠がある。「全部、自分で作ろう」という意気込みだ。気持ちはわかる。ただ、Webサービスには「自分で作るべきもの」と「外部サービスに任せるべきもの」がはっきり分かれている。後者を見極める目を持つことが、2026年のプロのスタイルだ。</p>
+
+      <h3>認証 ── 絶対に自前で書いてはいけない</h3>
+
+      <p>最初にきっぱり言っておく。<strong>認証(authentication)を、生のコードからフルスクラッチで書くべきではない</strong>。</p>
+
+      <p>これは技術的な難しさだけの話ではない。法的・セキュリティ的な責任の問題だ。パスワードのハッシュ化、ソルト、セッション管理、CSRFトークン、リフレッシュトークン、2要素認証、パスワードリセット、メール認証、レートリミット、ブルートフォース対策、アカウントロックアウト ── これらを一つ落とすだけで、ユーザーのデータが漏れる可能性が出てくる。</p>
+
+      <p>ありがたいことに、これらをまとめて面倒見てくれるソリューションが充実している。</p>
+
+      <table>
+        <thead>
+          <tr><th>サービス</th><th>特徴</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Auth.js (NextAuth)</strong></td><td>Next.jsとの統合が容易、OSS、自前DBに紐づけ可能</td></tr>
+          <tr><td><strong>Clerk</strong></td><td>商用、UI部品まで含まれる、開発体験が極めて良い</td></tr>
+          <tr><td><strong>Supabase Auth</strong></td><td>Supabase利用なら統合済み、無料枠が広い</td></tr>
+          <tr><td><strong>Auth0</strong></td><td>エンタープライズ向け、機能豊富、価格高め</td></tr>
+          <tr><td><strong>WorkOS</strong></td><td>B2B SaaS向け、SSO/SAML対応</td></tr>
+        </tbody>
+      </table>
+
+      <p>スタートアップなら Clerk か Supabase Auth、もう少し制御を握りたいなら Auth.js、エンタープライズや法人向けSaaSなら Auth0 / WorkOS、という大まかな住み分けだ。</p>
+
+      <p>そして2026年の重要なトピックは<strong>パスキー</strong>だ。FIDO2/WebAuthnベースの、パスワードを使わない認証方式が標準化されてきた。Apple、Google、Microsoftがすべて対応し、Clerk や Auth.js もパスキー対応を進めている。新規プロジェクトはパスキー前提で設計するのが、もう普通になっている。</p>
+
+      <h3>決済 ── Stripe 一強</h3>
+
+      <p>決済も、絶対に自前で組まないほうがいい領域だ。クレジットカード情報を直接扱うとPCI DSS準拠などの規制が降ってきて、コンプライアンスのコストだけでスタートアップが死ぬ。</p>
+
+      <p>決済の選択肢は、実質 <strong>Stripe</strong>(海外向け)か、地域特化サービス(日本ならStripe、PAY.JP、KOMOJUなど)になる。Stripeはエコシステムが圧倒的で、サブスクリプション、ワンタイム決済、複数通貨、税金計算(Stripe Tax)、請求書、Connect(マーケットプレイス向け)など、ほぼあらゆる決済ニーズに対応する。</p>
+
+      <p>実装パターンも標準化されている。Checkout(ホスト型決済ページ)を使えば、フロントエンドに決済UIを直接埋め込まずに済む。Webhook で決済イベントを受け取り、自分のDBに反映する。この基本パターンを覚えれば、たいていのSaaSの課金は組める。</p>
+
+      <h3>メール・通知 ── トランザクションメールの新潮流</h3>
+
+      <p>ユーザーへのメール送信(パスワードリセット、注文確認、通知など)も、自前のSMTPサーバーで送るのは古い。2026年の主流は、<strong>API経由でメールを送るSaaS</strong>を使うことだ。</p>
+
+      <ul>
+        <li><strong>Resend</strong>: 開発者体験に振った新興、React Emailとの組み合わせが熱い</li>
+        <li><strong>SendGrid</strong>: 老舗、機能豊富</li>
+        <li><strong>Postmark</strong>: トランザクションメール特化、配信成功率が高い</li>
+        <li><strong>AWS SES</strong>: 安い、ただし運用が面倒</li>
+      </ul>
+
+      <p>特に<strong>Resend + React Email</strong>の組み合わせはフロントエンドエンジニアと相性がよい。メールテンプレートをReactコンポーネントとして書ける ── これはメールHTMLの闇(table要素のネスト、互換性の混沌)を知っている人なら、衝撃的に便利だとわかるはずだ。</p>
+
+      <h3>Webhookという作法</h3>
+
+      <p>外部サービス(Stripe、GitHub、Slackなど)と連携するとき、避けて通れないのが<strong>Webhook</strong>だ。</p>
+
+      <p>Webhookとは、「向こうのサービスで何かイベントが起きたら、こちらのエンドポイントにHTTPリクエストを送ってくる」仕組みのこと。Stripeで決済が完了したら、こちらのサーバーに通知が来る。GitHubでPRが作成されたら、CIサーバーに通知が来る。</p>
+
+      <p>Webhookの作法はいくつかある。</p>
+
+      <ul>
+        <li><strong>署名検証</strong>: リクエストが本当に信頼できる送信元から来たか、HMAC署名で検証する</li>
+        <li><strong>冪等性</strong>: 同じイベントが2回届いても、結果が変わらないように作る</li>
+        <li><strong>非同期処理</strong>: Webhook受信時は素早く200を返し、重い処理はキューに回す</li>
+        <li><strong>再送処理</strong>: 失敗したら向こうが再送してくるので、それに耐える設計</li>
+      </ul>
+
+      <p>これらはフロントエンドにはなかった概念だが、外部サービス連携が増える現代のWebサービスでは必須の知識だ。</p>
+
+      <h3>「Build vs Buy」の判断軸</h3>
+
+      <p>ここまで「自分で作らない」を強調してきたが、ではどう判断するか。シンプルな指針を挙げる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">判断のフレームワーク</span>
+        <p class="key-concept__text">
+        ・<strong>コア機能</strong>(プロダクトの差別化要因)→ 自分で作る<br>
+        ・<strong>共通インフラ</strong>(認証、決済、メール、ログ)→ 既存サービスを買う<br>
+        ・<strong>規制対応が必要なもの</strong>(決済、医療データなど)→ 専門家に任せる<br>
+        ・<strong>時間で済むなら時間で</strong> → スタートアップ初期は、Buyに振る</p>
+      </div>
+
+      <p>「自分で書けるから書く」のは技術的な誘惑だが、ビジネスの観点から見れば多くの場合は損失だ。書かなくていいものを書かないことが、フルスタックの腕の見せ所のひとつである。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>認証は絶対に自前で書かない ── Clerk / Auth.js / Supabase Auth から選ぶ</li>
+          <li>決済も自前で書かない ── Stripe が事実上の標準</li>
+          <li>メールは Resend + React Email がフロント親和的</li>
+          <li>Webhookには署名検証・冪等性・非同期処理の作法がある</li>
+          <li>Build vs Buy の判断軸を持つ ── コア機能だけ自分で作る</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 スキーマ設計の作法</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 インフラ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章: インフラ
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">インフラ<br>──「サーバーを建てない」が標準になった</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AWS生のEC2から始めなくていい時代</p>
+    </header>
+
+    <div class="prose">
+      <p>データを持つこと、外部サービスと連携することの作法を見てきた。次は、書いたコードをどこで動かすかの話だ。</p>
+
+      <p>フロントエンドエンジニアにとって、インフラはおそらく最大の未知の領域だろう。SSH、Linux、ネットワーク設定、ファイアウォール、SSL証明書、ロードバランサ ── これらの知識がなければスタートできないのではないか、と身構えてしまう。</p>
+
+      <p>朗報がある。2026年のいま、これらの大半は知らなくていい。</p>
+
+      <h3>PaaSの進化 ── サーバーを建てる時代の終わり</h3>
+
+      <p>クラウドコンピューティングの初期(2010年代)は、AWSのEC2を立てて、自分でLinuxをセットアップして、Webサーバー(Nginx)を入れて、デプロイスクリプトを書いて……という重い作業が必要だった。これがフロントエンドエンジニアにとっての参入障壁だった。</p>
+
+      <p>PaaS(Platform as a Service)はこれを根本から変えた。「Gitリポジトリを繋ぐだけで、あとは全部やってくれる」プラットフォームの登場だ。</p>
+
+      <p>代表的なサービスを挙げる。</p>
+
+      <table>
+        <thead>
+          <tr><th>サービス</th><th>特徴</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Vercel</strong></td><td>Next.jsの開発元、フロントエンド界の事実上の標準</td></tr>
+          <tr><td><strong>Cloudflare Workers / Pages</strong></td><td>エッジ実行、価格破壊的に安い</td></tr>
+          <tr><td><strong>Fly.io</strong></td><td>Docker前提、リージョン選択が柔軟、データベースも一緒に動かせる</td></tr>
+          <tr><td><strong>Railway</strong></td><td>フルスタックアプリ向け、DBやRedisも統合</td></tr>
+          <tr><td><strong>Render</strong></td><td>Herokuの後継的位置づけ、シンプル</td></tr>
+          <tr><td><strong>Netlify</strong></td><td>静的サイトに強い、Jamstack文脈の老舗</td></tr>
+        </tbody>
+      </table>
+
+      <p>Next.jsで作ったアプリなら、まずはVercelにデプロイするのが最短経路だ。<code>vercel</code>コマンド一発で本番URLが手に入る。プレビューデプロイ(PRごとに固有URLが生まれる)も自動で動く。これは数年前なら自前で構築するのに数日かかっていた仕組みだ。</p>
+
+      <h3>Vercelがフロントエンジニアの第一選択になった理由</h3>
+
+      <p>Vercelの優位性は、単に「Next.jsの開発元だから」だけではない。</p>
+
+      <p>第一に、<strong>デプロイの速さ</strong>。<code>git push</code>から数十秒で本番反映される。第二に、<strong>開発者体験</strong>。プレビューURL、ログ閲覧、環境変数管理、ドメイン設定がすべてWebダッシュボードで完結する。第三に、<strong>エッジ最適化</strong>。世界中のリージョンに自動で配信される。</p>
+
+      <p>弱点は、コストだ。トラフィックが増えると料金が跳ね上がる。また、Vercel上でしか動かない機能(Vercel Functions、Edge Configなど)に依存すると、後で他のプラットフォームに移行しにくい。これは2024年頃から、エコシステム内で議論になっている問題だ。</p>
+
+      <p>中規模以上、特にコストとロックインを気にするなら、Cloudflare WorkersやFly.ioを検討する価値がある。</p>
+
+      <h3>エッジコンピューティングという新地平</h3>
+
+      <p>近年の重要な変化が<strong>エッジ実行</strong>だ。</p>
+
+      <p>従来、サーバーは「どこかのデータセンターに1箇所」立てるのが普通だった。日本のユーザーがアメリカのサーバーにアクセスすると、太平洋を往復するレイテンシで遅くなる。</p>
+
+      <p>エッジコンピューティングは、コードを世界中の何百もの拠点に分散配置して、ユーザーに最も近い場所で実行する。日本のユーザーには日本のエッジが応答する。Cloudflare Workersが先駆者で、いまはVercel Edge FunctionsやFly.ioのリージョン選択など、各PaaSが対応している。</p>
+
+      <div class="sidenote">
+        <span class="sidenote__label">注意 ── エッジは万能ではない</span>
+        データベースが特定リージョンにある場合、エッジから遠くのDBにアクセスすると逆に遅くなる。「エッジで動かす処理」と「リージョン固定で動かす処理」を意識的に分ける設計が必要。
+      </div>
+
+      <h3>Dockerは要るのか、要らないのか</h3>
+
+      <p>ここでもう一つ、フロントエンジニアが気にする話題に触れる。<strong>Docker</strong>だ。</p>
+
+      <p>結論から言うと、Vercelや類似のPaaSを使う場合、Dockerの知識は当面いらない。フレームワークと連携した独自のビルドパイプラインが動いているので、Dockerfileを書く必要はない。</p>
+
+      <p>Dockerが必要になるのは、こういう場面だ。</p>
+
+      <ul>
+        <li>Fly.io、Render、Railway などコンテナベースのPaaSを使うとき(Dockerfileを書くか、自動生成される)</li>
+        <li>自分でクラウド(AWS、GCP、Azure)にデプロイするとき</li>
+        <li>開発環境を統一したいとき(<code>docker-compose</code> で DB と Redis と app を一緒に動かす)</li>
+        <li>マイクロサービス的な構成を組むとき</li>
+      </ul>
+
+      <p>Dockerは強力だが、最初に学ぶ必要はない。Vercel前提で始めて、PaaSの制約に当たってから手を出せばいい。</p>
+
+      <h3>Kubernetes は必要になるのか</h3>
+
+      <p>「Kubernetes(k8s)が要るのはどこから?」というのも、よく聞かれる問いだ。</p>
+
+      <p>2026年現在の答えは、「<strong>大半のWebサービスにはいらない</strong>」である。Kubernetesは強力だが、複雑さも一級品だ。専任の運用エンジニア(SRE)がいない組織が手を出すと、運用負荷で潰れる。</p>
+
+      <p>目安として、「数十のマイクロサービスを動かす必要があり、専任のインフラチームがあり、PaaSの制約では事業要件を満たせない」レベルになって初めて検討する。多くの中規模Webサービスは、PaaS で生涯を全うできる。</p>
+
+      <p>「Kubernetesが必要になったら、それは組織の成長を意味する」と思っておくくらいでちょうどいい。</p>
+
+      <h3>IaC(Infrastructure as Code)はいつから</h3>
+
+      <p><strong>Terraform</strong> や <strong>Pulumi</strong> で、インフラ構成をコードとして管理する手法も覚えておく価値がある。</p>
+
+      <p>これも、最初からは必要ない。Vercelのダッシュボードでぽちぽち設定して始めて、構成が複雑になってきた段階で導入を検討する。複数環境(dev, staging, prod)を厳密に同期する必要が出てきたら、IaCの導入タイミングだ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">インフラ越境の心得</span>
+        <p class="key-concept__text">「サーバーを建てる」ことなく、Webサービスを世界に公開できる時代だ。これは2010年代には想像できなかった環境であり、<strong>フルスタック越境のいちばんの追い風</strong>になっている。Docker、Kubernetes、Terraform は <strong>必要になってから</strong> 学べばいい。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>PaaS(Vercel・Netlify・Cloudflare)でサーバー管理は不要に</li>
+          <li>Vercelは最短経路だがロックインとコストに注意</li>
+          <li>エッジコンピューティングは強力だがDB配置と合わせて設計する</li>
+          <li>Docker・Kubernetes・Terraform は必要になってから学ぶ</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 認証・決済・通知</span>
+      </a>
+      <a href="#ch9" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第9章 観測可能性</span>
+      </a>
+    </nav>
+  </div>
+</section>
+<!-- ============================================
+     第9章: 観測可能性
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER NINE</span>
+      <h2 class="chapter__title">観測可能性<br>── 動かしてからが本番</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「デプロイしたら終わり」ではない世界観</p>
+    </header>
+
+    <div class="prose">
+      <p>ここで、フロントエンドの世界にはほとんど存在しなかった概念に踏み込む。<strong>観測可能性(Observability)</strong> だ。</p>
+
+      <p>フロントエンドアプリの「本番」は、ある意味で単純だった。デプロイすればCDNにファイルが配置され、ユーザーがアクセスすればJSが実行される。バグがあれば再現する。直して再デプロイ。それで終わりだ。</p>
+
+      <p>バックエンドの世界は違う。本番にデプロイした瞬間が、本当の始まりだ。</p>
+
+      <h3>なぜ観測可能性が必要なのか</h3>
+
+      <p>サーバーで動くコードには、フロントエンドにはない特性がある。</p>
+
+      <ul>
+        <li><strong>24時間365日動き続けている</strong>: 寝ている間にも、何かが起きている</li>
+        <li><strong>多数のユーザーが同時にアクセスしている</strong>: 競合状態、レースコンディションが起きる</li>
+        <li><strong>状態がデータベースに永続する</strong>: 一度起きたバグの影響が、消えずに残る</li>
+        <li><strong>外部サービスと連携している</strong>: 自分のせいでない障害も起きる</li>
+        <li><strong>ユーザーから見えるのは結果だけ</strong>: 内部で何が起きているか、自分で観測しないとわからない</li>
+      </ul>
+
+      <p>これがフロントエンドとの決定的な違いだ。<strong>観測しない限り、何が起きているか永遠にわからない</strong>。</p>
+
+      <p>観測可能性とは、システム内部で何が起きているかを、外部から推測できる状態を作っておくことだ。「動かしてから始まる仕事」のための準備である。</p>
+
+      <h3>観測の三本柱 ── ログ、メトリクス、トレース</h3>
+
+      <p>観測可能性は、伝統的に三つの柱で構成される。</p>
+
+      <p><strong>ログ(Logs)</strong> は、時系列で記録される文字列だ。「ユーザーIDがログインした」「DBクエリが失敗した」「Webhookを受信した」といった出来事を、一行ずつ記録する。<code>console.log</code>をサーバーに置いたようなもの、と思えばまずは正しい。</p>
+
+      <p><strong>メトリクス(Metrics)</strong> は、数値の集約だ。「過去1分間のリクエスト数」「平均レスポンスタイム」「エラー率」「DB接続数」といった統計量を、時系列のグラフとして残す。</p>
+
+      <p><strong>トレース(Traces)</strong> は、一つのリクエストが、システムの中をどう流れたかの記録だ。「Aサービスが呼ばれて、その中でBサービスを呼んで、Cデータベースに問い合わせて、結果が返ってきた」というフロー全体を可視化する。</p>
+
+      <p>これら三つを抑えておくことが、観測可能性の基本だ。</p>
+
+      <h3>エラー監視 ── Sentryから始める</h3>
+
+      <p>最初に導入すべきは、エラー監視ツールだ。事実上のデファクトは <strong>Sentry</strong> である。</p>
+
+      <p>Sentryをアプリに組み込むと、本番で発生した例外(JavaScriptのエラー、サーバーサイドの例外、ネットワークエラー)が自動的に収集され、ダッシュボードに集約される。スタックトレース、発生回数、影響を受けたユーザー数、再現に必要な情報まで、まとめて見える。</p>
+
+      <p>これがあるとないとで、運用の質は天と地ほど違う。「謎の不具合報告」が「明確なエラーログ」に変わる。フロントエンド・バックエンド両方をカバーできるのも強みで、フルスタックエンジニアにとって最初に入れるべきSaaSの一つだ。</p>
+
+      <h3>メトリクスとダッシュボード</h3>
+
+      <p>サービスが大きくなってきたら、メトリクス監視を入れる。代表的なツールはこれらだ。</p>
+
+      <ul>
+        <li><strong>Datadog</strong>: 商用、機能リッチ、価格は高め</li>
+        <li><strong>New Relic</strong>: 商用、APMの老舗</li>
+        <li><strong>Grafana + Prometheus</strong>: OSS、自前運用なら定番</li>
+        <li><strong>Honeycomb</strong>: 高カーディナリティ対応、観測可能性の理論を実装した先進派</li>
+      </ul>
+
+      <p>中小規模なら、Vercelの組み込みアナリティクスやCloudflareの分析、あるいはSentryのパフォーマンス機能で十分なことも多い。Datadogが必要になるのは、複数のサービスにまたがる本格的な運用に入った段階だ。</p>
+
+      <h3>プロダクト分析の融合 ── PostHogという流れ</h3>
+
+      <p>近年の興味深い動きは、「<strong>エンジニアリングの観測可能性</strong>」と「<strong>プロダクトの分析</strong>」が一つのツールで扱われるようになってきたことだ。</p>
+
+      <p>伝統的には、Google AnalyticsやMixpanelがプロダクト分析、Datadogがエンジニアリング観測、というふうに分かれていた。<strong>PostHog</strong> はこれを統合し、エラー監視、機能フラグ、A/Bテスト、セッションリプレイ、プロダクト分析を一つのプラットフォームでカバーする。</p>
+
+      <p>フルスタックエンジニアにとって、これは自然な統合だ。「機能をリリースした → どう使われているか → どこでエラーが起きているか」を一つのダッシュボードで追える。プロダクト視点とエンジニアリング視点が、人為的に分断されない。</p>
+
+      <h3>アラートとSLOの考え方</h3>
+
+      <p>観測ツールを入れただけでは、夜中に問題が起きても気付けない。<strong>アラート</strong>を設定して、特定の条件で通知が飛ぶようにする必要がある。</p>
+
+      <p>ただし、アラートは下手に作ると、すぐに「アラート疲れ(Alert Fatigue)」を引き起こす。ちょっとした揺らぎで通知が飛びまくると、本当に大事な通知を見落とすようになる。</p>
+
+      <p>ここで使われる概念が <strong>SLO(Service Level Objective)</strong> だ。「99.9%のリクエストは1秒以内に応答する」「月間のエラー率は0.1%以下」といった、サービス品質の目標を数字で決める。これを破りそうな状況だけアラートを上げる。</p>
+
+      <p>最初から厳密にSLOを設計する必要はない。重要なエンドポイントに数個のアラートを置くところから始めて、運用しながら調整する ── これが現実的なやり方だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">運用者としての視座</span>
+        <p class="key-concept__text">「リリースしたら終わり」ではなく、「<strong>リリースしてからが始まり</strong>」 ── この感覚を身につけると、サービスへの責任感が変わる。観測可能性の導入は、フルスタックの腕の見せ所のひとつだ。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>サーバーは観測しないと内部が見えない、フロントとは別世界</li>
+          <li>観測の三本柱: ログ・メトリクス・トレース</li>
+          <li>最初に入れるべきは <strong>Sentry</strong></li>
+          <li>メトリクスとトレースは必要になってから(Datadog や Grafana)</li>
+          <li>PostHogはエンジニアリングとプロダクトを統合する新潮流</li>
+          <li>アラートは少なく、SLOベースで設計する</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 インフラ</span>
+      </a>
+      <a href="#ch10" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第10章 AIを前提にした設計</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章: AI
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TEN</span>
+      <h2 class="chapter__title">AIを前提にした設計</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">2026年に避けて通れない要素として</p>
+    </header>
+
+    <div class="prose">
+      <p>2026年のWebサービス開発を語るうえで、AIを抜きにすることはできない。ただし、ここでの「AI」は2つの意味で語られていることを区別しておきたい。</p>
+
+      <p>ひとつは <strong>開発プロセスにおけるAI</strong> ── Claude CodeやCursorといったコーディング支援ツール。<br>
+      もうひとつは <strong>プロダクトに組み込まれるAI</strong> ── ユーザーが使う機能としてのLLM活用。</p>
+
+      <p>それぞれ整理する。</p>
+
+      <h3>開発プロセスとしてのAI</h3>
+
+      <p>2026年現在、商用プロジェクトの開発者の大半が、なんらかのAIコーディング支援を日常的に使っている。これはもう「使うかどうか」の議論ではなく、「どう使いこなすか」の段階に入っている。</p>
+
+      <p>代表的なツールはこのあたりだ。</p>
+
+      <ul>
+        <li><strong>Claude Code</strong> (Anthropic): ターミナルベース、エージェント的に動くコーディング支援</li>
+        <li><strong>Cursor</strong>: VSCode派生のAI統合エディタ</li>
+        <li><strong>GitHub Copilot</strong>: 純正、補完中心</li>
+        <li><strong>Windsurf</strong>: Cursor類似の新興</li>
+      </ul>
+
+      <p>これらが開発フローに与える影響は大きい。ボイラープレートのコードは書かなくてよくなる。リファクタリングが大幅に速くなる。新しいライブラリを試すときの学習コストが下がる。</p>
+
+      <p>ただし、これは「AIに丸投げ」を意味しない。アーキテクチャの判断、データモデルの設計、セキュリティの考慮、ユーザー体験の意思決定 ── これらは人間の仕事として残る。むしろAIが書ける範囲のコードが増えるほど、人間が向き合う仕事は「上の階層」に上がっていく。</p>
+
+      <p>フロントエンドエンジニアがフルスタック化する際、AIは強力な味方だ。慣れないバックエンドのコードを書くとき、AIが書いた骨格を読んで学ぶ、というのは正当な学習法である。</p>
+
+      <h3>プロダクトに組み込まれるAI</h3>
+
+      <p>もうひとつの側面は、Webサービスそのものに AI 機能を組み込むことだ。これも2026年では避けて通れない。</p>
+
+      <p>代表的な組み込みパターンは、いくつかに分類できる。</p>
+
+      <ul>
+        <li><strong>チャットボット型</strong>: ユーザーが質問する、LLMが答える。シンプルだが、社内ナレッジに基づいた回答をさせたいなら RAG が必要になる。</li>
+        <li><strong>コンテンツ生成支援</strong>: 文章の下書き、要約、翻訳、画像生成など。「Notion AI」型と言ってもいい。ユーザーの仕事を加速する機能としてプロダクトに埋め込む。</li>
+        <li><strong>セマンティック検索</strong>: キーワードではなく「意味」で検索する。ベクトル埋め込み + ベクトルDB(pgvector など)の組み合わせで実装する。</li>
+        <li><strong>エージェント型</strong>: LLMが複数のステップを自律的に実行する。複雑だが、強力。</li>
+      </ul>
+
+      <h3>Vercel AI SDK ── フロントエンドからLLMを扱う</h3>
+
+      <p>LLM統合の難しさのひとつは、ストリーミング応答だ。ChatGPTのように、文字が一文字ずつ流れてくるUI。これを素直に実装するのは、案外面倒だった。</p>
+
+      <p><strong>Vercel AI SDK</strong> は、これをReactと統合して扱うためのライブラリだ。<code>useChat</code>や<code>useCompletion</code>といったフックで、ストリーミング応答を簡単にUIに反映できる。Claude、OpenAI、Geminiといった主要LLMをほぼ統一的なAPIで扱える。</p>
+
+<pre><code>'use client';
+import { useChat } from 'ai/react';
+
+export default function Chat() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat();
+
+  return (
+    &lt;div&gt;
+      {messages.map(m =&gt; &lt;div key={m.id}&gt;{m.content}&lt;/div&gt;)}
+      &lt;form onSubmit={handleSubmit}&gt;
+        &lt;input value={input} onChange={handleInputChange} /&gt;
+      &lt;/form&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+      <p>フロントエンドの感覚で、AI機能をプロダクトに組み込めるようになった ── これは2026年の重要な変化の一つだ。</p>
+
+      <h3>RAGの基礎</h3>
+
+      <p>RAG(Retrieval-Augmented Generation)は、AI機能を作るうえで頻出のパターンだ。日本語では「検索拡張生成」と訳される。</p>
+
+      <p>仕組みは単純だ。</p>
+
+      <ol>
+        <li>文書(社内ドキュメント、商品情報、過去のチャットログなど)をベクトル埋め込みに変換し、ベクトルDBに保存しておく</li>
+        <li>ユーザーの質問が来たら、それもベクトル化する</li>
+        <li>ベクトルDBで類似度が高い文書を検索する</li>
+        <li>それらの文書を、ユーザーの質問と一緒にLLMに渡す</li>
+        <li>LLMが、その文書を根拠に答える</li>
+      </ol>
+
+      <p>これによって、LLMが知らない情報(社内データ、最新情報)に基づいた回答を生成できる。</p>
+
+      <p>埋め込みモデルは OpenAI、Cohere、Voyage などが提供。ベクトルDBは pgvector で十分なケースが多い。実装の重さは、データの品質管理(古い情報をどう更新するか、検索精度をどう上げるか)のほうに重心がある。</p>
+
+      <h3>LLMコストの設計</h3>
+
+      <p>最後に、しばしば見落とされる重要な観点を一つ。<strong>LLM APIのコスト設計</strong>だ。</p>
+
+      <p>LLMはトークン課金で、使えば使うほどお金がかかる。プロダクトに組み込むときは、コスト管理を最初から設計しておく必要がある。</p>
+
+      <ul>
+        <li><strong>モデルの使い分け</strong>: 簡単なタスクは安いモデル(Haiku、GPT-4 mini)、難しいタスクだけ高性能モデル</li>
+        <li><strong>キャッシュ</strong>: 同じプロンプトには同じ回答を返す、プロンプトキャッシュ機能を活用する</li>
+        <li><strong>ユーザーあたりの上限</strong>: 無料ユーザーには制限を設ける</li>
+        <li><strong>コスト監視</strong>: 月次の予算アラートを設定する</li>
+      </ul>
+
+      <p>「ユーザー数 × 平均利用回数 × トークン数 × 単価」が、月額コストの基本式だ。これがビジネスとして成立するかを、機能設計の段階で見ておく必要がある。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">AIネイティブの時代へ</span>
+        <p class="key-concept__text">AI機能は、もはやWebサービスの追加機能ではなく、<strong>設計の前提条件</strong>になりつつある。フロントエンドエンジニアにとって、AI機能の組み込みはむしろ親和性が高い領域だ。ストリーミングUIの実装はフロントの腕が活きる場所だし、ベクトル検索のような新しいレイヤーは、フルスタックの差別化要因になりうる。</p>
+      </div>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>開発プロセスではAIコーディング支援を日常的に使う(Claude Code / Cursor)</li>
+          <li>プロダクトにはストリーミング・RAG・エージェントなど複数のAI組み込みパターン</li>
+          <li>Vercel AI SDK + pgvector が手軽な出発点</li>
+          <li>LLMコスト設計は機能設計の段階から組み込む</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch9" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第9章 観測可能性</span>
+      </a>
+      <a href="#ch11" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第11章 何を選ばないか</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第11章: 何を選ばないか
+     ============================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ELEVEN</span>
+      <h2 class="chapter__title">何を選ばないか<br>── トレンドに乗らない勇気</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">採用しない判断こそが、技術選定の上手さ</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまで、現代Webサービスの「標準的な構成」をひと通り見てきた。最後にやっておきたいのは、逆方向の視点だ。<strong>何を選ばないか</strong>。</p>
+
+      <p>技術選定の上手さは、新しいものを取り入れる速さではない。むしろ「採用しない判断」をどれだけ的確にできるかにある。中堅エンジニアであるあなたなら、この章の意味はわかるはずだ。</p>
+
+      <h3>マイクロサービスの罠</h3>
+
+      <p>マイクロサービスは、2010年代後半に強烈なブームになった。Netflix、Amazon、Spotifyといった巨大プラットフォームの事例が広まり、「モノリスは古い、マイクロサービスがモダン」という空気が業界を覆った。</p>
+
+      <p>しかし、中規模以下の組織でマイクロサービスに手を出した会社の多くが、苦しんだ。</p>
+
+      <p>理由はシンプルだ。マイクロサービスは「組織のスケーリング問題」を解く技術であり、「技術的なエレガンス」を追求するものではない。100人以上のエンジニアが同時に開発する場面で初めて、サービスを分けることのメリットが、ネットワーク越し通信のコストを上回る。</p>
+
+      <p>中小規模では、<strong>モジュラーモノリス</strong> のほうがはるかに健全だ。一つのコードベースの中で、適切にモジュール分割し、境界を明確にする。これで多くの組織は十分にやっていける。</p>
+
+      <p>「最初からマイクロサービスで設計する」のは、まず間違いなく早計だ。必要になったときに切り出せばいい。</p>
+
+      <h3>マイクロフロントエンドが流行らなかった理由</h3>
+
+      <p>マイクロサービスのフロントエンド版として、マイクロフロントエンドという発想も提唱された。Module Federationなどの技術と組み合わせて、複数チームが独立にUIを開発し、ランタイムで合成する。</p>
+
+      <p>これも、多くの組織でフィットしなかった。理由は似ている ── 解こうとしている問題が、組織規模を選ぶからだ。さらに、フロントエンドには「一貫したUX」という強い制約があり、コンポーネント間のスタイルやインタラクションの差を許容しにくい。</p>
+
+      <p>採用するかどうかの判断軸は、「複数チームが同じUIに同時に手を入れて、デプロイサイクルを分ける必要があるか」だ。Yesでなければ、普通のモノリスでよい。</p>
+
+      <h3>「最新」より「枯れた」を選ぶべき領域</h3>
+
+      <p>新しい技術には、二つの種類がある。「新しくて、いずれ標準になるもの」と、「新しくて、消えていくもの」だ。事前に見分けるのは難しいが、いくつか経験則はある。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">枯れたものを選ぶべき領域</span>
+        <p class="key-concept__text">
+        ・<strong>データベース</strong>(PostgreSQLが圧倒的に堅い)<br>
+        ・<strong>認証</strong>(自前で書かない、既存サービスを使う)<br>
+        ・<strong>決済</strong>(Stripeのような実績のあるものに任せる)<br>
+        ・<strong>メール送信</strong>(配信成功率に実績のあるもの)<br>
+        ・<strong>バックアップ・災害復旧</strong>(枯れたものほど信頼できる)</p>
+      </div>
+
+      <p>新しい技術を取り入れていい領域は、こちらだ。</p>
+
+      <ul>
+        <li><strong>フロントエンドフレームワーク</strong>: 進化が速く、置いていかれると採用にも影響する</li>
+        <li><strong>開発ツール</strong>: エディタ、CI、ローカル開発環境など、入れ替えコストが低いもの</li>
+        <li><strong>AIコーディング支援</strong>: 進化を追わないとすぐ遅れる</li>
+      </ul>
+
+      <p>つまり、「失敗したときの影響が大きい領域」では枯れたものを、「失敗しても影響が局所的な領域」では新しいものを試す ── この使い分けが、エンジニアとしての成熟だ。</p>
+
+      <h3>Build vs Buy の判断軸、再訪</h3>
+
+      <p>第7章で「自分で作らない」の話をしたが、これは技術選定全般の哲学でもある。</p>
+
+      <p>判断の指針を再度整理しておく。</p>
+
+      <ul>
+        <li><strong>時間で買えるなら、時間で買う</strong>(自分で作る時間が、別の価値ある仕事を奪うなら、Buyに振る)</li>
+        <li><strong>コア機能は自分で持つ</strong>(プロダクトの差別化要因を、外部に依存させない)</li>
+        <li><strong>コモディティ化したものは買う</strong>(認証、決済、メール、ログなど)</li>
+        <li><strong>ロックインを意識する</strong>(乗り換えコストが高くなりすぎないか)</li>
+      </ul>
+
+      <p>特に「ロックイン」は、新興のSaaSを採用するときに見逃しがちだ。便利だからと使い始めて、後で「移行できない」となるケースは多い。重要な機能ほど、データのエクスポート手段や移行戦略を事前に確認しておくとよい。</p>
+
+      <h3>トレンドへの懐疑</h3>
+
+      <p>最後に、もう少し抽象的なことを書く。</p>
+
+      <p>技術業界は、流行に振り回されやすい。SNSや技術ブログで話題になっている技術が、自分のプロジェクトに本当に合うとは限らない。むしろ、「流行っているから採用する」は、最も避けるべき判断軸だ。</p>
+
+      <p>中堅エンジニアの強みは、「過去に流行って消えた技術」を見てきていることだ。CoffeeScript、Bower、Grunt、Gulp、Backbone、Meteor、AngularJS、Flow ── これらは一時期「次のスタンダード」と言われたが、いまは過去のものになっている。同じことが、いま「最新」と言われている技術にも起こりうる。</p>
+
+      <p>新しいものを取り入れることと、流行に乗ることは違う。本当に問題を解いているか、自分の文脈に合っているか、3年後にも残っているか ── これを見極める目を持つことが、長く価値を出し続けるエンジニアの条件だ。</p>
+
+      <div class="summary">
+        <span class="summary__label">CHAPTER SUMMARY</span>
+        <h4 class="summary__title">この章で押さえたこと</h4>
+        <ul>
+          <li>マイクロサービスは組織問題を解く道具、技術エレガンスではない</li>
+          <li>マイクロフロントエンドも同様、組織規模を選ぶ</li>
+          <li>影響が大きい領域は枯れたもの、局所的な領域は新しいものを試す</li>
+          <li>ロックインの可能性をBuyの前に必ず確認する</li>
+          <li>流行と必要を区別する目を持つことが、長く生き残るエンジニアの条件</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch10" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第10章 AIを前提にした設計</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">あなたの最初の一歩</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">この地図を持って、どこへ歩き出すか</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまで読んでくれたあなたに、最後のメッセージを送る。</p>
+
+      <h3>規模別・状況別の推奨スタック</h3>
+
+      <p>判断材料として、典型的なケースごとの「推奨される最小構成」をまとめておく。</p>
+
+      <p><strong>個人開発・スタートアップ初期</strong></p>
+
+<pre><code>Next.js (TypeScript) + Tailwind + shadcn/ui
+Supabase (DB + 認証 + ストレージ)
+Vercel (デプロイ)
+Stripe (決済)
+Resend (メール)
+Sentry (エラー監視)
+PostHog (分析)</code></pre>
+
+      <p>これで小規模Webサービスは完結する。1人でも回せる。</p>
+
+      <p><strong>中規模スタートアップ・SaaS</strong></p>
+
+<pre><code>Next.js (TypeScript) + Tailwind + shadcn/ui
+Neon または Supabase (DB)
+Prisma または Drizzle (ORM)
+Clerk または Auth.js (認証)
+Vercel (デプロイ)
+Cloudflare (CDN・エッジ)
+Stripe (決済)
+Resend (メール)
+Sentry + PostHog (観測・分析)
+Upstash Redis (キャッシュ)</code></pre>
+
+      <p>ここまで来ると、フロントエンドエンジニア出身のチームでも十分に運用できる規模だ。</p>
+
+      <p><strong>エンタープライズ・大規模</strong></p>
+
+      <p>ここからは、組織の事情やコンプライアンス要件次第で大きく変わる。AWSやGCPに本格的に乗り、Kubernetes、Datadog、Terraformなどを揃え、専任のSREチームが運用する世界だ。フロントエンドエンジニアからフルスタック越境するキャリアパスとは別の話になる。</p>
+
+      
+
+<figure class="figure">
+  <div class="figure__inner">
+    <span class="figure__label">Figure 6 ── The Map</span>
+    <h4 class="figure__title">規模別・状況別の推奨スタック地図</h4>
+    <svg class="figure__svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg" font-family="Noto Serif JP, serif">
+      <!-- 横軸 -->
+      <line x1="60" y1="500" x2="740" y2="500" stroke="#1c1917" stroke-width="1"/>
+      <text x="100" y="522" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359">個人 / Solo</text>
+      <text x="400" y="522" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359">スタートアップ / Startup</text>
+      <text x="700" y="522" text-anchor="end" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359">大規模 / Enterprise</text>
+      <text x="400" y="495" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="9" fill="#8b6914" letter-spacing="2">→ ORGANIZATIONAL SCALE</text>
+
+      <!-- LEVEL 1 -->
+      <rect x="60" y="40" width="220" height="430" fill="#faf7f2" stroke="#1c1917" stroke-width="1"/>
+      <text x="170" y="68" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#a01c1c" letter-spacing="4">LEVEL Ⅰ</text>
+      <text x="170" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">個人 / 初期</text>
+      <line x1="100" y1="105" x2="240" y2="105" stroke="#d6cfc1" stroke-width="0.5"/>
+      
+      <g font-size="11" fill="#3f3a35">
+        <text x="85" y="130" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">FRAME</text>
+        <text x="85" y="148">Next.js + Tailwind</text>
+        <text x="85" y="164">+ shadcn/ui</text>
+        
+        <text x="85" y="195" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">DATA</text>
+        <text x="85" y="213">Supabase</text>
+        <text x="85" y="228" font-size="10" fill="#6b6359">(DB+Auth+Storage)</text>
+
+        <text x="85" y="258" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">DEPLOY</text>
+        <text x="85" y="276">Vercel</text>
+
+        <text x="85" y="306" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">PAYMENT</text>
+        <text x="85" y="324">Stripe</text>
+
+        <text x="85" y="354" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">MAIL</text>
+        <text x="85" y="372">Resend</text>
+
+        <text x="85" y="402" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">OBSERVABILITY</text>
+        <text x="85" y="420">Sentry + PostHog</text>
+      </g>
+      <text x="170" y="455" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#a01c1c">→ 1人で完結</text>
+
+      <!-- LEVEL 2 -->
+      <rect x="300" y="40" width="220" height="430" fill="#1c1917"/>
+      <text x="410" y="68" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#8b6914" letter-spacing="4">LEVEL Ⅱ</text>
+      <text x="410" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#faf7f2">中規模 / SaaS</text>
+      <line x1="340" y1="105" x2="480" y2="105" stroke="#8b6914" stroke-width="0.5"/>
+      
+      <g font-size="11" fill="#d6cfc1">
+        <text x="325" y="130" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">FRAME</text>
+        <text x="325" y="148">Next.js + Tailwind</text>
+        <text x="325" y="164">+ shadcn/ui</text>
+        
+        <text x="325" y="195" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">DATA</text>
+        <text x="325" y="213">Neon / Supabase</text>
+        <text x="325" y="228">+ Prisma or Drizzle</text>
+
+        <text x="325" y="258" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">AUTH</text>
+        <text x="325" y="276">Clerk / Auth.js</text>
+
+        <text x="325" y="306" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">DEPLOY</text>
+        <text x="325" y="324">Vercel + Cloudflare</text>
+
+        <text x="325" y="354" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">CACHE</text>
+        <text x="325" y="372">Upstash Redis</text>
+
+        <text x="325" y="402" font-size="9.5" font-weight="600" fill="#8b6914" letter-spacing="1.5">OBSERVABILITY</text>
+        <text x="325" y="420">Sentry + PostHog</text>
+      </g>
+      <text x="410" y="455" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#8b6914">→ FE出身チームで運用可能</text>
+
+      <!-- LEVEL 3 -->
+      <rect x="540" y="40" width="220" height="430" fill="#faf7f2" stroke="#6b6359" stroke-width="1" stroke-dasharray="3,3"/>
+      <text x="650" y="68" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="14" fill="#6b6359" letter-spacing="4">LEVEL Ⅲ</text>
+      <text x="650" y="90" text-anchor="middle" font-size="13" font-weight="600" fill="#1c1917">エンタープライズ</text>
+      <line x1="580" y1="105" x2="720" y2="105" stroke="#d6cfc1" stroke-width="0.5"/>
+      
+      <g font-size="11" fill="#3f3a35">
+        <text x="565" y="130" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">CLOUD</text>
+        <text x="565" y="148">AWS / GCP / Azure</text>
+
+        <text x="565" y="178" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">ORCHESTRATION</text>
+        <text x="565" y="196">Kubernetes</text>
+
+        <text x="565" y="226" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">INFRA AS CODE</text>
+        <text x="565" y="244">Terraform / Pulumi</text>
+
+        <text x="565" y="274" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">OBSERVABILITY</text>
+        <text x="565" y="292">Datadog / Splunk</text>
+
+        <text x="565" y="322" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">ARCHITECTURE</text>
+        <text x="565" y="340">マイクロサービス</text>
+
+        <text x="565" y="370" font-size="9.5" font-weight="600" fill="#6b6359" letter-spacing="1.5">TEAM</text>
+        <text x="565" y="388">専任 SRE / Platform</text>
+      </g>
+      <text x="650" y="455" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="11" fill="#6b6359">→ 別キャリアパスの世界</text>
+    </svg>
+    <p class="figure__caption">必要なものだけ持って次のレベルに移ればいい。最初から LEVEL Ⅲ を目指す必要はない ── むしろ、最後まで LEVEL Ⅱ で済むサービスのほうが多い。</p>
+  </div>
+</figure>
+
+
+      <h3>フロントから始める学習順序</h3>
+
+      <p>もしあなたが、いま実際に動き始めるとしたら、こういう順番で踏み出すといい。</p>
+
+      <ol>
+        <li><strong>Next.js App Router を本気で使う</strong>(Server Components、Server Actions まで)</li>
+        <li><strong>Supabase か Neon でデータベースを持ってみる</strong>(個人プロジェクトで)</li>
+        <li><strong>Prisma か Drizzle でスキーマを設計する経験を積む</strong>(主キー・リレーション・インデックスを意識して)</li>
+        <li><strong>マイグレーションの基本を体に覚えさせる</strong>(カラム追加・型変更・データ移行を実際にやる)</li>
+        <li><strong>Stripe で決済を組み込んだ何かを作る</strong>(SaaSのトイモデルでよい)</li>
+        <li><strong>Sentry を入れて、本番のエラーを観測する習慣を作る</strong></li>
+        <li><strong>AI機能(Vercel AI SDK + pgvector)を一つ組み込む</strong></li>
+      </ol>
+
+      <p>この7つを経験すると、もうあなたは「フロントエンドエンジニア」というラベルから少しはみ出している。</p>
+
+      <h3>「全部やる」より「全部見える」を</h3>
+
+      <p>フルスタックエンジニアを目指すとき、誤解しがちなのは、「全部の領域を専門家レベルでこなす」というイメージだ。それは現実的ではないし、必要でもない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">最後に届けたい視座</span>
+        <p class="key-concept__text">本当に大事なのは、「<strong>全部の領域が、自分の視野に入っている</strong>」状態だ。データベース設計の落とし穴を知っている。インフラのデプロイフローを把握している。観測可能性の重要性を理解している。AIの組み込み方をイメージできる。これらが「他人事ではない」と感じられる状態。そのうえで、自分のもっとも得意な領域(おそらくフロントエンド)で深く価値を出しつつ、必要なときには他の領域にも踏み込める ── これが、2026年の「フルスタック」の現実的な像だ。</p>
+      </div>
+
+      <h3>振り子は、まだ揺れる</h3>
+
+      <p>第1章で述べたように、Webの設計はサーバーとクライアントのあいだを振り子のように揺れ動いてきた。いまはサーバー側に振れているが、振り子はまた揺れ戻すかもしれない。</p>
+
+      <p>WebAssemblyが本格的に普及すれば、重い処理を再びクライアントに戻す動きが出るかもしれない。エッジコンピューティングがもっと進めば、「サーバー」と「クライアント」の区別自体が曖昧になるかもしれない。AIエージェントが普及すれば、コードを書くという行為自体が変質するかもしれない。</p>
+
+      <p>予測は難しい。確実なのは、変化は続くということだ。</p>
+
+      <p>そして、変化のなかで生き残る方法は、「最新を追い続けること」ではなく、「変化の根本にある力学を理解すること」だ。なぜサーバーに戻ってきたのか。なぜメタフレームワークが標準になったのか。なぜマイクロサービスは流行りすぎたのか。これらの「なぜ」を自分の言葉で説明できれば、次に何が来ても、その意味を理解できる。</p>
+
+      <blockquote>技術カタログは古びる。<br>でも、力学を理解する目は古びない。</blockquote>
+
+      <p>あなたの越境が、いいものになりますように。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch11" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第11章 何を選ばないか</span>
+      </a>
+      <a href="#prologue" class="chapter-nav__next">
+        <span class="chapter-nav__label">↑ TOP</span>
+        <span class="chapter-nav__title">最初に戻る</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <p>この記事は2026年5月時点の情報に基づいて書かれた。<br>
+  Web技術の世界は速く変わるので、半年もすれば細部はずれてくる。<br>
+  ただし、ストーリーの骨格と力学への視点は、もう少し長く役に立つはずだ。</p>
+  <div class="footer__rule"></div>
+  <p class="footer__date">May 2026 · A Field Guide</p>
+</footer>
+
+<!-- ============================================
+     JavaScript
+     ============================================ -->
+<script>
+// 読了進捗バー
+const progressFill = document.getElementById('progressFill');
+window.addEventListener('scroll', () => {
+  const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / scrollHeight) * 100;
+  progressFill.style.width = Math.min(scrolled, 100) + '%';
+});
+
+// 目次ドロワー
+const tocToggle = document.getElementById('tocToggle');
+const tocDrawer = document.getElementById('tocDrawer');
+const tocClose = document.getElementById('tocClose');
+const tocBackdrop = document.getElementById('tocBackdrop');
+
+function openToc() {
+  tocDrawer.classList.add('is-open');
+  tocBackdrop.classList.add('is-open');
+}
+function closeToc() {
+  tocDrawer.classList.remove('is-open');
+  tocBackdrop.classList.remove('is-open');
+}
+
+tocToggle.addEventListener('click', openToc);
+tocClose.addEventListener('click', closeToc);
+tocBackdrop.addEventListener('click', closeToc);
+
+// 目次内のリンクをクリックしたら閉じる
+document.querySelectorAll('.toc-drawer a').forEach(link => {
+  link.addEventListener('click', closeToc);
+});
+
+// ESCキーで閉じる
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeToc();
+});
+
+// Intersection Observer によるフェードイン
+const fadeElements = document.querySelectorAll('.chapter__header, .key-concept, .summary');
+fadeElements.forEach(el => el.classList.add('fade-in'));
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+fadeElements.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
