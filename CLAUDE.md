@@ -1,10 +1,11 @@
 # text-books プロジェクト ── 運用ルール
 
 このリポジトリは textbook-ds デザインシステムを使った長文教科書の置き場。
+`docs/` 配下を GitHub Pages でそのまま配信している (Settings → Pages → Source: `main` / `/docs`)。
 
 ```
 text-books/
-├── published/
+├── docs/                                   ← GitHub Pages の公開ルート
 │   ├── index.html                          ← 全教科書のコレクション目録
 │   └── <textbook-slug>.html                ← 各教科書 (1冊1ファイル)
 ├── single-file-demo.html                   ← デザインシステムのデモ
@@ -19,14 +20,14 @@ text-books/
 
 ### 1. 教科書本体を作る
 
-`published/<slug>.html` として作成する。
+`docs/<slug>.html` として作成する。
 
 - スラグは英小文字とハイフンのみ (例: `web-service-defacto-standard-textbook.html`)
-- `single-file-demo.html` または `published/web-service-defacto-standard-textbook.html` をベースにする
+- `single-file-demo.html` または `docs/web-service-defacto-standard-textbook.html` をベースにする
 - デザイントークン (`--color-paper`, `--color-accent`, `--font-serif-jp` など) は基本いじらない。テーマを変える場合のみ `tokens.css` 相当の変数を上書きする
 - `<title>`, `.hero__title`, `.hero__subtitle`, `.hero__meta` を必ず埋める
 
-### 2. `published/index.html` にエントリを追加する **(忘れない)**
+### 2. `docs/index.html` にエントリを追加する **(忘れない)**
 
 `<main class="catalog">` の中、**`<!-- ↓ ここに新しい教科書を追加していく (新しいものほど上) -->`** コメントの直後に新しい `<article class="entry">` を挿入する。**新しい巻ほど上**に置く (Vol番号は降順)。
 
@@ -57,8 +58,9 @@ text-books/
 
 ### 3. ブラウザで両方を開いて確認する
 
-- `published/index.html` ── エントリが追加されているか、レイアウトが崩れていないか
-- `published/<slug>.html` ── タイトル/メタが index と一致しているか、リンクから飛べるか
+- `docs/index.html` ── エントリが追加されているか、レイアウトが崩れていないか
+- `docs/<slug>.html` ── タイトル/メタが index と一致しているか、リンクから飛べるか
+- push 後は GitHub Pages のデプロイ完了を待ってから本番URLでも確認 (Actions タブの `pages-build-deployment` で確認できる)
 
 ---
 
@@ -68,7 +70,8 @@ text-books/
 - **古い順に並べる** ── 新しい巻が下に埋もれると、訪問者が最新作を見つけにくい。常に新しい巻が一番上
 - **巻番号をスキップ・重複させる** ── ローマ数字は連番 (I, II, III, IV, V, VI, VII, VIII, IX, X)
 - **デザインを毎回作り直す** ── index.html と教科書本体は同じデザイントークンで統一されている。一冊だけ別テイストにしたくなっても、まず既存トークンの範囲で表現できないか検討する
-- **published/ の外に教科書を置く** ── 公開教科書はすべて `published/` 配下。下書きやWIPは別ディレクトリ (例: `drafts/`) を切る
+- **docs/ の外に教科書を置く** ── 公開教科書はすべて `docs/` 配下 (= GitHub Pages の公開ルート)。下書きやWIPは別ディレクトリ (例: `drafts/`) を切る
+- **`docs/` をリネームする** ── GitHub Pages の Source 設定が `/docs` 固定なので、ディレクトリ名を変えると即座にサイトが落ちる
 
 ---
 
