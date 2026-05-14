@@ -51,7 +51,7 @@
   <div class="hero__meta">
     <div class="hero__meta-item">
       <span class="hero__meta-label">読了目安</span>
-      <span class="hero__meta-value">55 MIN</span>
+      <span class="hero__meta-value">57 MIN</span>
     </div>
     <div class="hero__meta-item">
       <span class="hero__meta-label">構成</span>
@@ -279,6 +279,23 @@
         起動オプションに <code>--dangerously-skip-permissions</code> がある。文字通り危険なので、開発用 sandbox / コンテナの中以外では使うべきでない。実機の自律ループでは <code>allow</code> を慎重に組むほうがよい。
       </div>
 
+      <h3 class="h3--practice"><span class="h3__tag">III. 場面</span>どんな時に何を使うか</h3>
+
+      <p>ここまで道具 ── 三層構造、permissions、env、statusLine ── を並べてきた。次に問うべきは、<em>それぞれを実際の現場でどう使い分けるか</em>だ。代表的な場面ごとに、設定の組み立て方が変わる。</p>
+
+      <p><strong>場面1: 夜間に走らせるテスト修復ループ</strong> ── 寝ている間にエージェントが赤いテストを直し、朝の差分を確認するだけにする運用。鍵は <em>長時間動かしても止まらないこと</em>。<code>.claude/settings.json</code> に <code>Bash(npm test:*)</code>、<code>Bash(npm run lint -- --fix:*)</code>、<code>Edit</code>、<code>Write</code> を allow し、<code>env</code> で <code>BASH_DEFAULT_TIMEOUT_MS</code> を <code>600000</code> (10分) に伸ばす。重いテストスイートで途中切れを起こさせない。<code>statusLine</code> には「失敗テスト数」を出しておくと、朝に画面を見るだけで進捗が分かる。</p>
+
+      <p><strong>場面2: PR コメントに自動応答するエージェント</strong> ── レビュー指摘を拾って修正コミットを返す運用。ここでは<em>外への副作用を最小化すること</em>が最優先になる。<code>Bash(gh pr view:*)</code> や <code>Bash(gh pr diff:*)</code> は allow、<code>Bash(gh repo delete:*)</code> と <code>Bash(git push --force:*)</code> は deny に入れる。GitHub の個人アクセストークンや MCP の認証情報は <code>.claude/settings.local.json</code> 側に置き、リポジトリにコミットしない。<code>statusLine</code> には「監視中の PR 数」を出し、暴走していないか人がいつでも確認できる状態を作る。</p>
+
+      <p><strong>場面3: ドキュメント生成・更新ボット</strong> ── コード変更に追従して docs を自動更新する用途。ここの定石は<em>「読み取りはほぼ全許可、書き込みは特定パスのみ」</em>。<code>Read(//**)</code> でリポジトリ全体を読ませる (副作用なし) 一方、<code>Write(./docs/**)</code> と <code>Edit(./docs/**)</code> だけを allow して他のディレクトリには手を出させない。<code>WebFetch</code> も <code>domain:docs.anthropic.com</code> のように取得先を絞り、勝手な外部参照を防ぐ。</p>
+
+      <p><strong>場面4: 個人の日常開発 (= 一人で対話的に触る時)</strong> ── 自律ループは回さず、その場のやり取りで開発する場合。ここで効くのは <code>~/.claude/settings.json</code> ── つまり<em>ホーム側の設定</em>だ。好きなテーマや常用モデル、Linear / Notion / Slack の個人トークンはすべてここに集約する。プロジェクトを移っても自分の作業環境は変わらない。プロジェクト固有のビルドコマンドや CI 用 allow は <code>.claude/settings.json</code> 側 ── つまり<em>そのリポジトリで完結する設定</em>に置く。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">KEY CONCEPT</span>
+        <p class="key-concept__text"><strong>場面が先、設定は後</strong>だ。「何をやりたいか」 ── 夜間に走らせるのか、PR に応答させるのか、ドキュメントを書かせるのか、対話で触るのか ── が決まれば、三層のどこに何を置き、何を allow し、env と statusLine をどう調整するかは自然に決まる。逆に、道具から場面を組み立てようとするとほぼ必ず過剰設計になる。</p>
+      </div>
+
       <div class="summary">
         <span class="summary__label">CHAPTER SUMMARY</span>
         <h4 class="summary__title">この章で押さえたこと</h4>
@@ -288,6 +305,7 @@
           <li><b>permissions</b>「読み取り・ローカル・冪等」のコマンドだけ allow</li>
           <li><b>permissions</b>「外に出る・破壊的・不可逆」は明示的に deny</li>
           <li><b>statusLine</b>人が見にきたときの情報をそこに置く</li>
+          <li><b>場面別</b>夜間ループ・PR応答・docs生成・日常開発で設定の重心が変わる</li>
         </ul>
       </div>
     </div>
