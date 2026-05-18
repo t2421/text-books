@@ -233,6 +233,23 @@ CSS/JS への参照は相対パスで `../css/textbook.css` `../js/textbook.js` 
 
 ---
 
+## 公開教科書一覧
+
+GitHub Pages で公開中。
+
+| Vol. | タイトル | URL |
+|------|---------|-----|
+| I | フロントから来たあなたのための、フルスタック越境地図 | https://t2421.github.io/text-books/web-service-defacto-standard-textbook.html |
+| II | AI時代の開発手法 ── Karpathyの地図 | https://t2421.github.io/text-books/karpathy-ai-era-development-textbook.html |
+| III | 関係の引き方 ── データベース設計の原典と現代 | https://t2421.github.io/text-books/database-design-textbook.html |
+| IV | 手を放す ── Claude Code で築く自律開発の工程 | https://t2421.github.io/text-books/claude-code-autonomous-development-textbook.html |
+| V | 目の前の他者 ── UX 設計の根源と、iOS / Web の細部 | https://t2421.github.io/text-books/ux-design-principles-textbook.html |
+| VI | 小さな商いのための、Webサイト制作全工程 | https://t2421.github.io/text-books/small-business-website-textbook.html |
+
+所蔵目録（トップ）: https://t2421.github.io/text-books/
+
+---
+
 ## 「最初の1冊」になった元教科書
 
 このデザインシステムは、ある教科書 (「フロントから来たあなたのための、フルスタック越境地図」) のために設計され、その後ライブラリとして抽出された。元の教科書での実例は、各コンポーネントの「実戦での使われ方」の参考になる。
