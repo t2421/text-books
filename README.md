@@ -245,6 +245,7 @@ GitHub Pages で公開中。
 | IV | 手を放す ── Claude Code で築く自律開発の工程 | https://t2421.github.io/text-books/claude-code-autonomous-development-textbook.html |
 | V | 目の前の他者 ── UX 設計の根源と、iOS / Web の細部 | https://t2421.github.io/text-books/ux-design-principles-textbook.html |
 | VI | 小さな商いのための、Webサイト制作全工程 | https://t2421.github.io/text-books/small-business-website-textbook.html |
+| VII | 一人軍団 ── AIと組んで、チームを超えるWeb制作 | https://t2421.github.io/text-books/solo-ai-web-creation-textbook.html |
 
 所蔵目録（トップ）: https://t2421.github.io/text-books/
 

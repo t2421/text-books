@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一人軍団 ── AIと組んで、チームを超えるWeb制作</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">一人軍団 ── <em>AIと組んで、チームを超えるWeb制作</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 一人が最強になれる時代</a></li>
+    <li><a href="#ch1">第1章 ── 一人という構造的優位</a></li>
+    <li><a href="#ch2">第2章 ── AIチームの招集</a></li>
+    <li><a href="#ch3">第3章 ── 企画と要件定義のAI協働</a></li>
+    <li><a href="#ch4">第4章 ── デザインの高速化</a></li>
+    <li><a href="#ch5">第5章 ── コーディングをAIと進める</a></li>
+    <li><a href="#ch6">第6章 ── 品質保証の自動化</a></li>
+    <li><a href="#ch7">第7章 ── デプロイと運用の自律化</a></li>
+    <li><a href="#ch8">第8章 ── ワークフロー設計と自己管理</a></li>
+    <li><a href="#ch9">第9章 ── 委譲の技術と限界の見極め</a></li>
+    <li><a href="#ch10">第10章 ── 一人軍団の倫理と持続性</a></li>
+    <li><a href="#epilogue">エピローグ ── 孤独という選択</a></li>
+    <li><a href="#bibliography">参 ── 参考資料一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A SOLO DEVELOPER'S MANIFESTO FOR THE AI ERA</div>
+  <h1 class="hero__title">一人軍団<em>AIと組んで、チームを超えるWeb制作</em></h1>
+  <p class="hero__subtitle">企画・設計・コーディング・テスト・デプロイ・運用 ── すべての工程でAIを協働者にする。コミュニケーションコストゼロ、判断の一貫性、機動力の最大化。十章で築く、個人の生産性の極限</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">55 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">10 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">SOLO BUILDERS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">一人が最強になれる時代</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">かつて「規模の経済」は組織の専売特許だった。2026年、その前提が崩れた</p>
+    </header>
+
+    <div class="prose">
+      <p>チームで作るから品質が上がる、という時代があった。デザイナーがワイヤフレームを引き、エンジニアがコードに落とし、テスターがバグを探し、PMが全体を調整する ── 分業が生産性の源泉だった。しかし分業には代償がある。<em>コミュニケーションコスト</em>だ。</p>
+
+      <p>打ち合わせ、認識合わせ、仕様変更の伝達、コードレビューの順番待ち、意思決定の上申、デザインと実装の乖離 ── これらはすべて、チームが大きくなるほど比例して増える摩擦だ。ブルックスの法則はこれを1975年に既に指摘していた。「遅れているソフトウェアプロジェクトへの人員追加は、さらに遅らせる」と。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">2026年の転換点</span>
+        <p class="key-concept__text">AI協働ツールの成熟は、<strong>分業の利益をほぼそのまま個人に与えながら、コミュニケーションコストをゼロにする</strong>という転換をもたらした。一人の開発者が、AIという「瞬時に応答し、文脈を理解し、専門知識を持つ協働者」を複数同時に動かせる。これはチームに対する個人の、構造的な優位だ。</p>
+      </div>
+
+      <p>本書は、この転換を最大限に活かす指針だ。「AIを道具として使う」という受動的な話ではない。<em>AIを協働者として設計し、工程全体を一人で完結させる</em>という能動的な構造の話だ。企画から本番運用まで、すべての工程でAIをどう組み込むか。その全体像を十章で描く。</p>
+
+      <p>ただし一つ先に言っておく。「AIがあれば誰でも開発できる」という話ではない。本書が想定するのは、Webの基礎知識を持ち、自分が何を作りたいかを言語化できる人間だ。AIはその判断を加速し、実行を代替する。判断そのものは、依然として人間のものだ。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 一人という構造的優位</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">一人という構造的優位<br>── コミュニケーションコストゼロの威力</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「人が少ない」は弱点ではない。「摩擦が少ない」という強みだ</p>
+    </header>
+
+    <div class="prose">
+      <p>「一人では限界がある」という常識を、まず解体するところから始める。この常識が指す「限界」は二種類ある。一つは<em>作業量の限界</em>（一人の手は二本しかない）、もう一つは<em>専門性の限界</em>（一人がデザインも開発もできるわけがない）。2026年現在、この両方をAIが大きく押し上げた。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>チームのコストを正直に数える</h3>
+
+      <p>5人チームで1ヶ月かかるプロジェクトを想像する。5人×1ヶ月＝5人月の<em>作業時間</em>が使われる。しかし実際に「作業」に使われる時間はそれより遥かに少ない。ミーティング、Slackの往復、仕様書のレビュー待ち、PR（プルリクエスト）のマージ待ち、環境差異のデバッグ ── これらが「作業時間」を侵食する。</p>
+
+      <p>Paul Graham は "Maker's Schedule, Manager's Schedule"（2009）で、作る人間のスケジュールは会議一つで半日が壊れると書いた。チーム開発には、必然的にこの破壊が組み込まれている。一人で開発するとき、この破壊はゼロだ。<strong>誰も割り込まない。認識の齟齬が生まれない。決定が即座に実行に移る。</strong></p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">摩擦ゼロの複利</span>
+        <p class="key-concept__text">コミュニケーションコストゼロの効果は線形ではなく<strong>複利で積み上がる</strong>。一つの決定がすぐ実行に移り、その結果がすぐフィードバックされ、次の決定がより良くなる。このサイクルが1日10回回る一人と、1日2回しか回らないチームの差は、一週間後には埋めがたい距離になる。</p>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>ビジョンの一貫性という非対称優位</h3>
+
+      <p>チームが持てないもので、一人が持てるものがある。<em>ビジョンの完全な一貫性</em>だ。デザインの細部から、コードの変数名の選び方から、コピーの語調まで、すべてが一つの頭から出てくるとき、それらは自然に整合する。チームでは、この整合を作るために「デザインシステム」「コーディング規約」「トーンガイド」という文書が必要になる。それを守らせるための時間もかかる。</p>
+
+      <p>一人で作ったプロダクトが持つ独特の<em>統一感</em>は、これが理由だ。Craigslist、Instagramの初期、Notion の初期バージョン ── 小さいチームや一人が作ったものには、チームで作ったものが持ちにくい「一つの頭から出た」感がある。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>一人+AIが勝つ領域と、チームが勝つ領域</h3>
+
+      <p>全てで一人+AIがチームを超えるわけではない。正直に分けておく。</p>
+
+      <ul>
+        <li><strong>一人+AIが有利</strong> ── 中小規模のWebサービス・サイト・ツール・MVP。判断のスピードが競争優位になる領域。コードベースが一人の頭に入る規模。</li>
+        <li><strong>チームが有利</strong> ── 大規模なシステム（50万行以上のコードベース）。物理的な並列作業が必要な領域（ハードウェア連携、現場調査）。法的・セキュリティ的なレビューが義務化された領域。ユーザインタビューや現地調査が大量に必要な段階。</li>
+      </ul>
+
+      <p>本書が射程とするのは前者だ。小さく始めて検証し、育てるWeb制作の全工程。ここでは、一人+AIは組織よりも速く、一貫性を持ち、機動力がある。</p>
+
+      <aside class="sidenote">
+        <p><strong>一人+AIの先行例 ──</strong> 2023〜2025年にかけて、一人または二人のチームが数週間でローンチし、数万ユーザを獲得するWebサービスが相次いだ。共通点は「AIをワークフローの中核に置き、チームが必要だった工程を自動化・外部化したこと」だ。これは偶然ではなく、再現性のある構造だ。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>チーム開発のコストの大半はコミュニケーションであり、人数が増えると指数関数的に増大する。</li>
+          <li>一人+AIはコミュニケーションコストゼロで、チームの生産性の多くを手に入れる構造だ。</li>
+          <li>ビジョンの一貫性は、一人が持ちチームが持ちにくい非対称優位だ。</li>
+          <li>中小規模のWebサービス・MVP・サイト制作が、一人+AIの最も有効な射程だ。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 AIチームの招集</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">AIチームの招集<br>── 役割別ツールの地図</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AIを「一つの万能ツール」として使うのをやめ、「役割を持ったチームメンバー」として設計する</p>
+    </header>
+
+    <div class="prose">
+      <p>「ChatGPTに聞けばなんでもできる」という誤解がある。一つのLLMに全てを任せることは、一人の人間に「企画も、デザインも、開発も、テストも全部やれ」と言うのと同じだ。それぞれの工程に適したツール・モデル・プロンプト設計がある。<em>AIチームを設計する</em>という発想が必要だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>役割で選ぶ、文脈で切り替える</h3>
+
+      <p>2026年現在の主要AIツールは、それぞれ異なる強みを持つ。一つのツールに固執するのではなく、工程ごとに最適なものを選ぶ。重要なのは、<em>各ツールをどの「役割」として使うか</em>を事前に決めておくことだ。役割が決まっていると、プロンプトの設計が安定し、期待する出力が安定する。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">2026年のAIチーム編成例</span>
+        <p class="key-concept__text">
+          <strong>PM / ブレスト相手</strong> ── Claude Opus（深い推論と対話）<br>
+          <strong>コード生成・補完</strong> ── Claude Code / GitHub Copilot / Cursor<br>
+          <strong>UI生成</strong> ── v0 by Vercel / Lovable / Bolt.new<br>
+          <strong>デザイン補助</strong> ── Figma AI / Framer AI<br>
+          <strong>コンテンツ・コピー</strong> ── Claude Sonnet / GPT-4o<br>
+          <strong>画像生成</strong> ── Midjourney / DALL-E 3 / Flux<br>
+          <strong>テスト・QA</strong> ── Playwright MCP / GitHub Copilot for Tests<br>
+          <strong>コードレビュー</strong> ── Claude Code（専用エージェント設定）
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>各ツールの特性と使い分け</h3>
+
+      <p><strong>Claude（Anthropic）</strong>は長い文脈の保持と、指示への忠実な追随に優れる。複雑なシステム設計の議論、長いコードベースへの適用、ニュアンスのある文章生成に向く。Claude Codeは特に、ファイルシステムを直接操作しながら自律的に開発を進める能力が高い。</p>
+
+      <p><strong>Cursor / GitHub Copilot</strong>はエディタに統合されたAIだ。コードを書いている途中でのリアルタイム補完・提案が強み。Cursorは複数ファイルをまたいだ文脈理解と、チャットからコード編集への橋渡しが優れている。</p>
+
+      <p><strong>v0 / Lovable / Bolt.new</strong>はテキストプロンプトからUIを生成するツール群だ。「こういうダッシュボードが欲しい」と書くだけで、動くReactコードが出てくる。完成品ではなくたたき台として使い、そこから自分でカスタマイズするのが正しい使い方だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>コンテキストウィンドウを戦略的に使う</h3>
+
+      <p>LLMの能力は、与える文脈（コンテキスト）の質に大きく左右される。「コードを修正して」ではなく、「このファイルは○○の目的で、このクラスは××を担当していて、今起きている問題は△△で、期待する動作は□□だ。この前提で修正して」と伝えると、出力の品質が劇的に変わる。</p>
+
+      <p>Claude Codeのようなエージェント型ツールは、ファイルを自ら読んで文脈を補完する。しかし、<em>設計意図・ビジネスロジックの背景・制約条件</em>はコードに書かれていない。これらを `CLAUDE.md` やコメントで明示しておくことが、AIとの協働精度を上げる最も費用対効果の高い投資だ。</p>
+
+      <aside class="sidenote">
+        <p><strong>モデルのコスト意識 ──</strong> Opusは推論が深いが高価でレイテンシも高い。探索・設計フェーズはOpus、実装・繰り返し作業はSonnet・Haiku、単純な補完はCopilotと使い分けることで、費用と速度のバランスを最適化できる。月のAI費用を把握し、どの工程に集中投資するかを意識する。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AIを「一つの万能ツール」ではなく「役割を持ったチームメンバー」として設計する。</li>
+          <li>工程ごとに最適なツールを選ぶ：設計はClaude Opus、UI生成はv0/Lovable、コード補完はCursor/Copilot。</li>
+          <li>コンテキストの質がAI出力の質を決める。設計意図・制約・背景を明文化しておく。</li>
+          <li>モデルのコスト×性能を意識し、工程ごとに使い分ける。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 一人という構造的優位</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 企画と要件定義のAI協働</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">企画と要件定義のAI協働<br>── ブレインストーミングから仕様書まで</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">一人の頭の中にある曖昧なアイデアを、AIとの対話で具体的な設計図に変える</p>
+    </header>
+
+    <div class="prose">
+      <p>企画フェーズは、一人開発の最大の弱点が現れやすい段階だ。チームなら、アイデアを出し合う中で盲点が消える。一人だと、自分の思考の外にある問題が見えない。AIはここで、<em>視点の多様化装置</em>として機能する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>AIを「批判者」として使う</h3>
+
+      <p>AIに「すごいですね」と言わせるのは簡単だ。しかし、それは価値がない。AIを企画フェーズで最も効果的に使う方法は、<strong>批判者・悪魔の代弁者</strong>として動かすことだ。「このアイデアの最も深刻な欠点を10個列挙してください。容赦なく」と頼む。出てきた批判の中から、本質的なものを選んで検討する。</p>
+
+      <p>この使い方で重要なのは、AIの批判を<em>全部受け入れない</em>ことだ。AIは批判するよう頼まれれば批判するが、そのすべてが正しいわけではない。批判を読みながら「これは本質的な問題か、それとも表面的な問題か」を自分で判断する。AIは批判の生成器であり、判断者は自分だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">企画フェーズのAI活用パターン</span>
+        <p class="key-concept__text">
+          <strong>① 競合分析の加速</strong> ── 「○○領域の主要プレイヤーをリストアップし、それぞれの強みと弱点を分析して」<br>
+          <strong>② ユーザストーリーの展開</strong> ── 「このペルソナが抱える課題を、1日のタイムラインに沿って詳細に描いて」<br>
+          <strong>③ 機能の優先度付け</strong> ── 「これらの機能をMoSCoW分析（Must/Should/Could/Won't）で分類して、その根拠を示して」<br>
+          <strong>④ リスクの洗い出し</strong> ── 「このMVPが失敗する最もあり得るシナリオを5つ、具体的に描いて」
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>AIと作る要件定義書</h3>
+
+      <p>対話で固まったアイデアを、構造化された要件定義書に変える。ここでもAIを使う。「以下の対話ログを元に、エンジニアが実装できる粒度の要件定義書（PRD）を作成してください」と対話履歴を渡す。出力はたたき台であり、必ず自分でレビューして修正する。</p>
+
+      <p>要件定義書に含めるべき項目。</p>
+      <ul>
+        <li><strong>目的と成功基準</strong> ── KPIの数値目標（ローンチ3ヶ月後の目標値まで含む）</li>
+        <li><strong>ユーザストーリー</strong> ── 「○○として、□□したい。なぜなら△△だから」の形式</li>
+        <li><strong>機能要件のリスト</strong> ── MVP（最小機能）と、フェーズ2以降の分離</li>
+        <li><strong>非機能要件</strong> ── パフォーマンス、セキュリティ、アクセシビリティの基準</li>
+        <li><strong>スコープ外の明示</strong> ── 「今回は作らないもの」を明文化しておくことで、スコープクリープを防ぐ</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>技術選定をAIと議論する</h3>
+
+      <p>要件が固まったら、技術スタックを決める。「要件はこれで、制約はこれで、自分のスキルはこれだ。最適な技術スタックを、理由とともに提案してください」とAIに投げる。複数の選択肢が返ってきたら、それぞれのトレードオフを深掘りする。</p>
+
+      <p>注意点は、AIが<em>常に最新で最も話題のスタック</em>を提案しがちなことだ。「あなたが今挙げたスタックの、2年後のリスクと、初心者がつまずきやすいポイントを挙げてください」と追加で問う。長期のメンテナビリティと、自分のスキルへの適合を最終的な判断軸にする。</p>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AIを企画フェーズで「批判者・悪魔の代弁者」として使う。賛同させるのではなく、欠点を出させる。</li>
+          <li>競合分析・ユーザストーリー・機能優先度・リスク洗い出しにAIを活用する。</li>
+          <li>対話ログからPRDをAIに生成させ、自分でレビュー・修正する。</li>
+          <li>技術選定はAIと議論するが、最終判断は「長期メンテナビリティ×自分のスキル」で行う。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 AIチームの招集</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 デザインの高速化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">デザインの高速化<br>── v0・Figma AI・Framer で一人がデザイナーを超える</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「デザインができない」は2026年においてもはや言い訳にならない</p>
+    </header>
+
+    <div class="prose">
+      <p>デザインは、一人開発の最大のボトルネックだった。エンジニアがコードは書けてもデザインに時間がかかり、デザイナーを雇う予算もなく ── という詰まり方をした個人開発者は多い。AI生成ツールの登場は、このボトルネックを劇的に解消した。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「ゼロから作る」から「正しく選ぶ・正しく修正する」へ</h3>
+
+      <p>AI時代のデザインスキルは、「美しいものをゼロから作る能力」ではなく、<strong>「AIが生成したものの良し悪しを判断し、的確に修正指示を出す能力」</strong>だ。これはデザインセンスの終わりではなく、変容だ。センスは「見る目」として残り、「手を動かす」部分をAIが担う。</p>
+
+      <p>だから、デザインの基本原則（コントラスト、整列、反復、近接 ── Robin Williamsが整理した4原則）を知っていることは、以前より重要になった。AIが生成したデザインのどこが問題かを言語化できなければ、修正指示が出せない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">AIデザインツールの使い分け</span>
+        <p class="key-concept__text">
+          <strong>v0 by Vercel</strong> ── プロンプトからReact/Tailwindの動くUIを生成。コンポーネント単位で使うのが最も効果的。<br>
+          <strong>Lovable / Bolt.new</strong> ── フルスタックのアプリ全体をプロンプトから生成。MVPの初期スケルトン作成に向く。<br>
+          <strong>Figma AI</strong> ── 既存のデザインファイルへのAI支援。バリアント生成・コピー変更・自動レイアウト調整。<br>
+          <strong>Framer AI</strong> ── Webサイトをプロンプトから生成し、そのままホスティング。ランディングページの高速制作。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>v0を使ったUIコンポーネント制作</h3>
+
+      <p>v0の効果的な使い方は、<em>コンポーネント単位での生成</em>だ。「サイト全体をv0で作る」ではなく、「ダッシュボードのデータカード部分をv0で作る」「ナビゲーションバーをv0で作る」という使い方が、修正のしやすさと品質のコントロールの両面で優れている。</p>
+
+      <p>プロンプトの書き方で品質が大きく変わる。避けるべき書き方：「かっこいいダッシュボードを作って」。目指すべき書き方：「Tailwind CSSを使った、ダークテーマのSaaSダッシュボード。左サイドバーにナビゲーション、メインエリアに3列のKPIカード（数値・前月比・スパークライン付き）、下部にデータテーブル。フォントはInter。アクセントカラーはindigo-600」。具体性が品質を決める。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>デザインシステムを早期に作る</h3>
+
+      <p>AI生成ツールを使うほど、<em>バラバラなスタイルが量産されるリスク</em>が高まる。v0で作ったコンポーネントAと、別に作ったコンポーネントBで、フォントサイズや間隔の基準が違う ── これを防ぐのがデザインシステムだ。</p>
+
+      <p>一人開発におけるデザインシステムは、複雑なStorybook構成は不要だ。Tailwindの `tailwind.config.js` にカラー・フォント・スペーシングのトークンを定義するだけで十分な場合が多い。これをAIに対して「このtailwind.configの設定を必ず使って」と渡すことで、AIが生成するコードのスタイルを統一できる。</p>
+
+      <aside class="sidenote">
+        <p><strong>画像生成の活用 ──</strong> ヒーロービジュアル、アイコン、OGP画像など、写真素材が手に入りにくいケースでは、Midjourney・Flux・DALL-E 3が選択肢になる。ただし、実際の人物・実際の店舗が見えることで信頼を作るビジネスサイトでは、AIイラストより実写写真の方が効果が高い。用途を見極めて使う。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AI時代のデザインスキルは「ゼロから作る」から「正しく選び、的確に修正指示を出す」へ変容した。</li>
+          <li>v0はコンポーネント単位で使う。プロンプトは具体的に（色・フォント・レイアウトを明示）。</li>
+          <li>Lovable/Bolt.newはMVPのスケルトン生成に。Framer AIはランディングページの高速制作に。</li>
+          <li>AIツールを多用するほど、デザインシステムの早期構築が重要になる。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 企画と要件定義のAI協働</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 コーディングをAIと進める</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">コーディングをAIと進める<br>── ペアプログラミングの次へ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AIはペアプロのパートナーを超え、自律的に動くジュニアエンジニアになりつつある</p>
+    </header>
+
+    <div class="prose">
+      <p>コーディング支援は、AI活用の中で最も成熟した領域だ。GitHub Copilotの登場（2021年）から数年、AIコーディング支援は「補完」から「生成」へ、「提案」から「自律実行」へと大きく進化した。2026年現在、Claude CodeはClaudeMD（プロジェクト設定ファイル）を読み、ファイルを自律的に操作しながら、複数ファイルにまたがる実装を完遂できる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「レビュワー」としての自分を保つ</h3>
+
+      <p>AIがコードを書く時代においても、人間の役割は消えない。それは<em>レビュワー</em>としての役割だ。AIが出力したコードを「動くかどうか」だけで評価するのは危険だ。「このコードは正しく動くか」「この設計は1年後も保守できるか」「セキュリティ上の問題はないか」「テストはあるか」── これらを判断する知識と責任は、依然として人間にある。</p>
+
+      <p>AIコードのレビューで最も気をつけるべきは、<strong>動くが間違っている</strong>コードだ。期待した挙動はするが、エッジケースで壊れる。動くが、セキュリティホールがある。動くが、パフォーマンスが致命的に悪い。これらはテストなしでは発見できない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">AIコーディングの三段階</span>
+        <p class="key-concept__text">
+          <strong>段階1：補完</strong> ── Copilotが行の続きを予測する。受動的。コードを書きながら採用・却下する。<br>
+          <strong>段階2：生成</strong> ── 「○○の関数を書いて」とチャットで依頼する。能動的だが単発。<br>
+          <strong>段階3：自律実行</strong> ── Claude Codeが「この機能を追加して」と言われ、ファイルを読み、複数ファイルを編集し、テストを実行し、問題があれば自己修正する。人間はゴールを指定し、結果をレビューする。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>CLAUDE.md でAIの行動を設計する</h3>
+
+      <p>Claude Codeを最大限に活用するための最重要ファイルが `CLAUDE.md` だ。プロジェクトルートに置くこのファイルは、AIが作業を開始する前に必ず読む「チームへの引き継ぎ書」だ。記載すべき内容：</p>
+
+      <ul>
+        <li><strong>プロジェクトの目的と構造</strong> ── 何を作っているか、ディレクトリ構成の意味</li>
+        <li><strong>技術スタックとバージョン</strong> ── 使用しているフレームワーク・ライブラリとそのバージョン制約</li>
+        <li><strong>コーディング規約</strong> ── 命名規則、エラーハンドリングの方針、コメントの書き方</li>
+        <li><strong>やってはいけないこと</strong> ── 直接書かなければAIが誤ってやりがちな操作（例：`git push -f` の禁止、本番DBへの直接接続禁止）</li>
+        <li><strong>テストの方針</strong> ── どのテストフレームワークを使い、どのレベルのカバレッジを期待するか</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>テスト駆動でAIに書かせる</h3>
+
+      <p>AIにコードを書かせるとき、最も品質が高まるパターンは<em>テストファーストでの依頼</em>だ。「この関数のユニットテストを書いて」→テストをレビュー・修正する→「このテストを通る実装を書いて」という順序を取る。これにより、AIが生成した実装の正しさをテストが自動的に検証してくれる。</p>
+
+      <p>特に役立つのは、エッジケースのテストを先に書かせることだ。「この関数に対して、バグが入りやすいエッジケースを10個考えて、テストとして書いて」と依頼する。AIは自分が書くコードの落とし穴を、コードを書く前の段階で予測できる。この予測をテストに変換することで、実装後のバグを大幅に減らせる。</p>
+
+      <aside class="sidenote">
+        <p><strong>コンテキスト汚染に注意 ──</strong> 長時間の会話でAIに依頼し続けると、コンテキストウィンドウが古い・誤った情報で汚染され、出力の品質が下がる。「なんかおかしいな」と感じたら、新しいセッションを開始してCLAUDE.mdと必要な情報だけを与え直す。定期的な「リセット」はAIコーディングの衛生習慣だ。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AIコーディングは「補完→生成→自律実行」の三段階に進化した。人間の役割はレビュワーへ移行する。</li>
+          <li>「動くが間違っている」コードへの警戒が最重要。テストなしに信頼してはいけない。</li>
+          <li>CLAUDE.mdにプロジェクトの設計意図・規約・禁止事項を明文化し、AIの行動を設計する。</li>
+          <li>テストファーストでAIに書かせる。エッジケースのテストを先に出させ、その後に実装を依頼する。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 デザインの高速化</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 品質保証の自動化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">品質保証の自動化<br>── テスト・レビュー・セキュリティをAIで代替する</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">一人でチームのQAプロセスを超える、自動化の設計</p>
+    </header>
+
+    <div class="prose">
+      <p>チーム開発においてQA（品質保証）は専任の担当者が行う。一人開発では、自分が開発者であり同時にQA担当でもある。この二役を人間が担うのは認知的に困難だ。「作った直後の自分」は「バグがある」とは思いにくい。AIと自動化の組み合わせが、この問題を解決する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「動く」から「壊れない」へ</h3>
+
+      <p>品質保証の目標を「動くことの確認」から「壊れないことの保証」に転換する。「動く」は一時点での状態だ。「壊れない」は変更が加えられても、環境が変わっても、予期しない入力が来ても、機能が維持されるという保証だ。この保証を一人で維持するためには、自動化しかない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">一人+AIの品質保証スタック</span>
+        <p class="key-concept__text">
+          <strong>単体テスト</strong> ── Vitest / Jest。AIが実装と同時に生成。<br>
+          <strong>E2Eテスト</strong> ── Playwright。主要ユーザーフローを自動で叩く。Playwright MCPでAIが直接テストコードを書く。<br>
+          <strong>型チェック</strong> ── TypeScript。コンパイル時の静的検証。AIが型を正確に書くよう指示する。<br>
+          <strong>Lint / Format</strong> ── ESLint / Prettier / Biome。コミット前に自動実行。<br>
+          <strong>AIコードレビュー</strong> ── Claude Codeに「このPRをセキュリティ・パフォーマンス・保守性の観点でレビューして」と依頼する。<br>
+          <strong>依存関係の脆弱性スキャン</strong> ── Dependabot / npm audit。GitHub Actionsで自動実行。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Playwright MCPによるE2Eテストの自動生成</h3>
+
+      <p>Playwright MCPは、AIがブラウザを直接操作してE2Eテストを書けるようにするツールだ。「ログインからダッシュボード表示まで、ユーザーが使うような形でテストを書いて」と依頼すると、実際にブラウザを操作しながらテストコードを生成する。</p>
+
+      <p>E2Eテストは「クリティカルパスだけ守る」という方針が一人開発には現実的だ。全機能のE2Eテストを書こうとすると維持コストが高い。ログイン・サインアップ・コア機能の実行・決済フロー ── これらだけをE2Eで守り、それ以外はユニットテストに任せる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>AIによるコードレビューの設計</h3>
+
+      <p>チームのコードレビューをAIで代替するとき、重要なのは<em>レビューの観点を明示する</em>ことだ。「レビューして」では広すぎる。以下のように観点を分けて依頼する。</p>
+
+      <ul>
+        <li><strong>セキュリティ観点</strong> ── 「このコードにXSS・SQLインジェクション・認証バイパスのリスクはないか確認して」</li>
+        <li><strong>パフォーマンス観点</strong> ── 「N+1クエリ・不要な再レンダリング・重い処理のブロッキングがないか確認して」</li>
+        <li><strong>保守性観点</strong> ── 「6ヶ月後の自分が読んで理解できるか。命名・関数の分割・コメントの適切さを評価して」</li>
+        <li><strong>テスト観点</strong> ── 「このコードでテストが書けない部分はどこか。依存のモックが難しい箇所を指摘して」</li>
+      </ul>
+
+      <p>各観点を独立したセッションで依頼すると、一つの長い会話で頼むより精度が上がる。</p>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>品質保証の目標を「動く確認」から「壊れない保証」へ転換する。自動化なしには達成できない。</li>
+          <li>一人のQAスタック：ユニットテスト・E2E（クリティカルパスのみ）・型チェック・Lint・AIレビュー・脆弱性スキャン。</li>
+          <li>Playwright MCPでAIがE2Eテストを書く。クリティカルパスだけに絞るのが維持可能な戦略。</li>
+          <li>AIレビューは観点を分けて依頼する：セキュリティ・パフォーマンス・保守性・テスタビリティ。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 コーディングをAIと進める</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 デプロイと運用の自律化</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">デプロイと運用の自律化<br>── 寝ている間にも動く仕組みを作る</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">インフラとCI/CDを一度正しく設計すれば、それ以降の運用コストはほぼゼロになる</p>
+    </header>
+
+    <div class="prose">
+      <p>一人開発の時間的制約の中で、最も「設計に時間をかける価値がある」のがCI/CDとインフラだ。最初の2〜3時間を投資して正しく構成すれば、それ以降は`git push`一本でテスト・ビルド・デプロイが自動実行される。この自動化を持つ一人開発者は、持たない5人チームよりも速くリリースできる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>プラットフォームの重力に乗る</h3>
+
+      <p>自力でサーバを管理しない。2026年において、個人開発者がVPSを借りてnginxを設定し、Let's Encryptを更新し、OSのパッチを当て続けることは、合理的ではない。<strong>プラットフォームの重力に乗る</strong>のが正しい選択だ。Vercel・Netlify・Cloudflare Pages・Render ── これらは、デプロイ・HTTPS・CDN・スケーリングを自動で処理する。</p>
+
+      <p>データベースも同様だ。Supabase・Neon・PlanetScaleのようなDBaaS（Database as a Service）は、バックアップ・可用性・スケーリングをマネージドで提供する。一人で運用できるのは、こうしたプラットフォームの上に構築したときだ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">一人開発の推奨インフラスタック（2026年）</span>
+        <p class="key-concept__text">
+          <strong>フロントエンド/フルスタック</strong> ── Vercel（Next.js）/ Cloudflare Pages（Remix・Astro）<br>
+          <strong>データベース</strong> ── Supabase（PostgreSQL + Auth + Storage）/ Neon（サーバーレスPostgreSQL）<br>
+          <strong>認証</strong> ── Supabase Auth / Clerk / Auth.js<br>
+          <strong>ファイルストレージ</strong> ── Supabase Storage / Cloudflare R2<br>
+          <strong>メール</strong> ── Resend / Postmark<br>
+          <strong>決済</strong> ── Stripe<br>
+          <strong>監視</strong> ── Sentry（エラー）/ Vercel Analytics（パフォーマンス）
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>GitHub ActionsでCI/CDを構成する</h3>
+
+      <p>GitHub Actionsのワークフローは、AIに書かせるのに最も向いているインフラコードの一つだ。「main ブランチへのpushで、Lint・型チェック・テストを実行し、全部通ったらVercelにデプロイするGitHub Actionsのワークフローを書いて」と依頼する。YAMLが正確に出てくる。</p>
+
+      <p>CI/CDが整うと、デプロイの心理的コストが下がる。「壊れたら大変だから今日はリリースやめよう」という判断が消え、小さな変更を頻繁にリリースできるようになる。これはフィードバックサイクルを速くし、製品の改善速度を上げる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>監視・アラートの設計</h3>
+
+      <p>一人で運用するとき、問題に気づくのが遅れることが最大のリスクだ。ユーザからの報告で初めて本番障害を知る ── これは避けなければならない。最低限の監視を設計する。</p>
+
+      <ul>
+        <li><strong>Sentry</strong> ── JavaScriptのランタイムエラーをリアルタイムで通知。エラー発生時にSlack/メールで受け取る。</li>
+        <li><strong>Vercel Analyticsの異常検知</strong> ── Core Web Vitalsの急劣化をアラート設定する。</li>
+        <li><strong>Uptimerobot / BetterStack</strong> ── 死活監視。サイトがダウンしたら即座に通知。</li>
+        <li><strong>Stripe Dashboard</strong> ── 決済失敗率の監視。急増したら即座に調査する。</li>
+      </ul>
+
+      <aside class="sidenote">
+        <p><strong>Vercel AI SDKの活用 ──</strong> Vercelが提供するAI SDKは、LLMをWebアプリに組み込む際のボイラープレートを大幅に削減する。ストリーミングレスポンス、ツールコール、マルチモーダルの実装が数十行で書ける。AIを使って開発した製品に、さらにAI機能を載せるという多層的な活用が、2026年の一人開発の標準形だ。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>インフラはプラットフォームの重力に乗る。VPSの自己管理は一人開発では非合理。</li>
+          <li>推奨スタック：Vercel/Cloudflare Pages + Supabase/Neon + Stripe + Sentry。</li>
+          <li>GitHub ActionsのワークフローはAIに書かせる。CI/CDが整うと、リリースの心理的コストが消える。</li>
+          <li>監視はSentry・死活監視・Core Web Vitalsの三点で最低限カバーする。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 品質保証の自動化</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 ワークフロー設計と自己管理</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">ワークフロー設計と自己管理<br>── 孤独の中で生産性を維持する技術</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AIが作業を引き受けるほど、人間に残る仕事は「何を作るか」の判断と、「続けること」の自己管理になる</p>
+    </header>
+
+    <div class="prose">
+      <p>一人開発の見えにくい難しさは、技術的なものよりも<em>自己管理</em>にある。チームがあれば、締め切りや仲間の存在が外部の圧力として機能する。一人では、その圧力がない。AIが作業を代替するほど、人間に残る「作業」は減り、「判断」と「継続」が全てになる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「今日何をするか」より「今週何を完成させるか」</h3>
+
+      <p>一人でAIと開発するとき、最大の生産性の罠は<em>進捗の錯覚</em>だ。AIとのやり取りは活発で、コードは量産され、「何かが進んでいる」感がある。しかし1週間後に振り返ると、ユーザに届く成果が何も増えていないことがある。</p>
+
+      <p>この罠を避けるために、<strong>週次でのゴール設定</strong>を軸にする。今週の終わりに「○○ができるようになっている」というゴールを月曜に設定する。日々の作業はそのゴールに向かっているかどうかで評価する。AIとの作業中も「これは今週のゴールに貢献するか」という問いを持ち続ける。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">一人開発の時間設計</span>
+        <p class="key-concept__text">
+          <strong>朝（90分）── 深い思考の時間</strong>：設計・企画・難しい問題の解決。AIとの対話も朝に集中させる。通知はオフ。<br>
+          <strong>午前中（2〜3時間）── 実装の時間</strong>：Claude Code・Cursorと並走しながら、コードを進める。<br>
+          <strong>午後（1〜2時間）── 確認と改善の時間</strong>：テスト実行・デプロイ・小さなバグ修正・ドキュメント更新。<br>
+          <strong>夕方（30分）── 棚卸しの時間</strong>：今日の成果を記録し、明日のタスクをリストする。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>コンテキストの管理</h3>
+
+      <p>一人開発でAIを使う最大の難点は、<em>自分の頭の中のコンテキストをAIに毎回伝える</em>手間だ。チームでは「みんなが状況を知っている」という暗黙の共有知識があるが、AIとのセッションはリセットされる。</p>
+
+      <p>この問題への対処は三つある。第一に<strong>CLAUDE.mdの充実</strong>（前章で述べた通り）。第二に<strong>開発ログの維持</strong>：毎日作業の終わりに「今日何をしたか・何が残っているか・次のセッションで伝えるべき文脈」を短くメモする。第三に<strong>セッション冒頭のブリーフィング</strong>：新しいAIセッションの最初に「現在のプロジェクト状況は○○で、今日やりたいことは△△で、特に注意してほしいのは□□だ」と伝える。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>詰まったときのプロトコル</h3>
+
+      <p>AIと作業していると、特定の問題で長時間詰まることがある。「AIに聞いてもうまくいかない」という状態だ。このとき、いつまでも同じアプローチを繰り返すのは時間の無駄だ。<em>詰まったときのプロトコル</em>を持つ。</p>
+
+      <ul>
+        <li><strong>15分ルール</strong> ── 同じ問題に15分以上かけても進まないとき、一旦止める。</li>
+        <li><strong>問題の言語化</strong> ── 「何が起きているか」「何を期待しているか」「どこで食い違っているか」を紙に書く。</li>
+        <li><strong>AIのモデルを変える</strong> ── Sonnetで詰まったらOpusに変える。違う視点が出ることがある。</li>
+        <li><strong>別の問いを立てる</strong> ── 「この実装を修正して」ではなく「この実装を一から設計し直すとしたらどうするか」に変える。</li>
+        <li><strong>30分散歩する</strong> ── 画面から離れる。多くの場合、答えは散歩の途中で降ってくる。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AIと開発するほど、人間に残る仕事は「何を作るか」の判断と「続ける」自己管理になる。</li>
+          <li>週次ゴールを軸にする。日々の作業が「今週のゴールに貢献するか」で評価する。</li>
+          <li>コンテキスト管理の三点：CLAUDE.mdの充実・開発ログ・セッション冒頭ブリーフィング。</li>
+          <li>詰まったときのプロトコルを持つ：15分ルール・問題の言語化・モデル変更・散歩。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 デプロイと運用の自律化</span>
+      </a>
+      <a href="#ch9" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第9章 委譲の技術と限界の見極め</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER NINE</span>
+      <h2 class="chapter__title">委譲の技術と限界の見極め<br>── 何をAIに任せ、何を自分が持つか</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">全てをAIに任せようとする誘惑と、全てを自分でやろうとする頑固さ ── どちらも間違いだ</p>
+    </header>
+
+    <div class="prose">
+      <p>AIへの委譲は、「できるかどうか」ではなく「すべきかどうか」で判断する。技術的にはAIが書けるコードでも、自分が理解していないまま本番に入れるべきではない。逆に、AIが確実にできることを自分でやり続けるのは、時間の浪費だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>委譲の判断軸</h3>
+
+      <p>何をAIに委譲するかを決める判断軸は二つだ。<em>「理解の確認可否」</em>と<em>「失敗のコスト」</em>だ。</p>
+
+      <p>理解の確認ができる領域 ── コード出力を自分でレビューでき、正しいかどうか判断できる ── では、積極的に委譲する。理解の確認が難しい領域 ── セキュリティの設計、データモデルの根本構造、法的なリスク ── では、慎重に委譲し、必ず専門家への確認を経る。</p>
+
+      <p>失敗のコストが低い領域（CSSの修正、コピーの言い回し、小さなユーティリティ関数）は大胆に委譲する。失敗のコストが高い領域（認証の実装、決済フロー、個人データの処理）は、AIの出力を深くレビューし、既存の信頼できるライブラリを優先する。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">委譲すべきもの・持つべきもの</span>
+        <p class="key-concept__text">
+          <strong>AIに委譲してよいもの</strong><br>
+          ボイラープレートコード・定型的なCRUD実装・CSS/スタイリング・テストコードの下書き・ドキュメント・コピーの初稿・定型的なCI/CD設定<br><br>
+          <strong>自分が持つべきもの</strong><br>
+          データモデルの設計・認証/認可の方針・ユーザへの価値提案・プロダクトの方向性・セキュリティの最終判断・ユーザインタビューの実施・ビジネスモデルの検証
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>AIが苦手なことを知る</h3>
+
+      <p>2026年現在、AIが構造的に苦手な領域がある。これを知ることで、自分の注意を集中させる場所がわかる。</p>
+
+      <ul>
+        <li><strong>長期的な一貫性の保持</strong> ── 会話が長くなるほど、前に決めたことと矛盾した提案をするようになる。設計の一貫性は人間が守る。</li>
+        <li><strong>「これは本当に必要か」の判断</strong> ── AIは依頼されたことを実行しようとする。「そもそもこの機能は要らないんじゃないか」という問いは人間がしなければならない。</li>
+        <li><strong>ユーザの感情の理解</strong> ── データとして与えられたユーザフィードバックは分析できるが、実際のユーザと話して「ここで困っている」を肌感覚で掴むことはできない。</li>
+        <li><strong>最新の情報</strong> ── 訓練データのカットオフ以降の情報（最新ライブラリのAPI、最新のセキュリティ脆弱性など）は持っていない。常に一次情報を確認する習慣を持つ。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>人間に頼むべきタイミングを知る</h3>
+
+      <p>一人+AIで完結しない、人間の専門家が必要な領域もある。「一人開発だから全部自分でやる」という誤解が、後で高いコストになることがある。</p>
+
+      <ul>
+        <li><strong>法務・契約</strong> ── 利用規約・プライバシーポリシーのAI生成は初稿として使い、弁護士に確認を依頼する。</li>
+        <li><strong>会計・税務</strong> ── 事業として売上が立ったら、税理士と連携する。AIは参考にはなるが、税務上の判断はしてはいけない。</li>
+        <li><strong>ユーザインタビュー</strong> ── 数人のリアルな顧客との会話は、AIが分析するどんなデータより価値がある。月1〜2回は実施する。</li>
+        <li><strong>セキュリティ監査</strong> ── 個人情報や決済情報を扱うサービスが一定規模になったとき、専門家によるペネトレーションテストを受ける。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>委譲の判断軸は「理解の確認可否」と「失敗のコスト」の二軸。</li>
+          <li>AIに委譲してよいもの：ボイラープレート・CSS・テスト下書き・ドキュメント。自分が持つもの：データモデル・認証方針・プロダクト方向性。</li>
+          <li>AIが苦手な領域：長期的一貫性・「本当に必要か」の判断・ユーザ感情・最新情報。</li>
+          <li>法務・税務・ユーザインタビュー・セキュリティ監査は、必要なタイミングで人間の専門家に頼む。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 ワークフロー設計と自己管理</span>
+      </a>
+      <a href="#ch10" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第10章 一人軍団の倫理と持続性</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TEN</span>
+      <h2 class="chapter__title">一人軍団の倫理と持続性<br>── 速さと責任の間で</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AIで一人が何でもできる時代だからこそ、何をすべきでないかの判断が重くなる</p>
+    </header>
+
+    <div class="prose">
+      <p>一人+AIの組み合わせは、個人の能力を劇的に拡張する。この拡張は、同時に<em>影響力の拡張</em>でもある。かつては組織が持てた規模の影響力を、一人が持てる時代に、倫理的な判断の重さは増している。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>速さが責任を免除しない</h3>
+
+      <p>「AIが書いたコードだから」「AIが提案したから」は、ユーザへの責任から逃れる理由にならない。AIが生成した認証の実装に脆弱性があれば、その責任は開発者にある。AIが生成した誤情報を含むコンテンツが公開されれば、その責任も開発者にある。<strong>AIの出力に署名するのは、常に人間だ。</strong></p>
+
+      <p>一人開発では、この責任を担う組織的な牽制がない。だからこそ、個人としての判断基準を明示的に持つことが重要だ。「このプロダクトは誰を傷つける可能性があるか」「この機能はユーザの利益になるか、それとも自分の利益のためだけか」 ── これらの問いを、リリースのたびに自分に問う習慣が必要だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">一人開発者の倫理的チェックリスト</span>
+        <p class="key-concept__text">
+          <strong>プライバシー</strong> ── 必要以上のデータを収集していないか。収集した目的と異なる使い方をしていないか。<br>
+          <strong>セキュリティ</strong> ── ユーザのデータを適切に保護しているか。脆弱性の報告窓口はあるか。<br>
+          <strong>アクセシビリティ</strong> ── 身体的制約を持つユーザが使えない設計になっていないか。<br>
+          <strong>透明性</strong> ── AIを使って生成したコンテンツを、そうと示さずに人間の著作として公開していないか。<br>
+          <strong>依存性</strong> ── ユーザが意図せず依存するような設計（ダークパターン）を使っていないか。
+        </p>
+      </div>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>持続可能な一人軍団の条件</h3>
+
+      <p>一人開発の最大のリスクは、<em>燃え尽き</em>だ。AIがあるから全部できる ── という思い込みで、際限なくスコープを広げ、深夜まで作業を続け、ユーザからのフィードバックに一人で対応し続ける。チームがあれば分散される負荷が、一点に集中する。</p>
+
+      <p>持続可能な一人開発のために守るべき三つのこと。第一に<strong>スコープの明示的な境界</strong>：「このプロジェクトでは○○はしない」を最初に書いて、見えるところに貼る。第二に<strong>稼働時間の上限</strong>：週に何時間をこのプロジェクトに使うかを事前に決め、超えたら翌週に回す。第三に<strong>ユーザとの距離</strong>：月に一度はユーザと直接話す。メトリクスだけ見ていると、人間の感覚が鈍る。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>スケールの閾値を知る</h3>
+
+      <p>一人+AIが限界を迎える規模がある。以下のいずれかに達したとき、チームを作るか、システムを整理するかの判断が必要になる。</p>
+
+      <ul>
+        <li><strong>コードベースが一人の頭に入らなくなったとき</strong> ── どのファイルが何をしているかを把握できなくなったら、AIも正しく支援できなくなる。</li>
+        <li><strong>ユーザからの問い合わせに追われるようになったとき</strong> ── カスタマーサポートが開発時間を食い始めたら、ツールまたは人を投入する。</li>
+        <li><strong>法的・セキュリティ的な義務が増えたとき</strong> ── 特定の規制（医療・金融・個人情報）に引っかかる規模になったら、専門家の継続的な関与が必要。</li>
+      </ul>
+
+      <p>これらの閾値に達したとき、「チームを作る」は失敗ではない。<em>一人軍団が成功した証拠だ</em>。小さく始めて、機能することを証明し、その後に拡張する ── これが最も合理的な順序だ。</p>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>「AIが書いたから」は責任から逃げる理由にならない。AIの出力に署名するのは常に人間だ。</li>
+          <li>倫理チェック：プライバシー・セキュリティ・アクセシビリティ・透明性・依存性。</li>
+          <li>持続性のための三点：スコープの明示的境界・稼働時間の上限・月1回のユーザとの直接対話。</li>
+          <li>スケールの閾値（コードベース・サポート量・法的義務）を超えたとき、チーム化は失敗ではなく成功の証拠。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch9" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第9章 委譲の技術と限界の見極め</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ 孤独という選択</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">孤独という選択</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">チームを組まないことは、後退ではなく、一つの戦略だ</p>
+    </header>
+
+    <div class="prose">
+      <p>一人でWebを作るという選択は、孤独だ。承認してくれるデザインレビューがない。「いいね」と言ってくれるチームメンバーがいない。本当に正しい方向に進んでいるのか、誰も教えてくれない。この孤独は、解消できるものではない。引き受けるものだ。</p>
+
+      <p>しかし、その孤独の中にしかない自由がある。<em>誰の承認も待たずに作れる</em>。誰の合意も取らずに変えられる。誰の感情も気にせず、正しいと思う方向に進める。この自由は、チームの中では手に入らない。</p>
+
+      <p>AIは、この自由を技術的に拡張した。かつて一人では届かなかったデザインの水準に、コードの品質に、コンテンツの深さに、今は届く。届くが、それは技術的な話だ。<strong>何を作るかは、依然として一人の判断だ。</strong>なぜ作るかも。誰のために作るかも。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">一人軍団の要諦</span>
+        <p class="key-concept__text">
+          AIは作業の速度を上げる。しかし方向を決めるのは人間だ。<br>
+          AIは選択肢を広げる。しかし選ぶのは人間だ。<br>
+          AIは孤独を紛らわせる。しかし責任を分かち合うことはない。<br><br>
+          <strong>一人軍団の強さは、AIと組んだことで生まれる。しかしその強さを何に使うかは、一人の意志にかかっている。</strong>
+        </p>
+      </div>
+
+      <p>本書を読んで、明日から一つだけ変えるとしたら何か。企画中のプロジェクトをAIと議論してみること、CLAUDE.mdを書いてみること、v0でコンポーネントを一つ生成してみること ── どれでもよい。始めることが全てだ。完璧な準備が整うのを待っていたら、永遠に始まらない。</p>
+
+      <p>作ってください。作りながら学んでください。壊れたら直してください。それが全工程だ。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch10" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第10章 一人軍団の倫理と持続性</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参考資料一覧</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考資料
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参考資料一覧</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">さらに深く学ぶための地図</p>
+    </header>
+
+    <div class="prose">
+
+      <h4>一人開発・インディーハッカーの思想</h4>
+      <ul>
+        <li>Paul Graham, "Maker's Schedule, Manager's Schedule", paulgraham.com, 2009. 作る人間の時間の使い方の原理。</li>
+        <li>Pieter Levels, <em>Make</em>, self-published, 2019. インディーハッカーの実践的な起業・開発論。</li>
+        <li>Frederick P. Brooks Jr., <em>The Mythical Man-Month</em>, Addison-Wesley, 1975. チームと生産性の関係の古典。ブルックスの法則。</li>
+      </ul>
+
+      <h4>AIコーディングとエージェント</h4>
+      <ul>
+        <li>Anthropic, <em>Claude Code ドキュメント</em>. docs.anthropic.com/claude-code. CLAUDE.md・Hooks・エージェントの公式仕様。</li>
+        <li>Andrej Karpathy, "Software 3.0", 2025. LLMがソフトウェアの新しい層になるという論考。</li>
+        <li>Simon Willison, <em>simonwillison.net</em>. LLMとAIツールの実践的な活用例の継続的な記録。</li>
+      </ul>
+
+      <h4>AI開発ツール</h4>
+      <ul>
+        <li>Vercel, <em>v0ドキュメント</em>. v0.dev/docs. プロンプトからUIを生成するツールの公式ガイド。</li>
+        <li>Vercel, <em>AI SDK ドキュメント</em>. sdk.vercel.ai. LLMをWebアプリに組み込むためのSDK。</li>
+        <li>Microsoft, <em>Playwright ドキュメント</em>. playwright.dev. E2Eテスト自動化の公式ガイド。</li>
+      </ul>
+
+      <h4>インフラ・クラウド</h4>
+      <ul>
+        <li>Supabase, <em>ドキュメント</em>. supabase.com/docs. PostgreSQL + Auth + Storage のオープンソースBaaS。</li>
+        <li>Cloudflare, <em>Developers ドキュメント</em>. developers.cloudflare.com. Pages・Workers・R2の実装ガイド。</li>
+        <li>Stripe, <em>Docs</em>. stripe.com/docs. 決済実装の公式ドキュメント。</li>
+      </ul>
+
+      <h4>品質・セキュリティ</h4>
+      <ul>
+        <li>OWASP, <em>Top 10</em>. owasp.org/Top10. Webアプリの代表的な脆弱性の分類。必読。</li>
+        <li>Google, <em>Core Web Vitals</em>. web.dev/vitals. LCP・INP・CLSの最新指針。</li>
+        <li>W3C, <em>WCAG 2.2</em>. w3.org/TR/WCAG22. アクセシビリティの国際標準。</li>
+      </ul>
+
+      <h4>自己管理・持続性</h4>
+      <ul>
+        <li>Cal Newport, <em>Deep Work</em>, Grand Central Publishing, 2016. 深い集中の技術と、その守り方。</li>
+        <li>Ethan Mollick, <em>Co-Intelligence</em>, Portfolio, 2024. AIと協働する時代の思考の枠組み。</li>
+      </ul>
+
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+      <span></span>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <div class="footer__ornament">◆ Finis ◆</div>
+  <p class="footer__text">
+    本書は <a href="./index.html">所蔵目録</a> の Vol.VII として書かれた。<br>
+    <em>一人軍団</em>として作り、届け、続けるすべての人へ。
+  </p>
+</footer>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>
