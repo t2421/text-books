@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小さな商いのための、Webサイト制作全工程 ── 目的の設定からアクセス解析まで</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">小さな商いのための、<em>Webサイト制作全工程</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 小さな船が大海に出るとき</a></li>
+    <li><a href="#ch1">第1章 ── 目的の定義</a></li>
+    <li><a href="#ch2">第2章 ── 市場・競合・ユーザ調査</a></li>
+    <li><a href="#ch3">第3章 ── 情報設計とサイト構造</a></li>
+    <li><a href="#ch4">第4章 ── プラットフォーム選定</a></li>
+    <li><a href="#ch5">第5章 ── デザインの基礎</a></li>
+    <li><a href="#ch6">第6章 ── コンテンツ戦略とSEO</a></li>
+    <li><a href="#ch7">第7章 ── 実装と構築</a></li>
+    <li><a href="#ch8">第8章 ── AI活用の現実解</a></li>
+    <li><a href="#ch9">第9章 ── 公開前チェックとローンチ</a></li>
+    <li><a href="#ch10">第10章 ── 運用・分析・改善</a></li>
+    <li><a href="#epilogue">エピローグ ── 小さな商いの武器として</a></li>
+    <li><a href="#bibliography">参 ── 参考資料一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">A PRACTICAL GUIDE TO SMALL BUSINESS WEBSITES</div>
+  <h1 class="hero__title">小さな商いのための、Webサイト制作全工程<em>2026年の地図を一冊に</em></h1>
+  <p class="hero__subtitle">目的の設定から競合調査、プラットフォーム選定、AI活用、ローンチ、改善サイクルまで ── 小規模事業者が迷わず進むための実践的な十章</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">52 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">10 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">SMB OWNERS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">小さな船が大海に出るとき</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Webサイトを「作る」ことと「機能させる」ことは、まったく別の話だ</p>
+    </header>
+
+    <div class="prose">
+      <p>2026年現在、日本の小規模事業者の約7割が何らかのWebプレゼンスを持つとされる。しかしその多くは「存在するだけ」で終わっている。問い合わせが来ない、検索に出てこない、スマートフォンで見ると崩れる、更新が止まって3年経っている ── 現場を見れば、そういうサイトにいくらでも出会う。</p>
+
+      <p>問題は技術ではない。<strong>順序</strong>の誤りだ。「何のためのサイトか」を決める前にデザインを考え、「誰に来てほしいか」を決める前に文章を書き、「公開した後どう運用するか」を決める前に構築を始める ── そういう順序の誤りが、機能しないWebサイトを量産し続けている。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">本書の主張</span>
+        <p class="key-concept__text">Webサイト制作の失敗の9割は、技術の問題ではなく<strong>順序の問題</strong>だ。目的・対象・構造を固めてから作り始めれば、予算が限られた小規模事業者でも、大企業の何分の一かのコストで機能するサイトが作れる。</p>
+      </div>
+
+      <p>本書の構成は五段だ。第一部 (1〜2章) は<em>発見</em>。目的を定義し、市場と顧客を知る。第二部 (3〜4章) は<em>設計</em>。情報の骨格を引き、使うツールを選ぶ。第三部 (5〜7章) は<em>制作</em>。デザイン、コンテンツ、実装の作業フロー。第四部 (8章) は<em>AI活用</em>。2026年の実務で使える具体的な使い方。第五部 (9〜10章) は<em>公開と運用</em>。ローンチの手順と、公開後の改善サイクル。</p>
+
+      <p>本書は「Webサイト制作を初めて経験する事業者」だけでなく、「一度作ったが機能していないサイトを立て直したい人」にも使えるように書いた。どの章から読んでもよいが、初めての方は第1章から順番に読むことを勧める。それでは始めよう。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a href="#ch1" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第1章 目的の定義</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER ONE</span>
+      <h2 class="chapter__title">目的の定義<br>── 「サイトが欲しい」の前に問うこと</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Webサイトは手段であって目的ではない。目的が曖昧なまま作ると何も起きない</p>
+    </header>
+
+    <div class="prose">
+      <p>「ホームページを作りたい」と相談を受けたとき、最初に返すべき質問は「どんなデザインがいいですか」ではない。「<em>それを作ることで、何が変わればいいですか</em>」だ。この質問に即答できない事業者が、残念ながら多い。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>Webサイトは「窓口」か「営業マン」か</h3>
+
+      <p>Webサイトの役割は、大きく分けて五つある。<strong>認知拡大</strong>（知ってもらう）、<strong>信頼形成</strong>（信じてもらう）、<strong>問い合わせ獲得</strong>（動いてもらう）、<strong>販売</strong>（買ってもらう）、<strong>顧客維持</strong>（繋ぎ止める）。一つのサイトがこれらすべてを担うことは難しく、どれを優先するかによって設計がまったく変わる。</p>
+
+      <p>整骨院のサイトと、作家のポートフォリオサイトと、地域の和菓子店のサイトは、外見が似ていても、目的の構造がまるで異なる。整骨院は<em>予約の獲得</em>が最終ゴールで、信頼形成がその手前に来る。ポートフォリオは<em>仕事の依頼</em>につなぐために実績を見せる。和菓子店は<em>来店・EC注文</em>のどちらを主軸にするかで、情報の比重が変わる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">目的の分解</span>
+        <p class="key-concept__text">Webサイトの目的は「最終ゴール」と「中間ゴール」に分ける。<strong>最終ゴール</strong>＝予約・購入・問い合わせなど、測定できる成果。<strong>中間ゴール</strong>＝信頼感の醸成、商品理解、来訪者の回遊など、最終ゴールの手前で必要な状態。この二段構えで考えると、何をどの順番で見せるべきかが見えてくる。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>目的を一文で書く</h3>
+
+      <p>目的の定義が終わったかどうかを確認する方法は単純だ。<em>「このサイトは、[対象者] に向けて、[行動] を促すためのものである」</em> という一文が書けるかどうか。</p>
+
+      <ul>
+        <li>「このサイトは、近隣の子育て世代に向けて、整骨院への初回予約を促すためのものである」</li>
+        <li>「このサイトは、地方移住を検討するITエンジニアに向けて、物件内覧の問い合わせを促すためのものである」</li>
+        <li>「このサイトは、贈り物を探している30〜50代に向けて、オンラインショップでの購入を促すためのものである」</li>
+      </ul>
+
+      <p>この一文が書けない場合、サイト設計を始めてはいけない。なぜなら、設計のすべての判断基準が「この一文に沿っているか」になるからだ。ナビゲーションの並び順も、トップページの主役コンテンツも、問い合わせボタンの文言も、この一文から逆算して決まる。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>KPIを先に決める</h3>
+
+      <p>目的が決まったら、測定指標（KPI）を先に決める。KPIを決めずに作り始めると、公開後に「効果があったのか」が永遠にわからない。小規模事業者がサイトで追うべき主要KPIは少数でよい。</p>
+
+      <ul>
+        <li><strong>問い合わせ数</strong> ── フォームの送信数、電話クリック数</li>
+        <li><strong>予約数</strong> ── 予約システムへの流入・完了数</li>
+        <li><strong>購入数・売上</strong> ── ECの場合</li>
+        <li><strong>特定ページへの到達数</strong> ── アクセスを誘導したいページ（採用、サービス説明など）</li>
+      </ul>
+
+      <p>「月間訪問者数を増やしたい」はKPIになりえない。なぜなら、訪問者が増えても問い合わせが0なら意味がないからだ。KPIは必ず「目的の一文」に直結する数字を選ぶ。</p>
+
+      <aside class="sidenote">
+        <p><strong>2026年のトレンド ──</strong> AI検索（ChatGPT、Perplexity、Google AIオーバービュー）が普及した結果、「検索からの流入」という概念が変わりつつある。従来のクリック数だけでなく、<em>AIの回答に自社情報が含まれているか</em>という新しい指標も視野に入れ始める事業者が増えている。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>Webサイトは手段。最初に「最終ゴール」と「中間ゴール」を二段構えで定義する。</li>
+          <li>「このサイトは、[対象者] に向けて、[行動] を促すためのものである」という一文が書けるまで、設計を始めない。</li>
+          <li>KPIは目的に直結する数字を、少数だけ選ぶ。訪問者数ではなく、成果に近い数字を選ぶ。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#prologue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">プロローグ</span>
+      </a>
+      <a href="#ch2" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第2章 市場・競合・ユーザ調査</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TWO</span>
+      <h2 class="chapter__title">市場・競合・ユーザ調査<br>── 作る前に知ること</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">競合のサイトを「真似る」のではなく「解剖する」</p>
+    </header>
+
+    <div class="prose">
+      <p>小規模事業者がWebサイト制作に失敗するもう一つのパターンが、<em>調査なし</em>で制作に突入することだ。「うちの業界はこういうサイトが多い」という思い込みで作り始め、公開後に誰も来ない ── という事例は後を絶たない。作る前に知ることで、限られたリソースを効果的な場所に集中できる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>競合調査は模倣のためではない</h3>
+
+      <p>競合他社のサイトを調査する目的を誤解している事業者が多い。「いいデザインをコピーする」のが目的ではない。<em>競合がカバーしていない隙間を見つける</em>のが目的だ。全員が同じ構成のサイトを持っている業界では、差別化はそこにしかない。</p>
+
+      <p>競合調査で見るべきポイントは五つだ。①<strong>目的の設計</strong>（どんな行動に誘導しているか）、②<strong>コンテンツの厚み</strong>（どの情報を充実させているか）、③<strong>弱点</strong>（情報が薄い箇所、更新が止まっている箇所）、④<strong>検索順位</strong>（どのキーワードで上位に来ているか）、⑤<strong>口コミ・評価</strong>（Googleビジネスプロフィールのレビューや評価）。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">競合の弱点を探す</span>
+        <p class="key-concept__text">地域の整骨院を例にとると、多くの競合が「施術メニュー一覧」はあっても「どんな人に向いているか」の説明が薄い。「腰痛持ちのデスクワーカー向け」という切り口で専用ページを作るだけで、特定の検索クエリで上位に入れる可能性がある。<strong>競合が作っていないページを作ることが、小規模事業者の戦略の核心だ。</strong></p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ユーザ調査の手軽な方法</h3>
+
+      <p>「ユーザ調査」と聞くと大がかりに聞こえるが、小規模事業者が使える方法はシンプルだ。以下の三つから始める。</p>
+
+      <ul>
+        <li><strong>既存顧客への5分インタビュー ──</strong> 「うちのことをどこで知りましたか」「来る前、何を調べましたか」「一番困っていたことは何ですか」の3問だけでよい。10人に聞けば、パターンが見える。</li>
+        <li><strong>Googleサジェストの観察 ──</strong> 自分の業種・地域名をGoogleに打ち込み、サジェストに出てくるキーワードを書き留める。これは実際のユーザが検索している言葉そのものだ。</li>
+        <li><strong>Googleビジネスプロフィールのレビュー分析 ──</strong> 自社と競合のGBPレビューを読み込む。高評価のレビューには「何を評価されているか」、低評価には「何が期待外れだったか」が書かれている。コンテンツのヒントの宝庫だ。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ペルソナは「一人」を具体的に描く</h3>
+
+      <p>調査の結果を統合して、ターゲットユーザの像を作る。この時、「30代女性」のような抽象的な属性の束ではなく、<em>具体的な一人の人物</em>として描く。名前、職業、日常の悩み、何を検索しているか、何を読んでいるか ── そこまで落とし込む。</p>
+
+      <p>なぜ一人に絞るのか。「30代女性・40代男性・60代シニア」全員に届けようとすると、誰にも届かないサイトができあがる。ペルソナを一人に絞ることで、文章のトーン、情報の深さ、写真の雰囲気、ボタンの文言まで、一貫した判断ができるようになる。メインの一人が来てくれれば、似た属性の人も自然についてくる。</p>
+
+      <aside class="sidenote">
+        <p><strong>2026年のAI検索の影響 ──</strong> ChatGPTやPerplexityに「○○市でおすすめの整骨院」と聞くユーザが増えている。AI検索はWebサイトのコンテンツを読んで回答を生成するため、<em>「どういう人に向いているか」を明示したコンテンツ</em>が、AI経由の流入においても有利になっている。ペルソナを具体的に描くことは、AI検索対応にもなる。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>競合調査は模倣のためではなく、競合がカバーしていない隙間を見つけるため。</li>
+          <li>競合調査の5視点：目的設計、コンテンツの厚み、弱点、検索順位、口コミ。</li>
+          <li>ユーザ調査は「既存顧客インタビュー」「サジェスト観察」「GBPレビュー分析」の三点で始める。</li>
+          <li>ペルソナは属性の束ではなく、具体的な一人として描く。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch1" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第1章 目的の定義</span>
+      </a>
+      <a href="#ch3" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第3章 情報設計とサイト構造</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER THREE</span>
+      <h2 class="chapter__title">情報設計とサイト構造<br>── 骨格を先に引く</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">デザインより先に「何が、どの順番で、どこにあるか」を決める</p>
+    </header>
+
+    <div class="prose">
+      <p>建物を建てるとき、内装のクロスを選ぶ前に間取りを決める。Webサイトも同じだ。色やフォントより先に、<em>何ページあって、何が書かれていて、どの順番で見せるか</em>を決める。これを情報設計（Information Architecture: IA）と呼ぶ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>サイトの「地図」を描く</h3>
+
+      <p>情報設計の最初の成果物は<strong>サイトマップ</strong>だ。全ページをツリー形式で書き出し、ページ間の関係を明確にする。サイトマップを書くことで、「このページは本当に必要か」「このページはどこからリンクされるか」が見える。</p>
+
+      <p>小規模事業者のサイトに必要なページは、多くの場合こうなる。</p>
+
+      <ul>
+        <li><strong>ホーム</strong> ── サイト全体の玄関。事業の核心と、行動喚起（CTA）を置く</li>
+        <li><strong>サービス・商品</strong> ── 何を提供しているかの詳細説明</li>
+        <li><strong>事例・実績・お客様の声</strong> ── 信頼を作るページ</li>
+        <li><strong>会社・店舗情報</strong> ── 誰がやっているかを伝える。所在地・営業時間</li>
+        <li><strong>お知らせ・ブログ</strong> ── 更新コンテンツ。SEOと信頼の両方に効く</li>
+        <li><strong>お問い合わせ・予約</strong> ── 最終ゴールへの出口</li>
+      </ul>
+
+      <p>重要なのは、「必要だから作る」ではなく「第1章で決めた目的一文に沿っているから作る」という判断基準で、各ページの存在を決めることだ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ユーザの動線を設計する</h3>
+
+      <p>サイトマップができたら、ユーザがたどるであろう経路（動線）を設計する。最もよくある動線は「ホーム → サービス詳細 → お客様の声 → お問い合わせ」という流れだ。この動線が<em>摩擦なく進めるか</em>を確認する。</p>
+
+      <p>摩擦の代表例は以下のとおり。①ホームから問い合わせページへのリンクが見つけにくい、②サービスの詳細を読もうとしたら別サイトに飛んだ、③価格が書いておらず問い合わせしないとわからない、④スマートフォンで電話番号がタップできない。これらはすべて、設計の段階で解決できる問題だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">3クリックルールの誤解</span>
+        <p class="key-concept__text">「3クリック以内に目的のページに到達できるべき」という俗説があるが、研究では否定されている。重要なのはクリック数ではなく、<strong>各クリックで「正しい方向に進んでいる」という確信を与えられるか</strong>だ。「このボタンを押したら次に何が起きるか」が明確なら、5クリックでも離脱しない。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ワイヤフレームを手書きする</h3>
+
+      <p>各ページに何を置くかを決める道具がワイヤフレームだ。精緻なツールを使う必要はない。A4の紙にページ枠を書き、大まかなブロックを配置する ── それで十分だ。ワイヤフレームで確認すべき四点。</p>
+
+      <ul>
+        <li><strong>最初の画面（ファーストビュー）に何があるか</strong> ── スクロールなしで見える範囲に、「誰向けの何のサイトか」が伝わるか</li>
+        <li><strong>CTAの位置</strong> ── 問い合わせ・予約ボタンが、ページのどこにあるか。複数箇所に置くか</li>
+        <li><strong>信頼形成要素の配置</strong> ── 実績数・お客様の声・メディア掲載などが、CTAの近くにあるか</li>
+        <li><strong>スマートフォンでの見え方</strong> ── モバイルファーストで考えているか</li>
+      </ul>
+
+      <aside class="sidenote">
+        <p><strong>モバイルファーストの現実 ──</strong> 2026年現在、多くの業種でモバイルからのアクセスが70〜80%を超える。「PC向けに作って、スマートフォンにも対応する」という順序は逆だ。スマートフォンの画面幅（360〜430px）でまず考え、PCへの拡張は後から。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>デザインより先にサイトマップで「何が、どこに、どう繋がるか」を決める。</li>
+          <li>各ページの存在理由は「目的一文」に照らして判断する。不要なページは作らない。</li>
+          <li>ユーザ動線を設計し、ホームから問い合わせまでの摩擦を事前に取り除く。</li>
+          <li>ワイヤフレームは手書きでよい。ファーストビュー・CTA・信頼要素・モバイル表示を確認する。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch2" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第2章 市場・競合・ユーザ調査</span>
+      </a>
+      <a href="#ch4" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第4章 プラットフォーム選定</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FOUR</span>
+      <h2 class="chapter__title">プラットフォーム選定<br>── 2026年の現実的な選択肢</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">ツールは目的に合わせて選ぶ。「流行っているから」で選ぶと後で後悔する</p>
+    </header>
+
+    <div class="prose">
+      <p>2026年のWebサイト制作には、かつてないほど多様なツールが揃っている。ノーコードツールの成熟、AIによる制作支援の普及、ホスティング環境のコモディティ化 ── 選択肢が増えたことは良いことだが、選択が難しくなったという側面もある。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「誰が更新するか」で選ぶ</h3>
+
+      <p>プラットフォームを選ぶ最大の基準は、<strong>誰が・どれくらいの頻度で更新するか</strong>だ。更新頻度が高いなら管理画面の使いやすさが最優先。更新は年1〜2回でよいなら、静的なサイトでもよい。外部のデザイナーや代理店に委託するなら、その会社が扱い慣れているツールを使うのが最速だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">2026年の主要プラットフォーム早見表</span>
+        <p class="key-concept__text">
+          <strong>Shopify</strong> ── EC最優先の場合。決済・在庫・配送連携が強力。<br>
+          <strong>Wix Studio / Webflow</strong> ── デザイン自由度が高いノーコード。制作会社向け。<br>
+          <strong>WordPress</strong> ── プラグイン資産が豊富。カスタマイズ性最高だが保守コストあり。<br>
+          <strong>Squarespace / STORES</strong> ── 簡単に作れる。ブログ・ポートフォリオ・小さなEC向け。<br>
+          <strong>Framer</strong> ── デザイナー向けのノーコード。AI生成機能が充実。<br>
+          <strong>Next.js + Vercel（静的・ヘッドレス）</strong> ── パフォーマンス最優先。エンジニアが必要。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ケース別の推奨選択</h3>
+
+      <p>業種・規模・運用体制別に、現実的な推奨をまとめる。</p>
+
+      <ul>
+        <li><strong>飲食店・美容室・士業など（予約・問い合わせ中心）</strong> ── Wix Studio または Squarespace。管理画面が直感的で、予約システムとの連携も容易。更新は事業者自身でできる。</li>
+        <li><strong>ハンドメイド・食品・雑貨など（小規模EC）</strong> ── BASE または STORES。日本の決済環境・送料設定に最適化されている。商品数が増えたらShopifyへ移行。</li>
+        <li><strong>製造業・建設業など（法人向けBtoB）</strong> ── WordPress。事例集・技術資料など、コンテンツの種類が多く、カスタム要件が発生しやすい業種。</li>
+        <li><strong>クリエイター・コンサルタント（個人事業）</strong> ── Notion + Super.so または Framer。スピードと低コストを優先。AI支援でほぼ一人で作れる。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>2026年に押さえるべき技術要件</h3>
+
+      <p>プラットフォームを問わず、2026年に必ず満たしておくべき技術的な最低ラインがある。</p>
+
+      <ul>
+        <li><strong>HTTPS（SSL/TLS）対応</strong> ── すべての主要プラットフォームで標準。非対応は論外。</li>
+        <li><strong>Core Web Vitals 合格</strong> ── LCP（最大コンテンツ描画）2.5秒以内、INP（インタラクション応答）200ms以内、CLS（累積レイアウトシフト）0.1以下。Google検索の順位に直接影響する。</li>
+        <li><strong>モバイルフレンドリー</strong> ── Googleのモバイルファーストインデックスに対応。</li>
+        <li><strong>構造化データ（Schema.org）</strong> ── 地域ビジネスのLocalBusinessマークアップ。AI検索への可視性向上に効く。</li>
+        <li><strong>プライバシーポリシーとCookie同意</strong> ── 個人情報保護法改正・GDPR対応。アクセス解析ツールを使う場合は必須。</li>
+      </ul>
+
+      <aside class="sidenote">
+        <p><strong>ノーコードの成熟 ──</strong> Framer のAI機能は2026年現在、テキストプロンプトから完成度の高いページを生成できる段階に達している。「コードが書けないからWebサイトが作れない」という時代は終わった。ただし<em>AIが生成したものを判断できる知識</em>は依然として必要だ。本書の第5〜7章がその判断軸を与える。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>プラットフォームは「誰が・どれくらい更新するか」で選ぶ。流行ではなく適合性で選ぶ。</li>
+          <li>EC重視はShopify/BASE/STORES、デザイン重視はWebflow/Framer、カスタム重視はWordPress。</li>
+          <li>HTTPS・Core Web Vitals・モバイル対応・構造化データは2026年の最低ライン。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch3" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第3章 情報設計とサイト構造</span>
+      </a>
+      <a href="#ch5" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第5章 デザインの基礎</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER FIVE</span>
+      <h2 class="chapter__title">デザインの基礎<br>── 見た目より「伝わること」</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">小規模事業者のサイトにとって、デザインの役割は「おしゃれに見せること」ではない</p>
+    </header>
+
+    <div class="prose">
+      <p>デザインという言葉を聞くと、多くの人は「色」「フォント」「余白のバランス」を思い浮かべる。だが本章での「デザイン」はもっと根本的なことを指す。<em>情報が、意図した順番で、正しく伝わること</em> ── それがWebデザインの本質だ。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>信頼のデザイン</h3>
+
+      <p>小規模事業者のサイトにおけるデザインの第一目的は、<strong>信頼を作ること</strong>だ。訪問者はサイトを見た最初の3秒で、「このサービスを使っても大丈夫か」を無意識に判断する。この判断は、デザインの印象から大きく影響を受ける。写真が粗い、文字が読みにくい、構成が雑然としている ── それだけで離脱される。</p>
+
+      <p>Stanford大学のウェブ信頼性研究によると、ユーザがWebサイトへの信頼・不信を判断する際、<em>視覚的なデザインが最も強く影響する</em>という。コンテンツの正確さよりも、見た目の質が先に評価される。これは小規模事業者にとって不利にも有利にも働く。競合のサイトが写真も文章も古びていれば、きちんとしたデザインをするだけで差別化できる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">信頼を作るデザインの5原則</span>
+        <p class="key-concept__text">
+          <strong>① 写真の質</strong> ── 自社・商品・スタッフの写真がプロ品質か。スマートフォンでも光の条件を整えれば十分。<br>
+          <strong>② 読みやすさ</strong> ── 本文の文字サイズ16px以上、行間1.7以上、行長は40〜60文字。<br>
+          <strong>③ 一貫性</strong> ── 色は2〜3色、フォントは2書体以内。バラバラな印象が信頼を損なう。<br>
+          <strong>④ 余白の使い方</strong> ── 詰め込まない。余白は「何もない空間」ではなく、要素を際立たせる道具。<br>
+          <strong>⑤ 最新性の証明</strong> ── 更新日時・最新の実績・SNSフィード。「このサイトは生きている」と伝える。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>色・フォント・写真の選び方</h3>
+
+      <p><strong>色</strong>は業種のイメージに合わせつつ、過剰に使わない。「ブランドカラー1色＋白・黒・グレーの無彩色」で構成するだけで、ほとんどのケースは成立する。強調したいときだけアクセントカラーを使う。色で情報を伝えようとする（赤＝重要など）場合は、色盲・色弱ユーザへの配慮から、形や文字でも同じ情報を伝える。</p>
+
+      <p><strong>フォント</strong>は「可読性」が最優先だ。日本語の本文には、Noto Sans JP・游ゴシック・ヒラギノ角ゴなどの信頼できるゴシック体を使う。見出しだけ明朝体・セリフ体にする組み合わせは、品格と読みやすさを両立させやすい。装飾的なフォントは、ロゴやキャッチコピーに限定する。</p>
+
+      <p><strong>写真</strong>は小規模事業者のサイトで最も投資対効果が高い要素だ。プロのカメラマンに1回撮影を依頼することで、数年間使える素材が揃う。費用対効果を考えれば、ロゴ制作や豪華なデザインよりも写真への投資が先だ。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>CTAのデザイン</h3>
+
+      <p>問い合わせ・予約などのCTA（行動喚起ボタン）のデザインは、サイト全体で最も慎重に作るべき要素だ。</p>
+
+      <ul>
+        <li><strong>色</strong> ── ページの他の要素と明確に差別化した色を使う。背景に溶け込まない。</li>
+        <li><strong>文言</strong> ── 「送信する」ではなく「無料相談を申し込む」。ユーザが押した後に何が起きるかを具体的に書く。</li>
+        <li><strong>サイズ</strong> ── スマートフォンの指でタップできる最低限のサイズ（高さ44px以上）。</li>
+        <li><strong>配置</strong> ── ファーストビューに1つ、ページの下部に1つ。長いページなら中間にも置く。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>小規模事業者のデザインの目的は「おしゃれ」ではなく「信頼形成」と「情報の伝達」。</li>
+          <li>信頼を作る五原則：写真の質・読みやすさ・一貫性・余白・最新性の証明。</li>
+          <li>色は2〜3色、フォントは2書体以内。写真への投資が最も費用対効果が高い。</li>
+          <li>CTAは色・文言・サイズ・配置を慎重に設計する。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch4" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第4章 プラットフォーム選定</span>
+      </a>
+      <a href="#ch6" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第6章 コンテンツ戦略とSEO</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SIX</span>
+      <h2 class="chapter__title">コンテンツ戦略とSEO<br>── 検索とAIの両方に見つけてもらう</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">2026年のSEOは「Googleに載る」だけでは足りない。AIの回答に引用される準備も必要だ</p>
+    </header>
+
+    <div class="prose">
+      <p>検索エンジン最適化（SEO）は、2026年において大きな転換点を迎えている。Google検索はAIによる「回答の要約」（AIオーバービュー）を検索結果の上部に表示するようになり、従来型の「検索結果→クリック→サイト訪問」という流れが変わりつつある。同時にChatGPTやPerplexityへの質問が増え、これらのAIがWebコンテンツを参照して回答を生成する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>SEOとAEOの二面作戦</h3>
+
+      <p>従来のSEO（Search Engine Optimization）に加え、<strong>AEO（Answer Engine Optimization）</strong>という概念が実務に入ってきた。AEOとは、AI検索エンジンが回答を生成する際に、自社のコンテンツが引用・参照されるよう最適化することだ。</p>
+
+      <p>良いニュースは、SEOとAEOの根本にあるものは同じだということだ。<em>正確で、具体的で、ユーザの疑問に答えるコンテンツ</em>は、Googleの検索にも、AIの回答にも有利に働く。テクニカルなトリックより、質の高いコンテンツが長期的に効く ── これは以前から言われてきたが、2026年においてより真実になった。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">AEOのための構造化コンテンツ</span>
+        <p class="key-concept__text">AIが好む文章構造がある。<strong>①質問形式の見出し</strong>（「整骨院と整形外科の違いは何ですか」）、<strong>②明確な答えが最初に来る</strong>（結論先行型）、<strong>③具体的な数字や固有名詞</strong>、<strong>④FAQ形式のコンテンツ</strong>。これらを意識して書かれたコンテンツは、AIの回答に引用されやすい。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ローカルSEOを最優先する</h3>
+
+      <p>地域密着型の小規模事業者にとって、最も即効性が高いSEO施策は<strong>ローカルSEO</strong>だ。特に「Googleビジネスプロフィール（GBP）の最適化」は、費用ゼロで大きな効果が出る。</p>
+
+      <ul>
+        <li><strong>GBPの完全記入</strong> ── 業種・営業時間・住所・電話番号・Webサイト・写真をすべて入力。未入力の項目があると検索結果での露出が下がる。</li>
+        <li><strong>写真の定期更新</strong> ── 月1回以上の写真追加が、ローカルパックへの表示に影響する。</li>
+        <li><strong>クチコミへの返信</strong> ── ポジティブ・ネガティブ問わず、すべてのクチコミに丁寧に返信する。AI検索はGBPのデータも参照する。</li>
+        <li><strong>投稿機能の活用</strong> ── キャンペーン・お知らせをGBP投稿で発信すると、検索結果に表示される。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>コンテンツ計画の立て方</h3>
+
+      <p>Webサイトのコンテンツは、大きく「固定ページ」と「定期更新コンテンツ（ブログ・お知らせ）」に分かれる。固定ページは制作時に作るが、定期更新コンテンツは長期戦だ。</p>
+
+      <p>ブログを始める場合、最初の3ヶ月で目指すべきことは「記事の本数」ではなく、<em>「誰かの疑問に完全に答える記事を10本作る」</em>ことだ。「整骨院はどんな症状に対応できる？」「初めての受診で準備するものは？」「保険が使えるケースと使えないケース」── 実際の顧客からよく受ける質問を記事にする。これがSEO・AEO両方に効く最速の方法だ。</p>
+
+      <aside class="sidenote">
+        <p><strong>コンテンツとE-E-A-T ──</strong> GoogleはE-E-A-T（経験・専門性・権威性・信頼性）を評価指標として重視する。小規模事業者が権威性を積み上げるには、<em>実際の経験に基づいた具体的なコンテンツ</em>が最も有効だ。「何年経験か」「何件対応したか」「どんな資格を持つか」を、コンテンツの中で自然に示す。</p>
+      </aside>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>技術的SEOの最低ライン</h3>
+
+      <p>コンテンツと並行して、技術的な基盤も整える。特に以下は見落としやすい。</p>
+
+      <ul>
+        <li><strong>titleタグとmeta descriptionの設定</strong> ── 各ページ固有の内容で。テンプレートのままにしない。</li>
+        <li><strong>画像のalt属性</strong> ── スクリーンリーダーとGoogleの画像認識の両方に効く。</li>
+        <li><strong>構造化データ（LocalBusiness）</strong> ── 事業所情報をJSONLDで記述。AIオーバービューへの表示に有利。</li>
+        <li><strong>サイトマップXMLの送信</strong> ── Google Search Consoleからサイトマップを送信。インデックスを促進。</li>
+        <li><strong>ページ速度</strong> ── 画像の最適化（WebP形式・適切なサイズ）。遅いサイトはGoogleに不利。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>2026年のSEOは従来の検索エンジン対策＋AEO（AI検索最適化）の二面作戦。</li>
+          <li>地域ビジネスはGBPの最適化が最も即効性の高い施策。写真・投稿・クチコミ返信を継続する。</li>
+          <li>ブログは本数より質。実際の顧客の疑問に完全に答える記事を10本作ることが先。</li>
+          <li>技術的SEO：titleタグ・alt属性・構造化データ・XMLサイトマップ・ページ速度を整える。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch5" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第5章 デザインの基礎</span>
+      </a>
+      <a href="#ch7" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第7章 実装と構築</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER SEVEN</span>
+      <h2 class="chapter__title">実装と構築<br>── ノーコードからコードまで</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">制作フェーズは「ページを作る」より「動線を確認する」工程だ</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまでの章で、目的・構造・プラットフォーム・デザイン・コンテンツ方針が揃った。第7章では実際の「作る」工程に入る。プラットフォームにかかわらず、制作フェーズに共通する考え方と手順を整理する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>完璧を目指さず、機能するものを早く</h3>
+
+      <p>Webサイトは完成後に改善するものだ。最初から完璧を目指すと、公開が遅れ、その間に市場が変わる。<em>最小限機能するサイト</em>（MVP：Minimum Viable Product）を早期に公開し、実際のユーザの動きを見てから改善するほうが、長期的に優れたサイトになる。</p>
+
+      <p>スタートアップが使う「リーン」の考え方は、小規模事業者のWebサイトにも当てはまる。「まず作って、動かしてみて、見直す」という反復のサイクルが、「一発で完璧なものを作ろうとする」姿勢よりも、結果的に良いサイトを生む。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>制作の標準的な工程</h3>
+
+      <p>プラットフォームを問わず、制作は以下の工程で進める。</p>
+
+      <ul>
+        <li><strong>Step 1 ── テンプレート/テーマの選定</strong>：目的と構造に最も近いテンプレートを選ぶ。「一番好きなデザイン」ではなく「一番構成が近いもの」を選ぶ。</li>
+        <li><strong>Step 2 ── コンテンツを先に流し込む</strong>：デザインの調整より先に、テキスト・写真を実際のものに入れ替える。ダミーコンテンツの状態でデザイン調整すると、実際の文章量と合わなくなる。</li>
+        <li><strong>Step 3 ── モバイル表示の確認</strong>：各ページをスマートフォン幅（375px）で表示し、文字・画像・ボタンが意図通りに見えるか確認する。</li>
+        <li><strong>Step 4 ── フォーム・予約システムの接続</strong>：問い合わせフォーム・予約システムを設置し、実際に送信テストを行う。通知メールが届くことを確認する。</li>
+        <li><strong>Step 5 ── アクセス解析の設置</strong>：Google Analytics 4（GA4）とGoogle Search Consoleを設置する。公開後の改善のために、初日から計測を始める。</li>
+      </ul>
+
+      <div class="key-concept">
+        <span class="key-concept__label">外注する場合の注意点</span>
+        <p class="key-concept__text">制作会社・フリーランスに依頼する場合、<strong>必ず「管理画面の操作権限」と「ドメイン・サーバの所有権」を自社で持つ</strong>こと。代理店が管理している状態で関係が終わると、サイトの更新も移管もできなくなる事例が後を絶たない。契約時に確認する。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>フォームと問い合わせ導線の作り方</h3>
+
+      <p>問い合わせフォームは、サイトの中で最も重要なページの一つだ。にもかかわらず、後回しにされやすい。フォームで押さえるべきポイントは四点。</p>
+
+      <ul>
+        <li><strong>項目数を最小化する</strong> ── 「名前・メールアドレス・相談内容」の3項目で十分。必須項目が多いほど離脱率が上がる。</li>
+        <li><strong>送信後のサンクスページを作る</strong> ── 「送信ありがとうございました。○営業日以内に返信します」と表示する。このページへの到達がコンバージョン測定の基点になる。</li>
+        <li><strong>自動返信メールを設定する</strong> ── 送信者へ自動でメールを返す。「確かに届いた」という安心感が信頼を作る。</li>
+        <li><strong>スパム対策</strong> ── reCAPTCHAまたはハニーポットを実装する。問い合わせフォームはスパムボットの標的になりやすい。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>「完璧なサイトを一発で作る」より「機能するサイトを早期公開し改善する」を選ぶ。</li>
+          <li>制作工程：テンプレート選定→実コンテンツの流し込み→モバイル確認→フォーム接続→解析設置。</li>
+          <li>外注時はドメイン・サーバの所有権と管理画面の権限を必ず自社で保持する。</li>
+          <li>フォームは項目数最小化・サンクスページ・自動返信・スパム対策の四点が必須。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch6" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第6章 コンテンツ戦略とSEO</span>
+      </a>
+      <a href="#ch8" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第8章 AI活用の現実解</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER EIGHT</span>
+      <h2 class="chapter__title">AI活用の現実解<br>── 制作効率と品質を上げる具体的な使い方</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">AIは「代わりに作ってくれるもの」ではなく「判断の速度を上げるもの」として使う</p>
+    </header>
+
+    <div class="prose">
+      <p>2026年現在、ChatGPT・Claude・Geminiなどの大規模言語モデル（LLM）は、Webサイト制作の文脈でも実用的な段階に達している。しかし現場を見ると、「AIに文章を丸投げして、そのまま使う」という使い方が多く、結果として他社と差のない凡庸なコンテンツが量産されている。本章では、AIを<em>適切に</em>使うための考え方と具体的な活用法を整理する。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>AIを「下書きと壁打ち」に使う</h3>
+
+      <p>AIの強みは「大量の情報を高速に処理・生成すること」だ。弱みは「固有の経験・実績・声のトーン」を持たないことだ。Webサイトのコンテンツで最も重要なのは、その事業者にしか語れない具体性だ。「10年、同じ通りで商いを続けてきた」「初診で8割の患者の痛みが軽減する」「素材の調達先はすべて顔を知っている農家から」── こうした固有の情報はAIが生成できない。</p>
+
+      <p>だから、AIの最適な使い方は<strong>「下書きを作る」と「壁打ち相手になる」</strong>の二つだ。下書きは人間が書くより速く、構造を整えて出力できる。その後に、固有の情報・事業者の声・具体的なエピソードを加えることで、オリジナルのコンテンツになる。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">AI活用の黄金律</span>
+        <p class="key-concept__text">AIに「ペルソナ：[具体的な顧客像]、目的：[具体的な行動]、制約：[文字数・トーン・禁止事項]」を与えてから生成させる。その後、<strong>①固有の数字・実績を加える、②AIっぽい言い回しを削る、③事業者の言葉で書き直す</strong>の三工程を経ることで、AIと人間の協働コンテンツが完成する。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>Webサイト制作でAIが使える場面</h3>
+
+      <p>AIを活用できる具体的な場面を、制作工程に沿って整理する。</p>
+
+      <ul>
+        <li><strong>コピーの下書き</strong> ── キャッチコピー・サービス説明・会社概要のたたき台をAIで生成し、人間が磨く。ゼロから書くより圧倒的に速い。</li>
+        <li><strong>FAQ作成</strong> ── 「○○業の初回来訪者がよく抱く疑問10個をリストアップして」とAIに聞く。実際の顧客インタビューで出た疑問と突き合わせて取捨選択する。</li>
+        <li><strong>ブログ構成の設計</strong> ── テーマを与えると、H2・H3の構成案を出してくれる。ライティングは自分で行うが、構成の抜け漏れを指摘させるのに便利。</li>
+        <li><strong>代替テキスト（alt属性）の生成</strong> ── 画像のURLや説明を与えると、SEOに適したalt属性を生成してくれる。</li>
+        <li><strong>メタディスクリプションの最適化</strong> ── タイトルとページ概要を渡し、「130文字以内でクリックを促すmeta descriptionを5パターン生成して」と頼む。</li>
+        <li><strong>デザインのフィードバック依頼</strong> ── スクリーンショットをアップロードし、「このランディングページのCVRを下げそうな要因を指摘して」と依頼する。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>AIが生成した文章の見分け方と修正</h3>
+
+      <p>AIが生成した文章には特徴がある。「〜です。また、〜です。さらに〜です」という並列的な文体、「総合的に」「様々な」「幅広く」といった抽象的な修飾語、具体的な数字や固有名詞の少なさ ── これらはAI文章のシグナルだ。</p>
+
+      <p>これらを修正する手順は単純だ。①抽象的な語を固有名詞・数字・エピソードに置き換える、②接続詞を削るか変える（「また」「そして」「さらに」が多用される）、③最初の一文を「問い」か「意外な事実」に変える。これだけで文章のオリジナリティが大幅に上がる。</p>
+
+      <aside class="sidenote">
+        <p><strong>AI検索とオリジナリティ ──</strong> Google・AIは「独自の洞察・経験・データを含むコンテンツ」を高く評価する傾向を強めている。AIが生成したそのままの文章は、同じモデルが他のサイトのためにも生成した類似のコンテンツと区別されにくい。<em>固有の経験の記述こそが、AI検索時代のコンテンツの差別化軸だ。</em></p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>AIは「代わりに作るもの」ではなく「下書きと壁打ち」として使う。</li>
+          <li>AIに与えるべき情報：ペルソナ・目的・文字数・トーン・禁止事項。</li>
+          <li>AI文章の三工程：固有の数字・実績を加える → AIっぽい言い回しを削る → 事業者の言葉で書き直す。</li>
+          <li>固有の経験・実績・声のトーンがAI時代のコンテンツ差別化の核心。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch7" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第7章 実装と構築</span>
+      </a>
+      <a href="#ch9" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第9章 公開前チェックとローンチ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER NINE</span>
+      <h2 class="chapter__title">公開前チェックとローンチ<br>── 見落としゼロの手順</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">公開直後に気づく問題のほとんどは、事前にチェックできる</p>
+    </header>
+
+    <div class="prose">
+      <p>サイトが完成したと思っても、公開前に必ず実施すべき確認がある。多くの事業者が「完成した興奮」のままに公開し、後で問題を発見する。リストに沿って一つずつ確認する習慣が、公開後のトラブルを大幅に減らす。</p>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>公開前チェックリスト</h3>
+
+      <p><strong>コンテンツ確認</strong></p>
+      <ul>
+        <li>すべてのページで誤字脱字・情報の誤りがないか</li>
+        <li>ダミーテキスト（Lorem ipsum等）が残っていないか</li>
+        <li>電話番号・住所・営業時間が正確か</li>
+        <li>価格表示が最新の状態か</li>
+        <li>写真に権利処理の問題がないか（フリー素材の利用規約確認）</li>
+      </ul>
+
+      <p><strong>技術確認</strong></p>
+      <ul>
+        <li>すべてのリンクが正常に動作するか（内部・外部リンク）</li>
+        <li>フォームの送信テスト（受信確認・自動返信確認）</li>
+        <li>スマートフォン（iOS/Android）での表示確認</li>
+        <li>主要ブラウザ（Chrome/Safari/Firefox/Edge）での表示確認</li>
+        <li>Page Speed InsightsでCore Web Vitalsのスコア確認</li>
+        <li>Google Search Consoleへのドメイン登録</li>
+      </ul>
+
+      <p><strong>SEO・アクセス解析</strong></p>
+      <ul>
+        <li>各ページのtitleタグとmeta descriptionが設定されているか</li>
+        <li>Google Analytics 4（GA4）が動作しているか（リアルタイムで計測確認）</li>
+        <li>XMLサイトマップをSearch Consoleに送信したか</li>
+        <li>robots.txtが意図した設定になっているか（非公開にしたいページが除外されているか）</li>
+      </ul>
+
+      <p><strong>セキュリティ・法的確認</strong></p>
+      <ul>
+        <li>HTTPSが有効か（アドレスバーの鍵アイコン）</li>
+        <li>プライバシーポリシーページがあるか（GA4等の解析ツール使用時は必須）</li>
+        <li>Cookie使用の告知（EU圏へのアクセスがある場合はGDPR対応も確認）</li>
+        <li>特定商取引法に基づく表示（EC・定期購入がある場合は必須）</li>
+      </ul>
+
+      <div class="key-concept">
+        <span class="key-concept__label">ソフトローンチの活用</span>
+        <p class="key-concept__text">一般公開の前に、<strong>信頼できる5〜10人にURLを共有してフィードバックをもらう</strong>「ソフトローンチ」を挟む。既存顧客・家族・知人が最適だ。「使いにくかった場所」「読んでいて疑問に思ったこと」を率直に教えてもらう。コストゼロで、公開後の問題の多くを事前につぶせる。</p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ローンチ当日のやること</h3>
+
+      <p>公開当日は「ボタンを押す」だけで終わりにしない。以下の作業をセットで行う。</p>
+
+      <ul>
+        <li><strong>SNSでの告知</strong> ── Instagram・X・Facebook等で、サイト公開を投稿。フォロワーへの初回流入を作る。</li>
+        <li><strong>Googleビジネスプロフィールの更新</strong> ── Webサイト欄のURLが新しいものになっているか確認。必要なら更新。</li>
+        <li><strong>既存顧客へのメール</strong> ── 名刺交換した人・既存顧客リストにメールでURLを告知する。知人の輪からの訪問は初期のGoogle評価に好影響をもたらす。</li>
+        <li><strong>GA4のリアルタイムで動作確認</strong> ── 自分でサイトを閲覧し、GA4リアルタイムレポートに計測が出ることを確認する。</li>
+      </ul>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>公開前チェックは：コンテンツ・技術・SEO/解析・セキュリティ/法的の4カテゴリで実施。</li>
+          <li>ソフトローンチで5〜10人からフィードバックを得てから一般公開する。</li>
+          <li>ローンチ当日はSNS告知・GBP更新・既存顧客へのメール告知をセットで行う。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch8" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第8章 AI活用の現実解</span>
+      </a>
+      <a href="#ch10" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">第10章 運用・分析・改善</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER TEN</span>
+      <h2 class="chapter__title">運用・分析・改善<br>── 公開後が本番だ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Webサイトは「作って終わり」ではなく「作ってから始まり」だ</p>
+    </header>
+
+    <div class="prose">
+      <p>Webサイトを公開することは、ゴールではなくスタートラインだ。公開後に何もしないサイトは、半年後には「情報が古いサイト」として評価が下がり始める。一方、適切に運用・改善を続けるサイトは、公開から1年後、2年後と指数関数的に効果が上がる。</p>
+
+      <h3 class="h3--thought"><span class="h3__tag">I. 思想</span>「分析」の目的は「行動」だ</h3>
+
+      <p>GA4やSearch Consoleで数字を見て「ふむふむ」と終わる事業者は多い。しかし分析の目的は、次の行動を決めることだ。<em>「この数字を見て、来月何を変えるか」</em>が問いの全体だ。見るべき指標は多くない。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">月1回見るべき3つの数字</span>
+        <p class="key-concept__text">
+          <strong>① コンバージョン数</strong> ── フォーム送信・予約完了・電話クリックの数。これが増えているかどうかが最重要。<br>
+          <strong>② 流入元の構成</strong> ── 検索・SNS・直接・その他。どこから来ているかを把握し、効果が高い経路を強化する。<br>
+          <strong>③ 離脱ページ</strong> ── どのページで最も多くのユーザが離脱しているか。そのページを優先的に改善する。
+        </p>
+      </div>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>SEO効果が出始めるまでのタイムライン</h3>
+
+      <p>SEO施策の効果は、一夜にして出るものではない。現実的なタイムラインを知っておくことで、途中で諦めずに続けられる。</p>
+
+      <ul>
+        <li><strong>公開〜1ヶ月</strong> ── Googleがサイトをクロール・インデックスする期間。Search Consoleにサイトマップを送信し、インデックスを確認する。</li>
+        <li><strong>2〜3ヶ月</strong> ── 固有ブランド名での検索に表示され始める。地域名＋業種での表示も始まる頃。</li>
+        <li><strong>3〜6ヶ月</strong> ── ブログ記事を継続的に追加していれば、ロングテールキーワードでの流入が増え始める。</li>
+        <li><strong>6ヶ月〜1年</strong> ── コアキーワードでの上位表示が見えてくる。GBPのクチコミが積み上がると、ローカルパック表示が安定する。</li>
+        <li><strong>1年以降</strong> ── コンテンツの蓄積と被リンクの獲得で、ドメインの信頼性が上がり、新しいコンテンツも速くインデックスされるようになる。</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>最低限必要な運用タスク</h3>
+
+      <p>リソースが限られた事業者が、最低限実施すべき運用タスクを頻度別に整理する。</p>
+
+      <ul>
+        <li><strong>毎月</strong> ── GA4のコンバージョン数確認・GBPへの写真追加（2〜3枚）・ブログ記事1本投稿</li>
+        <li><strong>四半期ごと</strong> ── 固定ページの情報更新（価格・スタッフ・営業時間）・競合サイトの確認・Search Consoleでの流入キーワード分析</li>
+        <li><strong>年1回</strong> ── 全ページのリンク切れ確認・プライバシーポリシーの見直し・Core Web Vitalsのスコア確認・デザイン・コンテンツの大規模見直し</li>
+      </ul>
+
+      <h3 class="h3--practice"><span class="h3__tag">II. 実務</span>ゼロパーティーデータとメールリスト</h3>
+
+      <p>2026年、Cookieの規制強化により、第三者のトラッキングに依存したマーケティングが難しくなっている。小規模事業者が今すぐ始めるべきことが、<strong>メールリストの構築</strong>だ。</p>
+
+      <p>顧客が自発的に教えてくれた情報（名前・メールアドレス・興味・希望）を「ゼロパーティーデータ」と呼ぶ。これはプラットフォームのアルゴリズム変更や規制に左右されない、自社資産だ。Webサイトで「お役立ち情報をメールでお届けします」と案内し、週1〜月1回のメールを送ることで、サイト訪問→購入→リピートのサイクルが生まれる。</p>
+
+      <aside class="sidenote">
+        <p><strong>Instagramアカウント凍結のリスク ──</strong> SNSのフォロワーは、プラットフォームに属する資産であり、自社のものではない。突然のアルゴリズム変更・アカウント凍結で、一夜にして接点を失った事業者は実際に多い。SNSは「認知」の道具として使いながら、最終的にはWebサイトとメールリストに顧客情報を集約する構造が、2026年の最も堅牢な戦略だ。</p>
+      </aside>
+
+      <div class="summary">
+        <h4>章のまとめ</h4>
+        <ul>
+          <li>分析の目的は「次の行動を決めること」。毎月見るべき指標：コンバージョン数・流入元・離脱ページの3つ。</li>
+          <li>SEOの効果が出るタイムライン：3〜6ヶ月でロングテール流入、1年で主要キーワードの安定化が目安。</li>
+          <li>運用タスクは毎月・四半期・年1回に分けてリスト化し、習慣にする。</li>
+          <li>Cookieレス時代に向け、自社メールリストの構築を最優先する。SNSのフォロワーは自社資産ではない。</li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch9" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第9章 公開前チェックとローンチ</span>
+      </a>
+      <a href="#epilogue" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">小さな商いの武器として</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">技術の話ではなく、覚悟の話として終わる</p>
+    </header>
+
+    <div class="prose">
+      <p>本書を通じて伝えたかったことは、技術の話ではなかった。目的を先に決め、顧客を具体的に想像し、骨格を整えてから形を作り、公開した後も改善を続ける ── この<em>順序と姿勢</em>の話だった。</p>
+
+      <p>小規模事業者は、資本でも人員でも大企業に敵わない。だが、<strong>顧客との距離の近さ</strong>と<strong>意思決定のスピード</strong>では、圧倒的に有利だ。大企業が稟議と会議でWebサイトの一行を変えようとしている間に、小規模事業者は今日決めて明日変えられる。この機動力こそ、小さな商いの最大の武器だ。</p>
+
+      <p>Webサイトはその武器の、今や不可欠な一部だ。営業時間が終わっても動き続け、問い合わせを受け取り、信頼を積み重ね、検索エンジンとAIの回答に静かに存在し続ける。人を雇わずに動く、最も費用対効果の高い営業活動だ。</p>
+
+      <div class="key-concept">
+        <span class="key-concept__label">本書の要点を一枚に</span>
+        <p class="key-concept__text">
+          <strong>① 目的を一文で書く</strong> ── 「誰に、何を促すか」が決まるまで作らない。<br>
+          <strong>② 顧客の言葉を使う</strong> ── 調査せずに書いた文章は届かない。<br>
+          <strong>③ 骨格を先に引く</strong> ── デザインより情報設計が先。<br>
+          <strong>④ 機能するものを早期に公開する</strong> ── 完璧より速さ。改善はその後。<br>
+          <strong>⑤ 公開後こそ本番</strong> ── 分析・更新・改善のサイクルを続ける。<br>
+          <strong>⑥ AIは下書きと壁打ちに</strong> ── 固有の経験で差別化する。<br>
+          <strong>⑦ メールリストを育てる</strong> ── 自社の資産を育てる。プラットフォームに依存しない。
+        </p>
+      </div>
+
+      <p>サイトを「完成」させることに意味はない。動き続け、改善し続けることに意味がある。本書がその第一歩と、続ける力の両方を渡せていれば、筆者としてこれ以上の喜びはない。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#ch10" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">第10章 運用・分析・改善</span>
+      </a>
+      <a href="#bibliography" class="chapter-nav__next">
+        <span class="chapter-nav__label">NEXT ──</span>
+        <span class="chapter-nav__title">参考資料一覧</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考資料
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参考資料一覧</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">さらに深く学ぶための地図</p>
+    </header>
+
+    <div class="prose">
+
+      <h4>Web制作の基礎</h4>
+      <ul>
+        <li>Steve Krug, <em>Don't Make Me Think, Revisited</em>, New Riders, 3rd ed. 2014. Webユーザビリティの古典。「考えさせるな」の原則。</li>
+        <li>Jakob Nielsen & Hoa Loranger, <em>Prioritizing Web Usability</em>, New Riders, 2006. 最初の3秒で判断されるWebサイトの現実。</li>
+        <li>Scott Kubie, <em>Writing for Designers</em>, A Book Apart, 2018. デザイナー・非ライターのためのコンテンツライティング。</li>
+      </ul>
+
+      <h4>コンテンツ戦略・SEO</h4>
+      <ul>
+        <li>Ann Handley, <em>Everybody Writes</em>, Wiley, 2nd ed. 2022. コンテンツマーケティングのためのライティングガイド。</li>
+        <li>Rand Fishkin, <em>Lost and Founder</em>, Portfolio, 2018. SEOとマーケティングを巡るスタートアップの現実。</li>
+        <li>Google, <em>Search Quality Evaluator Guidelines</em> (最新版). Googleが検索品質評価に使うE-E-A-Tの一次資料。</li>
+        <li>Google, <em>Search Central Documentation</em>. developers.google.com/search/docs. 技術的SEOの公式リファレンス。</li>
+      </ul>
+
+      <h4>ローカルビジネス・小規模事業</h4>
+      <ul>
+        <li>David Meerman Scott & Ben Halligan, <em>Marketing Lessons from the Grateful Dead</em>, Wiley, 2010. ファンを作ることの原則。</li>
+        <li>Google, <em>Google ビジネス プロフィール ヘルプ</em>. support.google.com/business/. ローカルSEOの公式ガイド。</li>
+      </ul>
+
+      <h4>AI・LLM活用</h4>
+      <ul>
+        <li>Ethan Mollick, <em>Co-Intelligence: Living and Working with AI</em>, Portfolio, 2024. AIと協働する思考の枠組み。</li>
+        <li>Google, <em>AI Overview ヘルプ</em>. AIオーバービューへのコンテンツ最適化の公式情報。</li>
+      </ul>
+
+      <h4>Web標準・パフォーマンス</h4>
+      <ul>
+        <li>Google, <em>Core Web Vitals</em>. web.dev/vitals/. LCP / INP / CLS の現代版指針。</li>
+        <li>W3C, <em>Web Content Accessibility Guidelines (WCAG) 2.2</em>, 2023. アクセシビリティの国際標準。</li>
+        <li>MDN Web Docs, <em>Schema.org LocalBusiness</em>. developer.mozilla.org. 構造化データの実装リファレンス。</li>
+      </ul>
+
+      <h4>デザインの基礎</h4>
+      <ul>
+        <li>Robin Williams, <em>The Non-Designer's Design Book</em>, Peachpit Press, 4th ed. 2014. 非デザイナーのためのデザイン原則4つ（CRAP）。</li>
+        <li>Jan Constantine, <em>The Elements of Typographic Style Applied to the Web</em>. webtypography.net. Web上の書体設計の実践。</li>
+      </ul>
+
+    </div>
+
+    <nav class="chapter-nav">
+      <a href="#epilogue" class="chapter-nav__prev">
+        <span class="chapter-nav__label">── PREV</span>
+        <span class="chapter-nav__title">エピローグ</span>
+      </a>
+      <span></span>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     フッター
+     ============================================ -->
+<footer class="footer">
+  <div class="footer__ornament">◆ Finis ◆</div>
+  <p class="footer__text">
+    本書は <a href="./index.html">所蔵目録</a> の Vol.VI として書かれた。<br>
+    <em>小さな商い</em>が、Webという海で迷わず進むための地図として。
+  </p>
+</footer>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>
