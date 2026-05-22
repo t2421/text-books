@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分業の設計 ── Claude Codeサブエージェントを「チーム」として動かす</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">分業の設計 ── <em>Claude Codeサブエージェントを「チーム」として動かす</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 「ひとり」を超える設計</a></li>
+    <li><a href="#ch1">第1章 ── エージェントの解剖学：定義ファイルが振る舞いを決める</a></li>
+    <li><a href="#ch2">第2章 ── 役割の設計：専門家を生むということ</a></li>
+    <li><a href="#ch3">第3章 ── descriptionは契約書である：呼び出し設計の原則</a></li>
+    <li><a href="#ch4">第4章 ── ツール権限の設計：最小権限と信頼境界</a></li>
+    <li><a href="#ch5">第5章 ── モデル選択の経済学：Haiku／Sonnet／Opusの使い分け</a></li>
+    <li><a href="#ch6">第6章 ── 並列オーケストレーション：ファンアウトの技法</a></li>
+    <li><a href="#ch7">第7章 ── コンテキスト経済学：委譲は最大の節約である</a></li>
+    <li><a href="#ch8">第8章 ── 失敗パターン六選：起動しない・暴走・形骸化</a></li>
+    <li><a href="#ch9">第9章 ── フリート運用：エージェントを「組織」として扱う</a></li>
+    <li><a href="#ch10">第10章 ── 指揮の作法：委譲と非委譲の判断</a></li>
+    <li><a href="#epilogue">エピローグ ── 編成は思考である</a></li>
+    <li><a href="#bibliography">参 ── 参考文献一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">DELEGATION ARCHITECTURE FOR CLAUDE CODE AGENT TEAMS</div>
+  <h1 class="hero__title">分業の設計<em>Claude Codeサブエージェントを「チーム」として動かす</em></h1>
+  <p class="hero__subtitle">「ひとり」のClaudeに全部やらせる時代は終わった。役割を切り、descriptionで呼び出しを契約し、tools権限を絞り、モデルを使い分け、並列で走らせ、コンテキストを節約する ── サブエージェントとは、思考を分業するための装置である。自作agentを運用しはじめた人のための、編成の体系</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">65 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">10 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">AGENT OPERATORS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">「ひとり」を超える設計</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントはツールではない。役割を持った同僚として組織する対象である</p>
+    </header>
+
+    <div class="prose">
+      <p>Claude Codeに慣れてくると、誰もがある壁にぶつかる。「メインのClaudeに全部やらせていると、長い作業の終盤で頭が回らなくなる」。あるいは「同じレビュー観点を毎回口頭で指示しなければならない」。あるいは「複数の独立した調査を直列にやらせていて、待ち時間が無駄になる」。</p>
+
+      <p>これらはすべて、<strong>「ひとりのClaude」に全責任を負わせている</strong>ことに由来する症状だ。サブエージェント機構は、この単一エージェント問題を構造的に解く。役割を分け、コンテキストを分け、権限を分け、必要なときだけ呼び出し、必要なら並列で走らせる。Claude Codeは、ひとりの強力なアシスタントから、<strong>あなたが指揮する小さな組織</strong>へと姿を変える。</p>
+
+      <h3>本書が扱う三つの層</h3>
+      <p>本書はサブエージェント運用を三つの層で扱う。第一は<strong>「設計」</strong>の層 ── 何をエージェントとして切り出すか、その境界をどう引くか。第二は<strong>「呼び出し」</strong>の層 ── descriptionとtoolsとmodel、自動起動とマニュアル起動、並列と直列。第三は<strong>「運用」</strong>の層 ── フリート全体の整理、陳腐化対応、指揮判断。</p>
+
+      <p>表層的な「サブエージェントとは何か」の説明は省く。読者はすでに数個のagent定義を書き、Taskツールで呼び出し、ときに期待通りに動かず首を傾げた経験があるはずだ。本書はその経験を体系に変える。</p>
+
+      <div class="key-concept">
+        <h4>本書の前提</h4>
+        <ul>
+          <li><code>~/.claude/agents/</code> 配下にカスタムagentを最低数個は置いている</li>
+          <li>Taskツールでサブエージェントを呼び出した経験がある</li>
+          <li>「呼ばれない」「呼ばれすぎる」「結果が肥大化する」などの困りごとを抱えている</li>
+          <li>単発の解決策ではなく、設計と運用の体系がほしい</li>
+        </ul>
+      </div>
+
+      <h3>「チーム」というメタファー</h3>
+      <p>サブエージェントを設計するとき、最も役立つメタファーは「同僚」だ。彼らには名前があり、専門があり、得意な道具があり、苦手な領域がある。あなたは彼らに仕事を渡すとき、相手の専門に応じて指示を変える。新人には細かく、ベテランには結論だけ求める。レビュアーには口を出さず最後に意見を聞く。並列で走れる仕事はバラバラに渡す。</p>
+
+      <p>サブエージェントの設計と運用は、まさにこの「同僚の使い方」の問題だ。技術仕様としてのagent機構を学ぶことと、組織運営の知恵を翻訳することは、本書では分けない。両方が同時に必要だ。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="単独エージェントとチーム編成の比較">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.12em; }
+              .fig-title { font-family: 'Noto Serif JP', serif; font-size: 14px; fill: #2c2416; font-weight: 600; }
+            </style>
+          </defs>
+          <!-- 左: 単独 -->
+          <text x="150" y="32" class="fig-label" text-anchor="middle">SINGLE AGENT</text>
+          <text x="150" y="52" class="fig-title" text-anchor="middle">ひとりで全部やる</text>
+          <circle cx="150" cy="160" r="50" fill="#b85c38" opacity="0.85"/>
+          <text x="150" y="166" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="14" font-weight="600">Main</text>
+          <text x="150" y="240" class="fig-text" text-anchor="middle">調査・実装・レビュー・</text>
+          <text x="150" y="258" class="fig-text" text-anchor="middle">テスト・コミットを</text>
+          <text x="150" y="276" class="fig-text" text-anchor="middle">単一コンテキストで処理</text>
+          <!-- 縦線 -->
+          <line x1="300" y1="60" x2="300" y2="290" stroke="#c9b99a" stroke-width="0.8" stroke-dasharray="3,4"/>
+          <!-- 右: チーム -->
+          <text x="450" y="32" class="fig-label" text-anchor="middle">AGENT TEAM</text>
+          <text x="450" y="52" class="fig-title" text-anchor="middle">役割で分業する</text>
+          <circle cx="450" cy="110" r="22" fill="#b85c38" opacity="0.9"/>
+          <text x="450" y="115" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="10" font-weight="600">Main</text>
+          <circle cx="390" cy="190" r="18" fill="#5a4e2e" opacity="0.85"/>
+          <text x="390" y="194" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="9">plan</text>
+          <circle cx="450" cy="190" r="18" fill="#5a4e2e" opacity="0.85"/>
+          <text x="450" y="194" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="9">review</text>
+          <circle cx="510" cy="190" r="18" fill="#5a4e2e" opacity="0.85"/>
+          <text x="510" y="194" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="9">test</text>
+          <line x1="450" y1="132" x2="390" y2="172" stroke="#8b7355" stroke-width="1"/>
+          <line x1="450" y1="132" x2="450" y2="172" stroke="#8b7355" stroke-width="1"/>
+          <line x1="450" y1="132" x2="510" y2="172" stroke="#8b7355" stroke-width="1"/>
+          <text x="450" y="248" class="fig-text" text-anchor="middle">指揮官は判断と統合に専念</text>
+          <text x="450" y="266" class="fig-text" text-anchor="middle">専門家は得意領域に集中</text>
+        </svg>
+        <p class="figure__caption">単独エージェントの認知負荷を、チーム編成で分散する。指揮官の仕事は「やる」から「割り振る」に変わる。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER I</span>
+      <h2 class="chapter__title">エージェントの解剖学<br><small style="font-size:0.6em;font-weight:400;">定義ファイルが振る舞いを決める</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントの設計とは、Markdownファイル一枚に「人格・職務・道具・思考の深さ」を刻むことに他ならない</p>
+    </header>
+
+    <div class="prose">
+      <p>サブエージェントの正体は、<code>~/.claude/agents/</code> 配下に置かれた一枚のMarkdownファイルだ。先頭のYAMLフロントマターに振る舞いの設定が書かれ、本文にシステムプロンプト（=そのエージェントの行動規範）が書かれる。これだけの構造で、Claude Codeはそのファイルを読み込み、別個のコンテキストで動く専門エージェントとして起動する。</p>
+
+      <h3>最小構成のエージェント定義</h3>
+      <p>まず、骨組みだけ見てみよう。以下は最小限のagent定義だ。</p>
+
+      <pre><code>---
+name: typescript-reviewer
+description: TypeScript/JavaScriptコードのレビュー専門家。型安全性、非同期処理、セキュリティを観点に確認する。コードを書いた直後に必ず使う。
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+あなたはTypeScriptとJavaScriptのコードレビュー専門家である。
+以下の観点でレビューせよ：
+
+1. 型安全性 ── any/unknownの濫用、type assertionの妥当性、null/undefined処理
+2. 非同期処理 ── Promise/async-awaitの正しさ、エラー伝播、race condition
+3. セキュリティ ── XSS、prototype汚染、信頼境界の処理
+...
+</code></pre>
+
+      <h3>フロントマターの五つのフィールド</h3>
+      <p>このYAML部分が、エージェントの「設定」を全て決める。各フィールドの意味と設計上の重みを正確に理解することが、優れた編成の前提になる。</p>
+
+      <p><strong>name</strong> ── エージェントの呼称。kebab-caseで、役割が一目でわかる名前にする。<code>reviewer</code>のような汎用名は避け、<code>typescript-reviewer</code>のように専門領域を含める。同じ職務ドメインの複数言語版を並列に置くなら、命名規則の統一でフリート全体の見通しが格段に良くなる。</p>
+
+      <p><strong>description</strong> ── 最重要フィールド。これは「いつこのエージェントを呼ぶべきか」をメインのClaudeに伝える契約書だ。詳細は第3章で扱うが、ここで覚えるべきは「descriptionの質がコール頻度を決める」という一点だ。曖昧なdescriptionは呼ばれず、厳密すぎるdescriptionは呼ばれすぎる。</p>
+
+      <p><strong>tools</strong> ── そのエージェントが使える道具の制限。省略すれば全ツール継承。明示すれば「指定したものだけ」に絞られる。レビュアーには <code>Read, Grep, Glob</code> だけ与え、書き込みを禁ずる。実装者には <code>Read, Write, Edit, Bash</code> を与える。<strong>権限を絞ることは振る舞いを絞ることでもある</strong>。詳しくは第4章。</p>
+
+      <p><strong>model</strong> ── 使うモデルの指定（<code>haiku</code> / <code>sonnet</code> / <code>opus</code>）。省略すれば親と同じ。高頻度・軽量な作業はHaikuに、複雑な推論はOpusに、主力はSonnetに。詳しくは第5章。</p>
+
+      <p><strong>color</strong> ── UI上の表示色（任意）。実機能には影響しないが、フリートが10個を超えた頃から、色分けが「どのエージェントが動いているか」を視覚的に追う助けになる。レビュー系は青、実装系はオレンジ、探索系は緑、といった独自規約を作るとよい。</p>
+
+      <div class="sidenote">
+        <p><strong>システムプロンプト本文の役割</strong></p>
+        <p>フロントマター下のMarkdown本文は、起動したエージェントが最初に読む指示書だ。「あなたは○○の専門家である」「以下の手順で作業せよ」「次の観点を必ずチェックせよ」── 振る舞いの規律はここに書く。長く書きすぎないこと。一読してエージェントが「自分の仕事の核」を掴める分量に抑える。</p>
+      </div>
+
+      <h3>定義ファイルが置かれる場所</h3>
+      <p>エージェント定義の置き場所は三系統ある。<strong>個人グローバル</strong>（<code>~/.claude/agents/</code>）はあなたの全プロジェクトで使える。<strong>プロジェクトローカル</strong>（リポジトリ内の <code>.claude/agents/</code>）はそのプロジェクト固有で、チームで共有できる。<strong>プラグイン経由</strong>はサードパーティ提供。</p>
+
+      <p>個人の作業ルーチン（コードレビュー、テスト書き、ドキュメント更新）はグローバルに置く。プロジェクト固有の業務知識を持つエージェント（このコードベース特有のレビュアーなど）はプロジェクトローカルに置く。境界は明確だが、最初は全部グローバルから始めて、プロジェクト固有の知見が溜まったら切り出す、で構わない。</p>
+
+      <div class="key-concept">
+        <h4>エージェント定義のチェックリスト</h4>
+        <ul>
+          <li><code>name</code> は kebab-case、専門領域を含める</li>
+          <li><code>description</code> は「いつ呼ぶべきか」が明確 ── 自動起動を狙うなら PROACTIVELY / MUST BE USED を含める</li>
+          <li><code>tools</code> は最小権限。書き込みが不要なら必ず制限する</li>
+          <li><code>model</code> は職務の重さで選ぶ。レビュー系・探索系はHaikuで十分なことが多い</li>
+          <li>本文（システムプロンプト）は1画面に収まる長さに整理する</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第1章まとめ</h4>
+        <ul>
+          <li>エージェントは一枚のMarkdownファイル。フロントマターと本文ですべてが決まる</li>
+          <li>name / description / tools / model / color の五つのフィールドが振る舞いを規定する</li>
+          <li>description はメインClaudeへの「呼び出し契約書」。最重要フィールド</li>
+          <li>個人グローバルとプロジェクトローカルを使い分け、知識の所在を明確にする</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER II</span>
+      <h2 class="chapter__title">役割の設計<br><small style="font-size:0.6em;font-weight:400;">専門家を生むということ</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「何でも屋」のエージェントは何の専門家でもない。役割の解像度が、価値の解像度を決める</p>
+    </header>
+
+    <div class="prose">
+      <p>エージェントを増やし始めた人が最初に陥る罠は、<strong>「便利なエージェント」を作ろうとすること</strong>だ。何でもできるアシスタント、汎用レビュアー、万能調査員。一見ありがたいが、こうしたエージェントはほとんど呼ばれない。理由は単純で、メインのClaudeにとって「いつ呼ぶか」が判断しづらいからだ。汎用性は呼び出し判断を曖昧にする。</p>
+
+      <h3>専門化が解像度を生む</h3>
+      <p>役割は具体的であればあるほど、メインのClaudeの「これはあいつに任せよう」という判断が速く正確になる。<code>code-reviewer</code> より <code>typescript-reviewer</code>。<code>typescript-reviewer</code> より <code>typescript-async-reviewer</code>。ただし細分化しすぎると、フリート全体の管理コストが爆発する。<strong>「メインClaudeがdescriptionの一文を見て即座にYes/Noを判断できる粒度」</strong>が適正解像度の目安だ。</p>
+
+      <h3>三類型 ── 探索／生産／検査</h3>
+      <p>サブエージェントを設計するとき、役割を次の三類型のどれかに当てはめると整理が楽になる。</p>
+
+      <p><strong>探索系（Explorers）</strong> ── 情報を集めて返す。コードベース調査、ドキュメント検索、Web情報収集。書き込み権限を持たず、Read/Grep/Glob/WebFetch などに限定する。出力は「要約された発見」であるべきで、長文の生データを返してはいけない。</p>
+
+      <p><strong>生産系（Producers）</strong> ── コードや文書を作る。実装、リファクタ、テスト生成、マイグレーション作成。Read/Write/Edit/Bash の権限を持つ。アウトプットは具体的な変更そのもの。</p>
+
+      <p><strong>検査系（Inspectors）</strong> ── 既存の成果物を評価する。コードレビュー、セキュリティ監査、UXレビュー、テスト結果検証。書き込み権限を持たず、出力は「重大度付きの指摘リスト」。生産系の直後に呼ばれることが多い。</p>
+
+      <p>この三類型のどれにも当てはまらないエージェントを作ろうとしたら、それは役割が曖昧という警告かもしれない。「これは探索なのか生産なのか検査なのか」を自問してみる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="エージェントの三類型">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; fill: #8b7355; letter-spacing: 0.12em; }
+              .fig-num { font-family: 'Cormorant Garamond', serif; font-size: 22px; fill: #b85c38; font-weight: 600; }
+            </style>
+          </defs>
+          <text x="300" y="34" class="fig-text" text-anchor="middle" font-size="14" font-weight="600">サブエージェントの三類型</text>
+          <line x1="180" y1="44" x2="420" y2="44" stroke="#c9b99a" stroke-width="0.8"/>
+          <!-- 探索 -->
+          <rect x="40" y="80" width="160" height="160" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <text x="120" y="120" class="fig-num" text-anchor="middle">E</text>
+          <text x="120" y="148" class="fig-text" text-anchor="middle" font-weight="600">EXPLORERS</text>
+          <text x="120" y="170" class="fig-text" text-anchor="middle">探索系</text>
+          <text x="120" y="194" class="fig-text" text-anchor="middle" font-size="11">読み取り限定</text>
+          <text x="120" y="212" class="fig-text" text-anchor="middle" font-size="11">情報を集めて要約</text>
+          <text x="120" y="230" class="fig-text" text-anchor="middle" font-size="11">出力＝発見</text>
+          <!-- 生産 -->
+          <rect x="220" y="80" width="160" height="160" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <text x="300" y="120" class="fig-num" text-anchor="middle">P</text>
+          <text x="300" y="148" class="fig-text" text-anchor="middle" font-weight="600">PRODUCERS</text>
+          <text x="300" y="170" class="fig-text" text-anchor="middle">生産系</text>
+          <text x="300" y="194" class="fig-text" text-anchor="middle" font-size="11">書き込み権限あり</text>
+          <text x="300" y="212" class="fig-text" text-anchor="middle" font-size="11">コードを作る／直す</text>
+          <text x="300" y="230" class="fig-text" text-anchor="middle" font-size="11">出力＝変更</text>
+          <!-- 検査 -->
+          <rect x="400" y="80" width="160" height="160" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <text x="480" y="120" class="fig-num" text-anchor="middle">I</text>
+          <text x="480" y="148" class="fig-text" text-anchor="middle" font-weight="600">INSPECTORS</text>
+          <text x="480" y="170" class="fig-text" text-anchor="middle">検査系</text>
+          <text x="480" y="194" class="fig-text" text-anchor="middle" font-size="11">読み取り限定</text>
+          <text x="480" y="212" class="fig-text" text-anchor="middle" font-size="11">既存物を評価</text>
+          <text x="480" y="230" class="fig-text" text-anchor="middle" font-size="11">出力＝指摘</text>
+        </svg>
+        <p class="figure__caption">どのエージェントもこの三類型のどれかに自然に収まる。役割の曖昧さは、類型を跨いだ設計の警告である。</p>
+      </div>
+
+      <h3>切り出す境界の見極め方</h3>
+      <p>「これはサブエージェントとして切り出すべきか、メインで処理すべきか」── 判断軸は三つある。</p>
+
+      <p>①<strong>反復性</strong>。同じ観点・手順を週に複数回呼び出すなら、専門エージェント化の価値が高い。一度しかやらない作業のためにエージェントを作るのは過剰投資。</p>
+
+      <p>②<strong>コンテキスト独立性</strong>。メインの作業文脈と切り離せる作業ほど、サブエージェントに向く。逆に「いまの会話の流れの上に積み上げて考える」必要がある作業は、メインに残す。</p>
+
+      <p>③<strong>専門知の濃度</strong>。レビュー観点・チェックリスト・規約のような「明文化された専門知」が大量にある領域は、エージェントに焼き付ける価値が高い。毎回手で書く指示が長くなる作業ほど、エージェント化の効果が大きい。</p>
+
+      <h3>重複役割の整理</h3>
+      <p>フリートが育つと、似た役割のエージェントが並立する状況が生まれる。<code>code-reviewer</code> と <code>typescript-reviewer</code> が両方ある、<code>planner</code> と <code>architect</code> の境界が曖昧、など。このとき取るべき行動は二つに一つだ。<strong>統合するか、境界を明文化するか</strong>。</p>
+
+      <p>統合の判断基準は「メインClaudeが両者を区別して呼ぶ判断ができているか」。できていないなら統合する。できているなら、descriptionに「○○には使わない（=もう一方のエージェントの担当）」と明記する。重複の放置は、メインClaudeの呼び出し精度を下げる。</p>
+
+      <div class="key-concept">
+        <h4>役割設計の判断軸</h4>
+        <ul>
+          <li>役割は具体的に。汎用エージェントは呼ばれない</li>
+          <li>三類型（探索／生産／検査）のどれかに自然に収まるか自問する</li>
+          <li>反復性・コンテキスト独立性・専門知の濃度の三軸で切り出しを判断する</li>
+          <li>重複が生まれたら、統合か境界明文化のどちらかを選ぶ。放置しない</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第2章まとめ</h4>
+        <ul>
+          <li>役割は具体的なほどよい ── descriptionの一文で「呼ぶか否か」が判断できる粒度</li>
+          <li>三類型（Explorers / Producers / Inspectors）に当てはめて整理する</li>
+          <li>切り出しの三軸：反復性・コンテキスト独立性・専門知の濃度</li>
+          <li>重複役割は統合または境界明文化で解消する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER III</span>
+      <h2 class="chapter__title">descriptionは契約書である<br><small style="font-size:0.6em;font-weight:400;">呼び出し設計の原則</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントが呼ばれるか呼ばれないかは、ほとんどがdescriptionの設計で決まる</p>
+    </header>
+
+    <div class="prose">
+      <p>カスタムエージェントを書いた経験のある人なら誰でも、次の現象を体験している。「作ったのに、メインのClaudeがちっとも呼んでくれない」「逆に、些細な作業でも片っ端から呼びにくる」。これらはどちらもdescriptionの設計問題だ。</p>
+
+      <p>descriptionは、メインのClaudeにとっての<strong>「エージェント選択カタログ」</strong>として機能する。メインは新しいタスクを受け取るたびに、利用可能なエージェント群のdescriptionを照らし合わせ、「これはこのエージェントに任せるべきか」を判断する。判断材料はdescriptionだけだ。本文（システムプロンプト）はエージェント起動後に読まれるもので、呼び出し判断には使われない。</p>
+
+      <h3>呼ばれるdescriptionの三要素</h3>
+      <p>呼ばれるdescriptionには三つの要素が含まれている。</p>
+
+      <p><strong>①役割の明示</strong>。「このエージェントは何の専門家か」を冒頭で言い切る。「コードレビュー専門家」「セキュリティ監査エージェント」「Python型エラー解決スペシャリスト」など。</p>
+
+      <p><strong>②トリガー条件</strong>。「いつ呼ぶべきか」を具体的に書く。「コードを書いた直後」「ユーザー入力を扱うコードを追加したとき」「ビルドが失敗したとき」など。</p>
+
+      <p><strong>③強度シグナル</strong>。<code>PROACTIVELY</code>（積極的に）や <code>MUST BE USED</code>（必ず使う）といったキーワードが、メインClaudeの呼び出し判断を強める。逆に強度シグナルがないと、メインは「呼ぶのが必須ではない」と判断しがちだ。</p>
+
+      <p>三要素を揃えた例：</p>
+
+      <pre><code>description: Expert security reviewer specializing in detecting OWASP Top 10
+  vulnerabilities. Use PROACTIVELY after writing code that handles user input,
+  authentication, API endpoints, or sensitive data. MUST BE USED before any
+  commit touching auth or payment flows.
+</code></pre>
+
+      <p>役割（OWASP Top 10専門のセキュリティレビュアー）、トリガー（ユーザー入力／認証／APIエンドポイント／機微データを扱うコードの後）、強度（PROACTIVELY / MUST BE USED）── 三つとも含まれている。</p>
+
+      <h3>反トリガー（SKIP条件）の重要性</h3>
+      <p>呼ばれすぎるエージェントを抑える鍵は<strong>「呼ぶべきでない条件の明示」</strong>だ。description に「○○のときは使わない」を含めることで、メインClaudeの過剰呼び出しを防げる。</p>
+
+      <pre><code>description: TRIGGER when: code imports openai/anthropic SDK; user asks for
+  LLM integration. SKIP: provider-neutral wrapper code, general programming
+  questions, files that don't touch model APIs.
+</code></pre>
+
+      <p>「呼ぶ条件」と「呼ばない条件」を対にして書くスタイルは、特に汎用エージェントとの境界が曖昧な専門エージェントで有効だ。</p>
+
+      <div class="sidenote">
+        <p><strong>descriptionの長さ</strong></p>
+        <p>短すぎても長すぎても呼び出し精度は落ちる。20〜80語が実用的なレンジ。一文で「何の専門家で、いつ呼ぶか、いつ呼ばないか」が表現できれば理想。複数文に渡る場合も、最初の一文で要旨を完結させる（メインClaudeが流し読みするときの精度が変わる）。</p>
+      </div>
+
+      <h3>自動起動とマニュアル起動</h3>
+      <p>サブエージェントの起動には二通りある。<strong>自動起動</strong>はメインClaudeが状況判断で勝手に呼ぶ。<strong>マニュアル起動</strong>はユーザーが「○○エージェントを使って」と明示的に指示する。</p>
+
+      <p>自動起動を狙うなら、descriptionに強度シグナル（PROACTIVELY / MUST BE USED）と具体的なトリガー条件を入れる。マニュアル起動だけで十分なエージェント（特殊な調査をするエージェントなど）は、強度シグナルを外し、淡々と役割を記述するだけでよい。</p>
+
+      <p>「どちらでも起動できるが、自動起動はしないでほしい」というケース ── 例えば慎重な操作を伴うエージェント ── では、description末尾に「Invoke only when explicitly requested by the user」のような注意書きを加える。</p>
+
+      <h3>descriptionを更新する習慣</h3>
+      <p>descriptionは書きっぱなしにしない。次の三つのタイミングで見直す。①エージェントを作って数週間使った後（実際の呼び出され方が見えてくる）。②呼ばれるべき場面で呼ばれなかった経験をしたとき。③呼ばれるべきでない場面で呼ばれた経験をしたとき。</p>
+
+      <p>このフィードバックループを回す習慣が、フリート全体の精度を上げる。descriptionはコードと同じくリファクタリング対象だ。</p>
+
+      <div class="key-concept">
+        <h4>呼ばれるdescriptionのテンプレート</h4>
+        <p>次のパターンを基準にすると、呼び出し精度が安定する：</p>
+        <pre><code>{役割の一文宣言}. Use {PROACTIVELY|MUST BE USED} when:
+{具体的トリガー1}; {具体的トリガー2}; {具体的トリガー3}.
+SKIP: {反トリガー1}; {反トリガー2}.</code></pre>
+      </div>
+
+      <div class="summary">
+        <h4>第3章まとめ</h4>
+        <ul>
+          <li>descriptionはメインClaudeへの「呼び出し契約書」。本文ではなくここで起動が決まる</li>
+          <li>三要素 ── 役割の明示／トリガー条件／強度シグナル</li>
+          <li>SKIP条件（反トリガー）を明示することで過剰呼び出しを抑える</li>
+          <li>descriptionは更新する。実際の呼び出され方を観察してチューニングする</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IV</span>
+      <h2 class="chapter__title">ツール権限の設計<br><small style="font-size:0.6em;font-weight:400;">最小権限と信頼境界</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">道具を絞ることは、エージェントの行動を絞ること。tools指定はセキュリティであると同時に振る舞い設計である</p>
+    </header>
+
+    <div class="prose">
+      <p><code>tools</code> フィールドは、表面的にはセキュリティ機能のように見える。たしかに「書き込みを禁じる」「Bash実行を禁じる」といった制限は、誤動作リスクを抑える。しかしtools設計の本質はもっと深い。<strong>「使える道具」が「やる仕事」を規定する</strong>という、より根本的な振る舞い制御として機能する。</p>
+
+      <h3>読み取り専用エージェントの設計</h3>
+      <p>探索系・検査系エージェントは、原則として書き込み権限を持たない。tools指定は次のような形になる。</p>
+
+      <pre><code>tools: Read, Grep, Glob, Bash
+</code></pre>
+
+      <p>Bashは含めているが、これは <code>ls</code> や <code>find</code> や <code>git log</code> など読み取り系コマンドを実行するため。ファイル編集系のWrite/Editを外すことで、エージェントが「自分は調べて報告する役割だ」と自然に理解する。誤って「修正してしまう」事故が起きない。</p>
+
+      <p>Web情報を扱う探索エージェントなら、こうなる。</p>
+
+      <pre><code>tools: Read, Grep, Glob, WebFetch, WebSearch
+</code></pre>
+
+      <p>Bashすら不要なら外す。<strong>「使わない道具を渡さない」</strong>のが鉄則だ。</p>
+
+      <h3>生産系エージェントの権限</h3>
+      <p>実装やリファクタを担う生産系エージェントには、書き込み権限を渡す。ただし丸ごとではなく、必要なものを列挙する。</p>
+
+      <pre><code>tools: Read, Write, Edit, Bash, Grep, Glob
+</code></pre>
+
+      <p>NotebookEdit を扱わないならNotebookEditは含めない。MCPツールを使わないならMCP系も含めない。<strong>権限リストはそのまま「このエージェントの仕事範囲」の宣言</strong>になる。</p>
+
+      <h3>Bash実行の慎重な扱い</h3>
+      <p>Bash権限は最も影響範囲が広い。<code>rm</code> や <code>git push</code> や任意のスクリプト実行が可能になる。生産系エージェントには必要だが、検査系エージェントには本来不要だ。</p>
+
+      <p>ただし「ビルドエラーを実際に再現して原因を特定する」ような検査タスクではBashが必要になる。この場合は権限を渡しつつ、システムプロンプト本文で「変更を加えない」「読み取り目的のコマンドに限る」「破壊的操作は禁止」を明文化する。</p>
+
+      <p>権限とプロンプト指示は<strong>「二重の安全装置」</strong>として機能する。権限で物理的に止め、プロンプトで規範を設ける。どちらか一方では弱い。</p>
+
+      <h3>MCPツールと第三者ツール</h3>
+      <p>MCP（Model Context Protocol）経由で接続された外部ツール（Slack、Gmail、Neon等）も、tools指定でエージェントごとに渡すか止めるかを決められる。原則は「業務に必要なものだけ」。レビュアーにSlack送信権限を渡す理由はない。逆に、コミュニケーション系エージェントにはRead/Editよりも slack_send_message のような外部発信ツールが核になる。</p>
+
+      <p>第三者の発信ツールを持つエージェントは特に慎重に扱う。<strong>「メッセージを送る」「メールを下書きする」といった外向きの行動は、人間のレビューを挟む設計にする</strong>のが原則だ。エージェント単独で送信完了させない。</p>
+
+      <div class="sidenote">
+        <p><strong>権限の継承と上書き</strong></p>
+        <p>toolsを省略するとメインの権限を継承する。明示すると指定されたものだけに絞られる（=継承を上書き）。「メインの権限から特定のものだけ除外したい」場合は、明示的にホワイトリストを書く以外の方法はない。漏れがちな道具はメモしておくと再利用しやすい。</p>
+      </div>
+
+      <h3>権限とdescriptionの整合性</h3>
+      <p>descriptionで「コードを修正します」と書きながらtoolsにEdit/Writeを含めないエージェントを作ってしまうことがある。これは矛盾だ。メインClaudeは「修正できるエージェント」として呼ぶが、起動したエージェントは書き込めずに困惑する。</p>
+
+      <p>逆も同じで、検査系のはずなのにWriteを与えてしまうと、エージェントが「ついでに直しておきました」と勝手に修正する事故が起きる。<strong>description（外向きの宣言）と tools（実際の能力）の整合性</strong>は、定義ファイルを書くたびに確認する。</p>
+
+      <div class="key-concept">
+        <h4>tools設計の原則</h4>
+        <ul>
+          <li>最小権限 ── 使わない道具を渡さない</li>
+          <li>探索系・検査系は書き込み禁止（Read, Grep, Glob, Bash までが目安）</li>
+          <li>生産系は必要なものだけ列挙（NotebookEdit不要なら外す）</li>
+          <li>Bash権限は強力。本文プロンプトで「変更しない」を二重に縛る</li>
+          <li>description と tools の整合性を必ず確認する</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第4章まとめ</h4>
+        <ul>
+          <li>tools指定はセキュリティであり、同時に振る舞い設計でもある</li>
+          <li>使える道具がそのエージェントの仕事範囲を規定する</li>
+          <li>Bash権限は二重の安全装置（権限制限＋プロンプト規範）で扱う</li>
+          <li>外部発信ツールを持つエージェントは人間レビューを必ず挟む</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER V</span>
+      <h2 class="chapter__title">モデル選択の経済学<br><small style="font-size:0.6em;font-weight:400;">Haiku／Sonnet／Opusの使い分け</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">サブエージェントは「いつでもOpus」ではない。職務の重さに応じて頭脳を選ぶ</p>
+    </header>
+
+    <div class="prose">
+      <p>サブエージェントを増やしていくと避けて通れないのが、モデル選択の問題だ。フロントマターの <code>model</code> フィールドで <code>haiku</code> / <code>sonnet</code> / <code>opus</code> のいずれかを指定できる（あるいは省略してメインのモデルを継承する）。何を選ぶかは、コスト・速度・精度の三軸のバランスで決まる。</p>
+
+      <h3>三モデルの位置づけ</h3>
+      <p><strong>Haiku</strong>は軽量・高速・低コスト。深い推論は不要だが定型処理が多い職務に向く。フォーマットチェック、簡単なファイル一覧化、定型的なログ要約、コミットメッセージ生成。判断が単純な反復作業の主力エンジン。</p>
+
+      <p><strong>Sonnet</strong>は主力。コーディング作業の品質と速度のバランスが最も取れている。実装、レビュー、複雑な調査、計画立案。<strong>迷ったらSonnet</strong>が現代の標準解だ。</p>
+
+      <p><strong>Opus</strong>は深い推論用。アーキテクチャ判断、複雑なデバッグ、長文の総合分析、複数の制約を同時に扱う設計問題。高コスト高遅延の代わりに、Sonnetが見落とす微妙な論点を拾ってくる。</p>
+
+      <h3>サブエージェントごとの典型的な選択</h3>
+      <p>役割の三類型と、典型的なモデル選択の対応関係：</p>
+
+      <p><strong>探索系</strong> ── 多くの場合Haikuで足りる。ファイル探索、grep結果の整理、ドキュメント検索は深い推論を必要としない。「大量の生データを要約して返す」職務はHaikuの得意領域だ。広範な探索で精度が落ちるなら、Sonnetに上げる。</p>
+
+      <p><strong>生産系</strong> ── 原則Sonnet。コードを書く・直すは品質依存。Haikuに任せると微妙なバグが混入しやすい。アーキテクチャ判断を含む大規模な実装ならOpusも検討する。</p>
+
+      <p><strong>検査系</strong> ── レビューの種類による。フォーマット・規約チェックのような機械的レビューはHaikuで十分。設計レビュー・セキュリティ監査・複雑なロジック検証はSonnet以上。「見落としを減らすこと」が価値の中心ならOpusも選択肢。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="モデル選択マトリクス">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; fill: #8b7355; letter-spacing: 0.1em; }
+              .fig-h { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; font-weight: 600; }
+              .fig-cell { font-family: 'Noto Serif JP', serif; font-size: 13px; fill: #b85c38; font-weight: 600; }
+            </style>
+          </defs>
+          <text x="300" y="32" class="fig-h" text-anchor="middle">役割とモデル選択の対応</text>
+          <line x1="200" y1="42" x2="400" y2="42" stroke="#c9b99a" stroke-width="0.8"/>
+          <!-- 表 -->
+          <text x="100" y="80" class="fig-label">ROLE</text>
+          <text x="240" y="80" class="fig-label">HAIKU</text>
+          <text x="370" y="80" class="fig-label">SONNET</text>
+          <text x="500" y="80" class="fig-label">OPUS</text>
+          <line x1="40" y1="92" x2="560" y2="92" stroke="#5a4e2e" stroke-width="0.6"/>
+          <!-- 探索系 -->
+          <text x="100" y="120" class="fig-text">探索系</text>
+          <text x="240" y="120" class="fig-cell" text-anchor="middle">主</text>
+          <text x="370" y="120" class="fig-cell" text-anchor="middle">○</text>
+          <text x="500" y="120" class="fig-cell" text-anchor="middle">─</text>
+          <line x1="40" y1="135" x2="560" y2="135" stroke="#c9b99a" stroke-width="0.4"/>
+          <!-- 生産系 -->
+          <text x="100" y="160" class="fig-text">生産系</text>
+          <text x="240" y="160" class="fig-cell" text-anchor="middle">─</text>
+          <text x="370" y="160" class="fig-cell" text-anchor="middle">主</text>
+          <text x="500" y="160" class="fig-cell" text-anchor="middle">○</text>
+          <line x1="40" y1="175" x2="560" y2="175" stroke="#c9b99a" stroke-width="0.4"/>
+          <!-- 検査系 -->
+          <text x="100" y="200" class="fig-text">検査系（機械的）</text>
+          <text x="240" y="200" class="fig-cell" text-anchor="middle">主</text>
+          <text x="370" y="200" class="fig-cell" text-anchor="middle">○</text>
+          <text x="500" y="200" class="fig-cell" text-anchor="middle">─</text>
+          <line x1="40" y1="215" x2="560" y2="215" stroke="#c9b99a" stroke-width="0.4"/>
+          <text x="100" y="240" class="fig-text">検査系（設計・安全）</text>
+          <text x="240" y="240" class="fig-cell" text-anchor="middle">─</text>
+          <text x="370" y="240" class="fig-cell" text-anchor="middle">主</text>
+          <text x="500" y="240" class="fig-cell" text-anchor="middle">○</text>
+          <line x1="40" y1="255" x2="560" y2="255" stroke="#c9b99a" stroke-width="0.4"/>
+          <text x="100" y="280" class="fig-text">アーキテクチャ判断</text>
+          <text x="240" y="280" class="fig-cell" text-anchor="middle">─</text>
+          <text x="370" y="280" class="fig-cell" text-anchor="middle">○</text>
+          <text x="500" y="280" class="fig-cell" text-anchor="middle">主</text>
+        </svg>
+        <p class="figure__caption">主＝典型的な第一選択、○＝条件次第で選択、─＝適さない。サブエージェントの過半数はHaikuまたはSonnetに収まる。</p>
+      </div>
+
+      <h3>「Sonnetでメインを動かしHaikuにサブを任せる」設計</h3>
+      <p>コスト最適化の定石は、メインを高品質なモデル（Sonnet/Opus）にし、頻繁に呼ばれるサブをHaikuに落とす構成だ。メインは判断と統合に集中し、定型的な探索・要約はHaikuサブが大量に処理する。これにより全体の単価が下がる一方、最終的な判断品質は維持できる。</p>
+
+      <p>逆パターン ── Haikuがメインで、特定タスクのときだけOpusを呼ぶ ── も有効。日常の編集はHaikuで安く済ませ、アーキテクチャ判断や複雑なデバッグだけOpusサブを起動する。「重い頭脳を必要なときだけ召喚する」という発想。</p>
+
+      <h3>モデル指定の運用上の注意</h3>
+      <p>モデル名は実行時に解決される。長期間メンテしていないagent定義に古いモデル名が残っていると、いずれ動かなくなる。フリート全体のモデル指定を定期的に棚卸しすることを推奨する。バージョン情報を含むモデル名（<code>claude-sonnet-4-6</code> のような完全名）よりも、エイリアス（<code>sonnet</code>）で書いておく方が長期保守が楽だ。</p>
+
+      <p>また、modelをdescriptionと整合させる。「深い推論を行うアーキテクチャ専門家」とdescriptionに書いてあるのにmodelがHaikuなら、その宣言は実態と乖離する。<strong>三つのレイヤー（description／tools／model）を一貫させる</strong>のがフロントマター設計の核だ。</p>
+
+      <div class="key-concept">
+        <h4>モデル選択の指針</h4>
+        <ul>
+          <li>迷ったらSonnet。Sonnetは「現代のデフォルト」</li>
+          <li>定型処理が多い・スピード重視 → Haiku</li>
+          <li>アーキテクチャ判断・複雑な総合分析 → Opus</li>
+          <li>メインを上位モデルにし、サブの大半をHaikuに落とす構成がコスト効率高い</li>
+          <li>description／tools／model の三層を一貫させる</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第5章まとめ</h4>
+        <ul>
+          <li>三モデルの位置づけを把握する：Haiku=軽量定型、Sonnet=主力、Opus=深い推論</li>
+          <li>役割の三類型ごとに典型的な選択がある（探索系はHaiku主、生産系はSonnet主）</li>
+          <li>メイン高品質＋サブHaikuの「召喚型」設計でコスト最適化</li>
+          <li>description／tools／model の三層を整合させる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VI</span>
+      <h2 class="chapter__title">並列オーケストレーション<br><small style="font-size:0.6em;font-weight:400;">ファンアウトの技法</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">独立したタスクを直列に積むのは、時間と知性の浪費である。並列はサブエージェント機構の最大の恩恵</p>
+    </header>
+
+    <div class="prose">
+      <p>サブエージェントを使う最大の実利は「並列化」だ。複数の独立したタスクを同時並行で走らせ、結果を統合する。直列で30分かかっていた作業が、並列なら10分で終わる。しかし並列化は「Taskを複数呼ぶ」と書けば自動で起きるわけではなく、設計と作法が必要だ。</p>
+
+      <h3>並列呼び出しの基本形</h3>
+      <p>並列実行は、メインClaudeが「一つのメッセージ内で複数のTaskツール呼び出し」を行うことで発生する。直列ではない。複数のtool callを<strong>同じターン内</strong>で発行することが鍵だ。</p>
+
+      <p>典型的な並列パターンを、メインClaudeの内部判断として表現するとこうなる：</p>
+
+      <pre><code>// 並列：単一メッセージ内で複数Taskを発行
+[
+  Task(subagent_type: "security-reviewer", prompt: "認証フロー全体を監査"),
+  Task(subagent_type: "performance-optimizer", prompt: "DB呼び出しのN+1を検出"),
+  Task(subagent_type: "typescript-reviewer", prompt: "型安全性を確認")
+]
+
+// 直列（悪い例）：メッセージを分けてしまうと並列にならない
+Task(...)  // 結果を待つ
+Task(...)  // また結果を待つ
+Task(...)  // また結果を待つ
+</code></pre>
+
+      <p>並列化が成立するのは、<strong>各タスクが互いに独立している</strong>場合のみ。前のタスクの結果が次のタスクの入力になるなら、それは並列化できない直列処理だ。並列化を試みる前に「これらは本当に独立か」を自問する。</p>
+
+      <h3>ファンアウト／ファンインの構造</h3>
+      <p>並列オーケストレーションの基本構造は<strong>「ファンアウト → 並列処理 → ファンイン」</strong>だ。メインが複数のサブに仕事を放ち（ファンアウト）、それぞれが独立して結果を返し、メインが結果を統合する（ファンイン）。</p>
+
+      <p>ファンアウトの分割設計が並列化の質を決める。良い分割は、各サブが「自分だけで完結できる」「他のサブの結果を待たない」「結果が小さく要約済み」の三条件を満たす。悪い分割は、サブ同士が暗黙の前提を共有していたり、結果が膨大で統合が難しかったりする。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="ファンアウト・ファンイン構造">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.12em; }
+            </style>
+          </defs>
+          <!-- ファンアウト矢印 -->
+          <circle cx="120" cy="140" r="28" fill="#b85c38" opacity="0.9"/>
+          <text x="120" y="144" class="fig-text" text-anchor="middle" fill="#faf6ef" font-weight="600">Main</text>
+          <text x="120" y="100" class="fig-label" text-anchor="middle">DIRECTOR</text>
+
+          <line x1="148" y1="125" x2="240" y2="70" stroke="#8b7355" stroke-width="1.2"/>
+          <line x1="148" y1="140" x2="240" y2="140" stroke="#8b7355" stroke-width="1.2"/>
+          <line x1="148" y1="155" x2="240" y2="210" stroke="#8b7355" stroke-width="1.2"/>
+
+          <rect x="240" y="50" width="100" height="40" rx="3" fill="#5a4e2e" opacity="0.85"/>
+          <text x="290" y="74" class="fig-text" text-anchor="middle" fill="#faf6ef">sub A</text>
+          <rect x="240" y="120" width="100" height="40" rx="3" fill="#5a4e2e" opacity="0.85"/>
+          <text x="290" y="144" class="fig-text" text-anchor="middle" fill="#faf6ef">sub B</text>
+          <rect x="240" y="190" width="100" height="40" rx="3" fill="#5a4e2e" opacity="0.85"/>
+          <text x="290" y="214" class="fig-text" text-anchor="middle" fill="#faf6ef">sub C</text>
+
+          <!-- ファンイン矢印 -->
+          <line x1="340" y1="70" x2="430" y2="125" stroke="#8b7355" stroke-width="1.2"/>
+          <line x1="340" y1="140" x2="430" y2="140" stroke="#8b7355" stroke-width="1.2"/>
+          <line x1="340" y1="210" x2="430" y2="155" stroke="#8b7355" stroke-width="1.2"/>
+
+          <circle cx="460" cy="140" r="28" fill="#b85c38" opacity="0.9"/>
+          <text x="460" y="144" class="fig-text" text-anchor="middle" fill="#faf6ef" font-weight="600">Main</text>
+          <text x="460" y="100" class="fig-label" text-anchor="middle">SYNTHESIZER</text>
+
+          <text x="290" y="262" class="fig-label" text-anchor="middle">PARALLEL EXECUTION</text>
+        </svg>
+        <p class="figure__caption">ファンアウト（分割発注）→ 並列処理 → ファンイン（結果統合）。指揮官の仕事は「割る」と「束ねる」に集中する。</p>
+      </div>
+
+      <h3>多視点レビュー（split role）パターン</h3>
+      <p>並列化の典型的応用が<strong>「多視点レビュー」</strong>だ。同じ成果物を複数の視点から並行レビューさせ、観点ごとの指摘を集める。例えば一つのPRに対して：</p>
+
+      <pre><code>並列に三つのレビュアーを起動：
+- security-reviewer ── OWASP観点
+- performance-optimizer ── N+1とバンドルサイズ観点
+- typescript-reviewer ── 型安全と非同期観点
+</code></pre>
+
+      <p>各レビュアーは独立して動き、メインに結果を返す。メインは三者の指摘を統合し、重複を整理し、重大度順に並べてユーザーに提示する。直列で同じことをやると、後発のレビュアーが先発の指摘に引きずられて視点が偏ることがある。並列なら独立性が保たれる。</p>
+
+      <h3>並列の限界 ── 直列が必要な場面</h3>
+      <p>並列化は万能ではない。次のような場面では直列が正しい：</p>
+
+      <p><strong>結果が次の入力になる</strong>ケース：探索エージェントの結果を見てから実装エージェントを呼ぶ、レビューの結果を見てから修正エージェントを呼ぶ、など。これらは因果関係があるので並列にしてはいけない。</p>
+
+      <p><strong>同じファイルを編集する</strong>ケース：複数の生産系エージェントを並列に走らせて同じファイルを触らせると、互いの変更を上書きする。生産系の並列は「異なるファイルを担当する」場合に限る。</p>
+
+      <p><strong>結果の統合に判断が必要な前段階</strong>：細かな探索を複数並列で走らせた後、その統合判断のためにさらに別のエージェントを呼ぶなら、その呼び出しは直列。</p>
+
+      <h3>並列実行時の注意</h3>
+      <p>並列で多数のサブエージェントを同時に走らせると、メインのコンテキストに大量の結果が一気に流れ込む。各サブの戻り値が冗長だと、ファンインで詰まる。<strong>並列化を成功させる鍵は、各サブに「要約して返す」「結論だけ返す」を徹底させること</strong>だ。コンテキスト経済学（次章）と密接に関わる。</p>
+
+      <p>また、並列数が多すぎる（5個以上同時など）と、メインがどのサブを起動したか追跡しづらくなる。3〜4並列が実用上の上限と考えてよい。</p>
+
+      <div class="key-concept">
+        <h4>並列オーケストレーションの作法</h4>
+        <ul>
+          <li>一つのメッセージ内で複数Taskを発行する（直列ではない）</li>
+          <li>並列化の前提：各タスクが互いに独立している</li>
+          <li>ファンアウト → 並列処理 → ファンイン の構造を意識する</li>
+          <li>多視点レビューは並列化の典型応用（独立性が保たれる）</li>
+          <li>結果が次の入力になる場合・同じファイルを触る場合は直列で</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第6章まとめ</h4>
+        <ul>
+          <li>並列化はサブエージェント機構の最大の恩恵 ── 直列化された無駄を解消する</li>
+          <li>一つのメッセージ内で複数Taskを発行することが並列化の必要条件</li>
+          <li>多視点レビュー（split role）は並列化の代表的応用パターン</li>
+          <li>並列の限界：因果関係がある／同じファイルを触る／統合に判断が要る場面は直列</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VII</span>
+      <h2 class="chapter__title">コンテキスト経済学<br><small style="font-size:0.6em;font-weight:400;">委譲は最大の節約である</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">サブエージェントの真価は「能力を借りる」ではなく「メインのコンテキスト窓を守る」ことにある</p>
+    </header>
+
+    <div class="prose">
+      <p>長時間のセッションを経験した人なら誰でも、ある時点でClaudeの応答が鈍る、判断がぼやける、過去の指示を忘れる、といった現象に気づいているはずだ。これはコンテキスト窓に大量の情報が積み上がり、有効な思考領域が圧迫されたサインだ。</p>
+
+      <p>サブエージェントは、この問題に対する構造的な解だ。<strong>調査や検査の生データをメインのコンテキストに持ち込まず、サブで処理して要約だけを返す</strong>。メインは結論だけを受け取って判断に専念する。これがサブエージェントが提供する「コンテキスト経済学」の本質である。</p>
+
+      <h3>サブのコンテキストはブラックボックス</h3>
+      <p>サブエージェントは独立したコンテキストで動く。サブが何百ファイルをReadしようが、Bashで巨大なログを吐かせようが、それらはサブのコンテキスト内に閉じる。メインに返ってくるのはサブの最終応答だけだ。</p>
+
+      <p>この性質は、リサーチや検索のような<strong>「大量に読む必要があるが、最終的に必要なのは結論だけ」</strong>のタスクに最適だ。例えば「このコードベース全体でユーザー認証を扱っている箇所を列挙し、共通パターンを要約せよ」というタスクをメインで実行すると、何十ファイルもの中身がメインのコンテキストに流れ込む。同じタスクを探索系サブに渡せば、メインには「3つの認証パターンが存在する：A方式（X件）、B方式（Y件）、C方式（Z件）。詳細は……」という10行の要約だけが戻ってくる。</p>
+
+      <div class="sidenote">
+        <p><strong>コンテキスト窓は希少資源</strong></p>
+        <p>「Sonnet 4は1Mコンテキストだから余裕」と思うかもしれない。だが実用上、20万トークンを超えたあたりから思考の鋭さは目に見えて落ちる。窓のサイズではなく、<strong>窓に何が入っているか</strong>が応答品質を決める。サブエージェントは「窓に入れずに済ませる」技術である。</p>
+      </div>
+
+      <h3>戻り値設計 ── サブに「短く返せ」と伝える</h3>
+      <p>サブエージェントの戻り値設計は、コンテキスト経済学の中核だ。サブを呼ぶときのpromptに、明示的に出力形式を指定する。</p>
+
+      <pre><code>Task(subagent_type: "explorer", prompt: "
+  認証フローの全実装箇所を調査せよ。
+
+  出力形式：
+  - パターン分類（最大3つ）
+  - 各パターンのファイル数とパス例（最大3ファイル）
+  - 全体の総括（150字以内）
+
+  生のコード断片は返さない。要約のみ。
+")
+</code></pre>
+
+      <p>「出力形式」と「禁止事項」を明示することで、サブの戻り値が暴れない。これを書かずに「調査してください」とだけ伝えると、サブは丁寧に生データを大量に返してきて、メインのコンテキストを汚染する。</p>
+
+      <h3>探索系サブの真価</h3>
+      <p>探索系サブエージェントの真価は、まさにこのコンテキスト経済学にある。Read/Grep/Globで数十ファイルを読みながら、最終的に短い要約だけをメインに返す。メインは「読まずに済む」ことで思考領域を守れる。</p>
+
+      <p>「コードベース調査」「ドキュメント検索」「ライブラリ仕様の確認」「過去の類似実装の発見」── これらはすべて探索系サブの担当領域だ。メインClaudeが「自分で <code>grep</code> してから判断しよう」と動くと、grep結果の数百行がメインに流れ込む。同じことをサブに任せれば、結論の数行だけが戻ってくる。</p>
+
+      <h3>生産系・検査系での戻り値節約</h3>
+      <p>生産系・検査系のサブにも、戻り値節約の発想は適用できる。</p>
+
+      <p>生産系では、<strong>「変更内容を全部復唱しない」</strong>。サブが10ファイルに変更を加えたとき、それぞれの変更内容をメインに長文で返す必要はない。「10ファイル変更、主な変更：認証フックの導入、エラー処理の統一、型定義の集約。詳細は git diff で確認可能」程度で十分だ。</p>
+
+      <p>検査系では、<strong>「重大度別の指摘リスト」</strong>形式に統一する。CRITICAL / HIGH / MEDIUM / LOW の四段階で構造化された出力は、コンパクトで、メインが優先度判断しやすく、ユーザーに提示しやすい。長文の説明はLOW以下の優先度に押し込む。</p>
+
+      <h3>「読まずに済む」を設計する</h3>
+      <p>サブエージェント運用を突き詰めると、「メインが何を読まずに済むか」を最大化する設計に行き着く。<strong>「メインClaudeのコンテキストに直接データを入れていいのは、本当に判断に使うものだけ」</strong>という規律を持つ。</p>
+
+      <p>大量のログ、巨大なドキュメント、長大なAPI応答、デバッグ用の生データ ── これらはサブに処理させて要約だけ受け取る。メインの仕事は<strong>判断と統合</strong>であり、データ処理ではない。役割を分けることで、双方が最良の働きをする。</p>
+
+      <div class="key-concept">
+        <h4>コンテキスト経済学の実装ルール</h4>
+        <ul>
+          <li>サブ呼び出し時のpromptに必ず「出力形式」と「禁止事項」を書く</li>
+          <li>大量読み込みを伴う調査は必ず探索系サブに委譲する</li>
+          <li>サブの戻り値は「要約／結論／重大度付きリスト」のいずれかに整える</li>
+          <li>「メインClaudeが直接読むべきデータ」を最小化する</li>
+          <li>メインの仕事は判断と統合。データ処理ではない</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第7章まとめ</h4>
+        <ul>
+          <li>サブエージェントの真価は「能力の借り受け」ではなく「コンテキストの保護」にある</li>
+          <li>サブのコンテキストはブラックボックス。生データは中に閉じ込めて要約だけ受け取る</li>
+          <li>Task呼び出しのpromptで出力形式・禁止事項を明示し、戻り値の暴れを抑える</li>
+          <li>「読まずに済む」設計を意識し、メインの思考領域を守る</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VIII</span>
+      <h2 class="chapter__title">失敗パターン六選<br><small style="font-size:0.6em;font-weight:400;">起動しない・暴走・形骸化</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントは作って終わりではなく、失敗パターンと付き合う運用の対象である</p>
+    </header>
+
+    <div class="prose">
+      <p>自作エージェントが期待通りに動かないとき、症状は六つのパターンに集約される。それぞれに原因と対処がある。本章ではこれらを順に解剖していく。</p>
+
+      <h3>失敗1：呼ばれないエージェント</h3>
+      <p><strong>症状</strong>：作ったのにメインClaudeがほとんど呼んでくれない。明らかにそのエージェントの担当領域なのに、メインが自力で処理してしまう。</p>
+
+      <p><strong>原因</strong>：descriptionが弱い。役割宣言が曖昧、トリガー条件が抽象的、強度シグナル（PROACTIVELY / MUST BE USED）がない。</p>
+
+      <p><strong>対処</strong>：descriptionを書き直す。「いつ呼ぶべきか」を具体例で示し、強度シグナルを加える。第3章のテンプレートを参考に。それでも呼ばれないなら、ユーザー側で「○○エージェントを使って」と数回明示的に呼んで、運用知見を蓄積してから再調整する。</p>
+
+      <h3>失敗2：呼ばれすぎるエージェント</h3>
+      <p><strong>症状</strong>：些細な作業でも片っ端から呼びにくる。本来メインで直接処理した方が速い場面でも、わざわざサブを起動する。レスポンスが遅く、コストも嵩む。</p>
+
+      <p><strong>原因</strong>：descriptionが広すぎる。SKIP条件（反トリガー）が書かれていない。強度シグナルが過剰。</p>
+
+      <p><strong>対処</strong>：「○○のときは使わない」を明記する。トリガー条件をより具体化する。MUST BE USEDのような最強の強度シグナルを使うのは、本当に必須の場面に限る。</p>
+
+      <h3>失敗3：メインが自分でやってしまう</h3>
+      <p><strong>症状</strong>：明らかにエージェントの担当領域なのに、メインが「ちょっと自分でやった方が速いから」と判断して自力で処理してしまう。レビューエージェントを作ったのにメインがレビューしてしまう、など。</p>
+
+      <p><strong>原因</strong>：description に「MUST BE USED」が入っていない、または、メイン側の指示（ユーザープロンプトやCLAUDE.md）に「自分でやらず○○エージェントを使う」が書かれていない。</p>
+
+      <p><strong>対処</strong>：プロジェクトのCLAUDE.mdやユーザー指示で「コードを書いた直後は必ず code-reviewer を呼ぶ」のように規範化する。エージェント側のdescriptionだけに頼らず、運用ルールとして強制する。</p>
+
+      <h3>失敗4：サブが勝手な判断をする</h3>
+      <p><strong>症状</strong>：レビュー専門のはずのエージェントが、ついでに修正までしてしまう。調査専門のはずが、勝手にコードを書き換えてしまう。</p>
+
+      <p><strong>原因</strong>：tools権限の過剰付与。検査系・探索系にEdit/Write/Bashを与えている。本文のシステムプロンプトに「修正しない」「読み取りのみ」が書かれていない。</p>
+
+      <p><strong>対処</strong>：第4章の最小権限原則を適用する。tools指定からEdit/Writeを外す。同時に本文に「You MUST NOT modify any files. Report only.」のような明示的禁止を入れる。権限とプロンプトの二重縛りで防ぐ。</p>
+
+      <h3>失敗5：結果が肥大化する</h3>
+      <p><strong>症状</strong>：サブが返してくる結果が長大で、メインのコンテキストを圧迫する。複数並列で呼び出すと顕著に悪化する。</p>
+
+      <p><strong>原因</strong>：Task呼び出し時のpromptに「出力形式」「禁止事項」が書かれていない。サブのシステムプロンプト本文に「要約して返す」「結論のみ返す」が書かれていない。</p>
+
+      <p><strong>対処</strong>：第7章のコンテキスト経済学を適用する。Task promptに出力形式を明記する。サブの本文に「Report under 200 words」「Generic data should not be returned」を入れる。</p>
+
+      <h3>失敗6：古びたエージェントが残る</h3>
+      <p><strong>症状</strong>：フリートが10個を超えた頃から、何のために作ったか覚えていないエージェントが出現する。description が古くなって実態と合わない。モデル名が古い指定のまま放置されている。</p>
+
+      <p><strong>原因</strong>：エージェント定義はコードと同じく時間とともに陳腐化するが、定期的な棚卸しの習慣がない。</p>
+
+      <p><strong>対処</strong>：第9章のフリート運用に従い、四半期ごとに <code>~/.claude/agents/</code> を全件レビューする。「直近3ヶ月で一度も呼ばれていない」エージェントは削除候補。description が実態と合わないものは更新するか廃棄する。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="失敗パターンと対処">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.1em; }
+              .fig-h { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; font-weight: 600; }
+              .fig-cause { font-family: 'Noto Serif JP', serif; font-size: 10px; fill: #b85c38; }
+            </style>
+          </defs>
+          <text x="300" y="32" class="fig-h" text-anchor="middle">六つの失敗パターンと根本原因</text>
+          <line x1="180" y1="42" x2="420" y2="42" stroke="#c9b99a" stroke-width="0.8"/>
+          <text x="50" y="78" class="fig-label">SYMPTOM</text>
+          <text x="350" y="78" class="fig-label">ROOT CAUSE</text>
+          <line x1="40" y1="88" x2="560" y2="88" stroke="#5a4e2e" stroke-width="0.5"/>
+
+          <text x="50" y="110" class="fig-text">① 呼ばれない</text>
+          <text x="350" y="110" class="fig-cause">description が弱い／強度シグナル不足</text>
+          <line x1="40" y1="122" x2="560" y2="122" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="50" y="140" class="fig-text">② 呼ばれすぎる</text>
+          <text x="350" y="140" class="fig-cause">SKIP条件なし／description が広い</text>
+          <line x1="40" y1="152" x2="560" y2="152" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="50" y="170" class="fig-text">③ メインが自分でやる</text>
+          <text x="350" y="170" class="fig-cause">運用ルール（CLAUDE.md）の不在</text>
+          <line x1="40" y1="182" x2="560" y2="182" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="50" y="200" class="fig-text">④ サブが勝手に判断</text>
+          <text x="350" y="200" class="fig-cause">tools 過剰付与／プロンプト禁止文言なし</text>
+          <line x1="40" y1="212" x2="560" y2="212" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="50" y="230" class="fig-text">⑤ 結果が肥大化</text>
+          <text x="350" y="230" class="fig-cause">出力形式の未指定</text>
+          <line x1="40" y1="242" x2="560" y2="242" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="50" y="260" class="fig-text">⑥ 古びて使われない</text>
+          <text x="350" y="260" class="fig-cause">フリート棚卸しの習慣なし</text>
+        </svg>
+        <p class="figure__caption">どの症状も「設定／プロンプト／運用ルール」のどこかの不備に対応する。原因と対処が特定できれば、症状は再発しなくなる。</p>
+      </div>
+
+      <div class="key-concept">
+        <h4>失敗パターンの診断順</h4>
+        <p>エージェントが期待通りに動かないとき、次の順で確認する：</p>
+        <ol>
+          <li>description は具体的か（役割／トリガー／強度／SKIP）</li>
+          <li>tools は最小権限か（探索系・検査系は書き込み禁止）</li>
+          <li>本文プロンプトに禁止事項と出力形式があるか</li>
+          <li>Task呼び出し側のpromptで出力形式を指定したか</li>
+          <li>運用ルール（CLAUDE.md等）で呼び出しが規範化されているか</li>
+        </ol>
+      </div>
+
+      <div class="summary">
+        <h4>第8章まとめ</h4>
+        <ul>
+          <li>エージェントの失敗症状は六つに集約される ── どれも設定／プロンプト／運用ルールに原因がある</li>
+          <li>呼ばれない／呼ばれすぎる：descriptionの設計問題</li>
+          <li>勝手な判断をする：tools権限とプロンプト禁止文言の問題</li>
+          <li>結果肥大化：出力形式の未指定</li>
+          <li>形骸化：定期棚卸しの習慣不足</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IX</span>
+      <h2 class="chapter__title">フリート運用<br><small style="font-size:0.6em;font-weight:400;">エージェントを「組織」として扱う</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">5個のエージェントは「集まり」、20個のエージェントは「組織」である。組織には組織の設計と運用が要る</p>
+    </header>
+
+    <div class="prose">
+      <p>エージェントが数個のうちは、個別に作って個別に使えばよい。だが10個を超え、20個に近づく頃から、フリート全体の設計と運用が問題になる。どのエージェントがあるか把握できない、似た役割が並立する、descriptionの方針が一貫しない、使われないエージェントが温存される。これらは個別エージェントの問題ではなく<strong>フリート全体の問題</strong>だ。</p>
+
+      <h3>カタログを持つ</h3>
+      <p>フリートが10個を超えたら、エージェントカタログを作る。<code>~/.claude/agents/</code> の直下にREADMEを置き、各エージェントの目的・役割類型・呼び出しタイミングを一覧化する。</p>
+
+      <pre><code># Agent Fleet Catalog
+
+## Reviewers（検査系）
+- code-reviewer        ── 言語非依存の一般レビュー
+- typescript-reviewer  ── 型安全性／非同期／セキュリティ
+- security-reviewer    ── OWASP Top 10 ／ 機微データ
+- performance-optimizer── N+1／バンドル／レンダ最適化
+
+## Producers（生産系）
+- tdd-guide            ── テスト先行で実装
+- refactor-cleaner     ── 不要コードの削除と統合
+- doc-updater          ── ドキュメント更新
+
+## Explorers（探索系）
+- planner              ── 実装計画
+- architect            ── アーキテクチャ判断
+- general-purpose      ── 汎用調査
+</code></pre>
+
+      <p>カタログは <strong>「自分が何を持っているか」を一目で把握する</strong>ための地図だ。新規エージェントを作る前に必ず眺め、既存と重複していないかを確認する。</p>
+
+      <h3>命名規則の統一</h3>
+      <p>フリート内のエージェント名には命名規則を持つ。例えば：</p>
+
+      <ul>
+        <li>レビュー系：<code>{言語|領域}-reviewer</code>（typescript-reviewer, security-reviewer）</li>
+        <li>ビルド解決系：<code>{言語}-build-resolver</code>（rust-build-resolver, java-build-resolver）</li>
+        <li>テスト系：<code>{役割}-runner</code> or <code>{役割}-guide</code>（e2e-runner, tdd-guide）</li>
+      </ul>
+
+      <p>規則があると、新規追加時に「この役割なら名前はこうなるはずだ」と即座に決まる。逆に既存の規則を破る命名は、フリートに「異物」を作る。</p>
+
+      <h3>ロール体系の設計</h3>
+      <p>フリートが20個を超えるなら、エージェント群を「ロール」でグルーピングする。レビュアー陣、実装者陣、探索者陣、ビルド解決者陣、UX/デザイン陣、運用系。各ロールに3〜5名程度の専門家を配置する。</p>
+
+      <p>このグルーピングは、メインClaudeに直接認識されるわけではないが、<strong>あなた自身がフリートを管理する単位</strong>として機能する。新規追加するなら「このロールに不足はないか」、削除するなら「このロールの整合性を崩さないか」と考えられる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="フリート構造">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 10px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 9px; fill: #8b7355; letter-spacing: 0.1em; }
+              .fig-role { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #b85c38; font-weight: 600; }
+            </style>
+          </defs>
+          <!-- 中央：メイン -->
+          <circle cx="300" cy="160" r="36" fill="#b85c38" opacity="0.9"/>
+          <text x="300" y="158" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="12" font-weight="600">Main</text>
+          <text x="300" y="174" class="fig-text" text-anchor="middle" fill="#faf6ef" font-size="9">Director</text>
+
+          <!-- 4ロールのクラスタ -->
+          <!-- 左上：Reviewers -->
+          <text x="90" y="48" class="fig-role" text-anchor="middle">Reviewers</text>
+          <circle cx="60" cy="80" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="100" cy="65" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="140" cy="80" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="100" cy="105" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <line x1="265" y1="140" x2="120" y2="95" stroke="#8b7355" stroke-width="0.7" stroke-dasharray="3,3"/>
+
+          <!-- 右上：Producers -->
+          <text x="510" y="48" class="fig-role" text-anchor="middle">Producers</text>
+          <circle cx="480" cy="80" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="520" cy="65" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="560" cy="80" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="520" cy="105" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <line x1="335" y1="140" x2="490" y2="95" stroke="#8b7355" stroke-width="0.7" stroke-dasharray="3,3"/>
+
+          <!-- 左下：Explorers -->
+          <text x="90" y="290" class="fig-role" text-anchor="middle">Explorers</text>
+          <circle cx="60" cy="245" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="100" cy="260" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="140" cy="245" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="100" cy="225" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <line x1="265" y1="180" x2="120" y2="240" stroke="#8b7355" stroke-width="0.7" stroke-dasharray="3,3"/>
+
+          <!-- 右下：Resolvers -->
+          <text x="510" y="290" class="fig-role" text-anchor="middle">Resolvers</text>
+          <circle cx="480" cy="245" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="520" cy="260" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="560" cy="245" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <circle cx="520" cy="225" r="15" fill="#5a4e2e" opacity="0.85"/>
+          <line x1="335" y1="180" x2="490" y2="240" stroke="#8b7355" stroke-width="0.7" stroke-dasharray="3,3"/>
+        </svg>
+        <p class="figure__caption">フリートをロール単位でグルーピングする。指揮官は各ロールの「人数バランス」と「役割の欠け」を俯瞰できる。</p>
+      </div>
+
+      <h3>定期棚卸し ── 陳腐化との戦い</h3>
+      <p>エージェント定義は時間とともに陳腐化する。技術スタックが変わる、プロジェクトの方向が変わる、新しいモデルが出る、Claude Code側のAPI仕様が変わる。四半期に一度、フリート全体を棚卸しする。</p>
+
+      <p>棚卸しのチェック項目：</p>
+      <ul>
+        <li>直近3ヶ月で一度も呼ばれていないエージェントはあるか（候補：削除）</li>
+        <li>descriptionと実態がズレているエージェントはあるか（候補：更新）</li>
+        <li>同じ役割を持つエージェントが並立していないか（候補：統合）</li>
+        <li>モデル指定が古いままのエージェントはないか（候補：エイリアス指定に書き換え）</li>
+        <li>命名規則から外れた異物はないか（候補：リネーム）</li>
+      </ul>
+
+      <p>削除を恐れない。<strong>使われないエージェントが残ると、フリート全体の見通しが悪化する</strong>。「いつか使うかも」で温存するくらいなら、必要になったときに作り直す方がよい。</p>
+
+      <h3>個人ECCとしてのフリート</h3>
+      <p>大きな組織には Engineering Center of Excellence（ECC）のような、品質基準と方法論を集約する部署がある。サブエージェント・フリートは、いわば<strong>「個人版ECC」</strong>として機能する。あなたの過去の経験・規約・チェックリスト・方法論が、エージェント群として永続化される。</p>
+
+      <p>レビュー観点、テスト書き方、コミットメッセージの規範、ドキュメント更新のチェック ── これらをすべてエージェントに焼き付けることで、毎回ゼロから指示する必要がなくなる。<strong>あなた自身が一人の組織になっていく</strong>。これがフリート運用の到達点だ。</p>
+
+      <div class="key-concept">
+        <h4>フリート運用の実践チェック</h4>
+        <ul>
+          <li>エージェントが10個を超えたらカタログ（README）を作る</li>
+          <li>命名規則を統一する（言語-役割 のような型）</li>
+          <li>ロール単位でグルーピングし、各ロールの過不足を意識する</li>
+          <li>四半期ごとに棚卸し ── 削除・統合・更新を躊躇しない</li>
+          <li>フリートはあなたの方法論の永続化先。育てる対象である</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第9章まとめ</h4>
+        <ul>
+          <li>5個は「集まり」、20個は「組織」── フリート全体の設計と運用が必要になる</li>
+          <li>カタログ・命名規則・ロール体系の三点でフリートを構造化する</li>
+          <li>四半期ごとに棚卸しし、陳腐化したエージェントは躊躇なく削除・統合する</li>
+          <li>フリートはあなたの方法論を永続化する「個人版ECC」である</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第10章
+     ============================================ -->
+<section class="chapter" id="ch10">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER X</span>
+      <h2 class="chapter__title">指揮の作法<br><small style="font-size:0.6em;font-weight:400;">委譲と非委譲の判断</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">エージェントを増やすほど、あなたの仕事は「やる」から「割り振る」へと変わっていく。指揮の作法を持つこと</p>
+    </header>
+
+    <div class="prose">
+      <p>フリートが整い、各エージェントが信頼できる動きをするようになると、あなた（人間ユーザー）の役割は徐々に変わっていく。コードを書く時間が減り、何を作るか・誰に任せるか・結果をどう統合するかを判断する時間が増える。これは個人開発者が「ひとり指揮官」へと進化していく道筋だ。本章では、その指揮の作法を扱う。</p>
+
+      <h3>委譲する判断・自分でやる判断</h3>
+      <p>すべての作業をエージェントに任せるべきではない。次の作業は人間（あなた）が直接行うべきだ。</p>
+
+      <p><strong>方向性の決定</strong>：何を作るか、どの問題を解くか、優先順位はどうかは人間の判断領域。エージェントに「次に何をすべきか考えて」と丸投げすると、たいてい無難で凡庸な選択肢が返ってくる。方向性は人間が決め、実行をエージェントに渡す。</p>
+
+      <p><strong>価値判断を伴うトレードオフ</strong>：技術選択（このライブラリを使うか自前実装か）、UX判断（このボタンの文言は何が正解か）、ビジネス判断（この機能を出すべきか）。客観的な正解がなく、価値観が絡む選択は人間の領域。</p>
+
+      <p><strong>外向きのコミュニケーション</strong>：クライアントへのメッセージ、チームメンバーへの依頼、PRレビューでの議論。エージェントに下書きまでは作らせてよいが、送信前に必ず人間が読む。</p>
+
+      <p><strong>クリエイティブな起点</strong>：新しいプロダクトのアイデア、デザインの方向性、文章の骨子。エージェントは「あなたの方向性を膨らませる」のは得意だが、ゼロから方向性を生み出す役割には向かない。</p>
+
+      <h3>エージェントに任せる仕事</h3>
+      <p>逆に、エージェントに任せるべき仕事は明確だ。</p>
+
+      <p><strong>反復性の高い実装</strong>：CRUDの追加、コンポーネントの新規作成、テストの追加、似た構造のリファクタ。</p>
+
+      <p><strong>規約・観点が明文化できる検査</strong>：コードレビュー、セキュリティ監査、アクセシビリティチェック、パフォーマンス検査。観点リストを持っている作業はすべてエージェント化できる。</p>
+
+      <p><strong>大量読み込みを伴う調査</strong>：「コードベース全体で○○を使っている箇所を列挙」「過去のPRで類似ケースがあるか確認」「ライブラリのドキュメントから関連箇所を抽出」。</p>
+
+      <p><strong>形式変換</strong>：ログの整形、データ抽出と要約、ドキュメントの構造化、コミットメッセージ生成。</p>
+
+      <h3>信頼境界の設計</h3>
+      <p>エージェントの結果をどこまで信頼するか ── これが指揮の中核判断だ。三段階に分けて考える。</p>
+
+      <p><strong>無条件で受け入れる</strong>：軽微な編集、フォーマット、コミットメッセージ生成、規約に基づく機械的レビュー。これらはエージェントの判断をそのまま反映する。</p>
+
+      <p><strong>確認してから受け入れる</strong>：実装、リファクタ、テスト追加、設計レビューの結論。エージェントの結果に目を通し、納得してから次へ。多くの作業がこの層に属する。</p>
+
+      <p><strong>必ず人間レビューを経由する</strong>：外向きの送信（メール、Slack、コミットメッセージ）、データベース変更、本番デプロイ、機微情報の取り扱い、契約や金銭が絡む判断。エージェントが下書きを作っても、最終確認と決定は人間が行う。</p>
+
+      <p>この三層をあらかじめ意識しておくことで、「思考停止で受け入れる」「全部疑って消耗する」のどちらも避けられる。エージェントに対する適度な信頼と適度な監視のバランスが、長期的な運用効率を決める。</p>
+
+      <h3>結果統合の作法</h3>
+      <p>並列で複数のエージェントを走らせた後、結果を統合するのは人間（あるいはメインClaude）の仕事だ。統合の作法は三つ。</p>
+
+      <p>①<strong>重複を排除する</strong>：複数のレビュアーが同じ指摘を出していることがある。重複を排除し、ユニークな指摘だけ残す。</p>
+
+      <p>②<strong>優先順位を付ける</strong>：CRITICAL → HIGH → MEDIUM → LOW で並び替え、対応順を決める。</p>
+
+      <p>③<strong>判断と却下を明示する</strong>：すべての指摘に対応する必要はない。「これは却下：理由は…」を記録しておくことで、次回同じ指摘が来たときに迷わない。</p>
+
+      <h3>人間に残る仕事</h3>
+      <p>サブエージェントを使いこなすほど、人間に残る仕事の輪郭がはっきりしてくる。<strong>方向を決めること、価値判断をすること、相手とコミュニケーションすること、エージェントが出した結果を統合して判断すること</strong>。これらは現時点ではエージェントに完全に任せられない領域だ。</p>
+
+      <p>だからこそ、エージェントに任せられる作業はすべて任せる。あなたの認知資源を、人間にしかできないことに集中させる。それがサブエージェント運用の最終的な目標である。</p>
+
+      <div class="key-concept">
+        <h4>指揮判断の三層モデル</h4>
+        <ul>
+          <li><strong>無条件で受け入れる</strong>：機械的な反復処理、定型レビュー</li>
+          <li><strong>確認してから受け入れる</strong>：実装、リファクタ、設計判断</li>
+          <li><strong>必ず人間レビューを経由する</strong>：外向き送信、本番変更、機微情報、契約・金銭</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第10章まとめ</h4>
+        <ul>
+          <li>委譲すべき仕事：反復性の高い実装、規約ベースの検査、大量読み込み調査、形式変換</li>
+          <li>非委譲：方向性の決定、価値判断、外向きコミュニケーション、クリエイティブな起点</li>
+          <li>信頼境界は三層 ── 無条件／確認／必須人間レビュー</li>
+          <li>結果統合の作法 ── 重複排除・優先順位付け・判断と却下の明示</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">編成は思考である</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">フリートを設計することは、自分の思考過程を設計することと同じである</p>
+    </header>
+
+    <div class="prose">
+      <p>本書を通じて見てきたのは、表面的にはClaude Codeのサブエージェント機構の使い方だった。しかし本質的には、もっと深いものを扱ってきた ── <strong>「思考を分業する」</strong>という、知的作業そのものの設計だ。</p>
+
+      <p>あなたがエージェントを作るとき、「どの作業を切り出すか」「どんな観点を焼き付けるか」「いつ呼ぶべきか」を考える。これらの問いに答えることは、自分自身の作業フローを言語化し、構造化する作業に他ならない。エージェント定義ファイルは、あなたの<strong>思考過程が外化された姿</strong>だ。</p>
+
+      <h3>フリートはあなた自身である</h3>
+      <p>長くフリートを育ててきた人のagent群を眺めると、その人の思考のクセや関心がそのまま見える。どんなレビュー観点を重視するか、どんな調査を頻繁にするか、どこに慎重で、どこを自動化したいか。フリートは技術的なツール群であると同時に、<strong>あなたの仕事観と方法論のアーカイブ</strong>である。</p>
+
+      <p>だからこそ、他人のagent定義をそのままコピーして使うのは難しい。表面的には同じ役割でも、その人の思考のクセが滲んだプロンプトは、自分の仕事の流れと合わない場面がある。参考にしつつ、自分の言葉で書き直し、自分の判断軸で調整する。それを続けるうちに、あなただけのフリートが立ち上がる。</p>
+
+      <h3>明日からの一歩</h3>
+      <p>本書を読み終えたあなたが、明日から実践できる三つのことを挙げる。</p>
+
+      <p><strong>一つ</strong>：既存のagent定義を一つ選び、descriptionを書き直してみる。第3章のテンプレート（役割／トリガー／強度／SKIP）に沿って、20〜80語に整える。それだけで呼び出し精度が変わる。</p>
+
+      <p><strong>二つ</strong>：直近3ヶ月で呼ばれていないagentを一つ削除する。フリートを軽くする快感を体験する。</p>
+
+      <p><strong>三つ</strong>：次に複数の独立タスクを抱えたとき、意識的に「並列で渡せないか」を考えてみる。直列で走らせていた作業が、半分の時間で終わる体験は、サブエージェント機構の真価を体感させてくれる。</p>
+
+      <h3>個人指揮官の時代</h3>
+      <p>かつて「個人開発者」は文字通り一人で全部やる存在だった。設計し、実装し、テストし、レビューし、デプロイし、運用する。AIエージェントの登場で、その姿は変わりつつある。あなたは一人で<strong>小さな組織を指揮する立場</strong>になった。専門家を抱え、彼らに仕事を割り振り、結果を統合し、方向を決める。</p>
+
+      <p>この変化は、技術の話に留まらない。一人の知的労働者が、ひとりで組織的なアウトプットを生み出せる時代の到来だ。エージェントの編成術は、その時代を生き抜くための基礎技能になる。</p>
+
+      <p>あなたのフリートは、今日も少しずつ育っている。明日、もう一人専門家を加える前に ── まず、いまの編成を眺めてみよう。そこにあなたの思考の地図が見える。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参 考 文 献</h2>
+      <div class="chapter__rule"></div>
+    </header>
+
+    <div class="bibliography">
+      <ul>
+        <li>Anthropic, <em>Claude Code Documentation: Subagents</em> ── サブエージェント機構の公式仕様。definition file format、tools、modelのリファレンス</li>
+        <li>Anthropic, <em>Claude Code Documentation: Task Tool</em> ── サブエージェント呼び出しの基本API</li>
+        <li>Anthropic, <em>Building Effective Agents</em> (Engineering Blog) ── エージェント設計の一般原則 ── 単機能エージェント、並列化、コンテキスト管理</li>
+        <li>Anthropic, <em>Claude Agent SDK Documentation</em> ── サブエージェント機構を支える設計思想の理解に有用</li>
+        <li>Fred Brooks, <em>The Mythical Man-Month</em> (1975) ── 分業と統合のコストに関する古典。エージェントチームでも本質は同じ</li>
+        <li>David Marquet, <em>Turn the Ship Around!</em> (2012) ── 委譲と権限委譲の指揮哲学。エージェント運用のメタファーとして示唆深い</li>
+        <li>Andrej Karpathy, <em>Software 2.0 / Software 3.0</em> (講演・記事) ── 自然言語が「コード」になる時代の作業設計の見取り図</li>
+        <li>Simon Willison, <em>Building Personal Tools with LLMs</em> (Blog) ── 個人がLLMを使い込んで自分専用ツール群を作っていく実例の宝庫</li>
+        <li>Eric Raymond, <em>The Cathedral and the Bazaar</em> (1999) ── 分散型の知的協業に関する古典。「組織化された個人」の作業様式の参考</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__link chapter-nav__link--prev" href="./client-website-growth-strategy-textbook.html">← Vol.XII 公開後が本番</a>
+      <a class="chapter-nav__link chapter-nav__link--next" href="./index.html">↑ 目録へ戻る</a>
+    </nav>
+  </div>
+</section>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>
