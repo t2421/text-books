@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公開後が本番 ── クライアントWebサイトの認知・集客設計</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">公開後が本番 ── <em>クライアントWebサイトの認知・集客設計</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── サイト公開はスタートラインだ</a></li>
+    <li><a href="#ch1">第1章 ── 公開直後の初動設計：Googleに発見させる</a></li>
+    <li><a href="#ch2">第2章 ── SEO設計：検索意図に刺さる構造を作る</a></li>
+    <li><a href="#ch3">第3章 ── Googleビジネスプロフィールとローカル集客</a></li>
+    <li><a href="#ch4">第4章 ── SNS連携：サイトとソーシャルの往復経路</a></li>
+    <li><a href="#ch5">第5章 ── リスティング・SNS広告の使いどころ</a></li>
+    <li><a href="#ch6">第6章 ── コンテンツ更新戦略：サイトを生きた資産にする</a></li>
+    <li><a href="#ch7">第7章 ── 口コミ・レビュー設計：第三者の声を集める</a></li>
+    <li><a href="#ch8">第8章 ── アクセス解析と成果報告：数字で語れる制作者になる</a></li>
+    <li><a href="#epilogue">エピローグ ── 「作る人」から「育てる人」へ</a></li>
+    <li><a href="#bibliography">参 ── 参考文献一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">GROWTH STRATEGY FOR CLIENT WEBSITES</div>
+  <h1 class="hero__title">公開後が本番<em>クライアントWebサイトの認知・集客設計</em></h1>
+  <p class="hero__subtitle">Webサイトは完成した瞬間が終わりではない。公開してから、誰かに見つけてもらい、信頼を得て、行動を引き出すまでが本当の仕事だ。SEO・MEO・SNS連携・広告・コンテンツ更新・レビュー設計 ── クライアントのサイトを世の中に届けるための、制作後の全戦略</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">60 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">8 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">WEB CREATORS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">サイト公開はスタートラインだ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">美しく作ったサイトも、誰も来なければ、存在しないのと変わらない</p>
+    </header>
+
+    <div class="prose">
+      <p>Web制作者として、あなたはサイトを公開した。デザインは整い、スマホでも崩れず、表示速度も問題ない。クライアントも満足している。しかし数ヶ月後、クライアントから連絡が来る。「お問い合わせが一件も来ない」「アクセスが増えない」「作ってもらったけど意味がなかった」── この言葉が怖い。</p>
+
+      <p>サイト公開はゴールではない。これを最初から理解しているWeb制作者と、「サイトを作ること」がゴールと思っているWeb制作者の間には、クライアントにとって大きな価値の差がある。<strong>作った後に「どう世の中に届けるか」を設計できる制作者は、圧倒的に少ない。</strong>だからこそ、そこに差別化の余地がある。</p>
+
+      <p>この教科書は、クライアントのWebサイトを世の中に届けるための戦略をまとめたものだ。SEO、MEO（地図検索）、SNS連携、広告、コンテンツ更新、口コミ設計、アクセス解析 ── それぞれの施策がどう機能し、いつ使い、クライアントにどう説明するかを扱う。</p>
+
+      <div class="key-concept">
+        <h4>この教科書が前提とするクライアント像</h4>
+        <ul>
+          <li>中小企業・個人事業主・店舗（飲食・美容・クリニック・士業など）</li>
+          <li>大きな広告予算はないが、集客・問い合わせを増やしたい</li>
+          <li>デジタルマーケティングの知識は薄い。制作者に一定の判断を委ねている</li>
+          <li>成果が出れば継続発注・保守契約・追加施策の依頼が期待できる</li>
+        </ul>
+      </div>
+
+      <p>本書は「制作者がクライアントに何を提案・実施できるか」という視点で書いている。すべてをあなたが実施する必要はない。クライアント自身が動くべき部分は教育し、あなたがハンドルすべき部分はサービスとして提供する ── その切り分けも含めて設計する力が、今後の差別化になる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER I</span>
+      <h2 class="chapter__title">公開直後の初動設計<br><small style="font-size:0.6em;font-weight:400;">Googleに発見させる</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">公開直後の48時間でやることが、その後の数ヶ月の検索表示を左右する</p>
+    </header>
+
+    <div class="prose">
+      <p>サイトを公開した直後、Googleはそのサイトの存在をまだ知らない。放置すれば数週間〜数ヶ月かけて自然にクロールされるが、初動の設定を正しくやれば大幅に短縮できる。制作者としてこの初動を「納品物の一部」として実施することが、クライアントへの最初の実質的な価値提供になる。</p>
+
+      <h3>Google Search Consoleへの登録</h3>
+      <p>まず行うべきはGoogle Search Consoleへのプロパティ登録とサイトマップの送信だ。サイトマップ（sitemap.xml）はWordPressなら「XML Sitemap Generator」プラグインで自動生成できる。Search Consoleで「URL検査」ツールを使い、トップページのインデックス登録をリクエストする。これで早ければ数日以内に検索結果に表示され始める。</p>
+
+      <h3>Googleアナリティクス（GA4）の設定</h3>
+      <p>GA4のプロパティを作成し、測定IDをサイトに埋め込む。重要なのは「コンバージョンイベント」の設定だ。問い合わせフォームの送信、電話番号クリック、予約ボタンのタップ ── クライアントの「成果」に直結するアクションをコンバージョンとして定義しておく。これがないと「アクセスが来ているが何人が問い合わせたか」を後から追えなくなる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="公開直後の初動チェックリスト">
+          <defs>
+            <style>
+              .fig1-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .fig1-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.08em; }
+              .fig1-check { font-family: 'Cormorant Garamond', serif; font-size: 18px; fill: #b85c38; }
+            </style>
+          </defs>
+          <!-- タイムライン -->
+          <line x1="80" y1="50" x2="80" y2="290" stroke="#c9b99a" stroke-width="2"/>
+          <!-- 各ステップ -->
+          <!-- Day 0 -->
+          <circle cx="80" cy="80" r="10" fill="#b85c38"/>
+          <text x="80" y="84" class="fig1-label" text-anchor="middle" fill="white" font-size="9">0</text>
+          <text x="110" y="76" class="fig1-text" font-weight="600">公開当日</text>
+          <text x="110" y="93" class="fig1-text">GA4設定・コンバージョンイベント定義</text>
+          <!-- Day 1 -->
+          <circle cx="80" cy="140" r="10" fill="#b85c38"/>
+          <text x="80" y="144" class="fig1-label" text-anchor="middle" fill="white" font-size="9">1</text>
+          <text x="110" y="136" class="fig1-text" font-weight="600">翌日まで</text>
+          <text x="110" y="153" class="fig1-text">Search Console登録・サイトマップ送信</text>
+          <!-- Day 3 -->
+          <circle cx="80" cy="200" r="10" fill="#8b7355"/>
+          <text x="80" y="204" class="fig1-label" text-anchor="middle" fill="white" font-size="9">3</text>
+          <text x="110" y="196" class="fig1-text" font-weight="600">3日以内</text>
+          <text x="110" y="213" class="fig1-text">Googleビジネスプロフィール更新（店舗の場合）</text>
+          <!-- Week 1 -->
+          <circle cx="80" cy="260" r="10" fill="#4a7c59"/>
+          <text x="80" y="264" class="fig1-label" text-anchor="middle" fill="white" font-size="7">7</text>
+          <text x="110" y="256" class="fig1-text" font-weight="600">1週間以内</text>
+          <text x="110" y="273" class="fig1-text">初回インデックス確認・SNSへのURL掲載</text>
+          <!-- タイトル -->
+          <text x="300" y="28" class="fig1-text" text-anchor="middle" font-size="14" font-weight="600">公開後の初動タイムライン</text>
+          <line x1="100" y1="36" x2="520" y2="36" stroke="#c9b99a" stroke-width="0.8"/>
+        </svg>
+        <p class="figure__caption">公開直後の設定が、その後の数ヶ月の検索パフォーマンスを左右する。納品物の一部として実施する。</p>
+      </div>
+
+      <h3>Bing Webmaster Toolsも忘れない</h3>
+      <p>Googleに意識が向きがちだが、Bing（Microsoft）の検索も無視できない。特に法人・BtoB系のクライアントのサイトは、ビジネスパーソンがEdgeブラウザで検索することも多い。Bing Webmaster Toolsへの登録も初動で行っておく。</p>
+
+      <h3>SNSプロフィールへのURL掲載</h3>
+      <p>クライアントがInstagram・X・Facebookなどを運用しているなら、プロフィールのURLを新サイトに更新してもらう。既存のフォロワーへの「サイトリニューアルの告知投稿」も初動の重要なアクションだ。既存の認知を新サイトへの流入に変換する、最も即効性の高い施策の一つだ。</p>
+
+      <div class="summary">
+        <h4>第1章まとめ</h4>
+        <ul>
+          <li>公開直後にGA4とSearch Consoleを設定することで、データ蓄積とインデックス登録を加速させる</li>
+          <li>コンバージョンイベント（問い合わせ・電話タップ）を必ず定義する。後から追えなくなる</li>
+          <li>既存SNSプロフィールのURL更新とリニューアル告知が、最も即効性の高い初動施策</li>
+          <li>この初動設定を「納品物の一部」として提供することが、制作者としての付加価値になる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER II</span>
+      <h2 class="chapter__title">SEO設計<br><small style="font-size:0.6em;font-weight:400;">検索意図に刺さる構造を作る</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">SEOは「キーワードを入れること」ではなく「検索者の問いに、最も丁寧に答えること」だ</p>
+    </header>
+
+    <div class="prose">
+      <p>SEOに詳しくないクライアントは「キーワードをたくさん入れれば上がるんでしょ？」と思っている。それは2010年代前半の話だ。現在のGoogleは検索者の意図（Search Intent）を読み、それに最も的確に答えているページを上位に表示する。制作者として、この「検索意図の設計」をサイト構造に組み込むことが仕事の一部だ。</p>
+
+      <h3>クライアントのサイトが狙うべきキーワードの探し方</h3>
+      <p>まずクライアントの見込み客が「何を検索して、このサイトにたどり着くか」を逆算する。「渋谷 美容室 カラー 傷まない」「横浜 内科 土曜 予約」「名古屋 行政書士 相続 費用」── こうした<strong>業種＋地域＋ニーズの組み合わせ</strong>がローカルビジネスの主戦場だ。</p>
+      <p>キーワード調査にはGoogleキーワードプランナー（無料）、またはUbersuggest・Ahrefs・Semrushなどのツールを使う。月間検索ボリュームが100〜1,000程度のキーワードを複数狙う方が、大きなキーワードを一つ狙うより現実的だ。</p>
+
+      <h3>ページ構造とキーワードの対応</h3>
+      <p>一つのページに一つの主要キーワード、という原則を守る。トップページ、サービスページ、エリアページ、事例ページ ── それぞれが異なるキーワードに答える構造を設計する。特にサービス別・エリア別のページを細かく作ることで、ロングテールキーワードへの対応力が増す。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" aria-label="サイト構造とキーワード対応マップ">
+          <defs>
+            <style>
+              .figseo-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .figseo-label { font-family: 'Cormorant Garamond', serif; font-size: 9px; fill: #8b7355; letter-spacing: 0.06em; }
+            </style>
+          </defs>
+          <!-- トップページ -->
+          <rect x="210" y="30" width="180" height="50" rx="4" fill="#faf6ef" stroke="#b85c38" stroke-width="2"/>
+          <text x="300" y="52" class="figseo-text" text-anchor="middle" font-weight="600">トップページ</text>
+          <text x="300" y="68" class="figseo-label" text-anchor="middle">「渋谷 美容室」など短いKW</text>
+          <!-- 第二層へのライン -->
+          <line x1="240" y1="80" x2="130" y2="150" stroke="#c9b99a" stroke-width="1.2"/>
+          <line x1="300" y1="80" x2="300" y2="150" stroke="#c9b99a" stroke-width="1.2"/>
+          <line x1="360" y1="80" x2="470" y2="150" stroke="#c9b99a" stroke-width="1.2"/>
+          <!-- サービスページ -->
+          <rect x="60" y="150" width="140" height="50" rx="4" fill="#faf6ef" stroke="#8b7355" stroke-width="1.5"/>
+          <text x="130" y="170" class="figseo-text" text-anchor="middle" font-weight="600">サービスページ</text>
+          <text x="130" y="186" class="figseo-label" text-anchor="middle">「カラー 傷まない」など</text>
+          <!-- エリアページ -->
+          <rect x="220" y="150" width="160" height="50" rx="4" fill="#faf6ef" stroke="#8b7355" stroke-width="1.5"/>
+          <text x="300" y="170" class="figseo-text" text-anchor="middle" font-weight="600">エリアページ</text>
+          <text x="300" y="186" class="figseo-label" text-anchor="middle">「恵比寿 美容室」など</text>
+          <!-- ブログ・事例 -->
+          <rect x="400" y="150" width="140" height="50" rx="4" fill="#faf6ef" stroke="#8b7355" stroke-width="1.5"/>
+          <text x="470" y="170" class="figseo-text" text-anchor="middle" font-weight="600">ブログ・事例</text>
+          <text x="470" y="186" class="figseo-label" text-anchor="middle">ロングテールKW群</text>
+          <!-- 第三層へのライン -->
+          <line x1="130" y1="200" x2="90" y2="260" stroke="#c9b99a" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="130" y1="200" x2="175" y2="260" stroke="#c9b99a" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- LP系 -->
+          <rect x="40" y="260" width="100" height="40" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1"/>
+          <text x="90" y="278" class="figseo-text" text-anchor="middle">カラーLP</text>
+          <text x="90" y="292" class="figseo-label" text-anchor="middle">「ハイライト 渋谷」</text>
+          <rect x="150" y="260" width="100" height="40" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1"/>
+          <text x="200" y="278" class="figseo-text" text-anchor="middle">縮毛矯正LP</text>
+          <text x="200" y="292" class="figseo-label" text-anchor="middle">「縮毛 渋谷 安い」</text>
+          <!-- タイトル -->
+          <text x="300" y="16" class="figseo-text" text-anchor="middle" font-size="13" font-weight="600">一ページ・一キーワード設計</text>
+        </svg>
+        <p class="figure__caption">ページの階層構造に対して、狙うキーワードを事前に割り当てる。これがSEO設計の骨格だ。</p>
+      </div>
+
+      <h3>タイトルタグとメタディスクリプションの書き方</h3>
+      <p>タイトルタグは検索結果に表示される最も重要な要素だ。「キーワード｜ブランド名」の形式で、32文字以内に収める。メタディスクリプションは120文字以内で、そのページを読むと何が得られるかを具体的に書く。クリック率に直結するため、制作者が丁寧に書くことで大きな差が出る。</p>
+
+      <h3>内部リンクの設計</h3>
+      <p>各ページが互いに適切にリンクしていることで、Googleがサイトの構造を理解しやすくなり、重要なページへの評価が集中する。特に「関連するサービスページへのリンク」「事例からサービスページへのリンク」は制作時から意識して設計する。</p>
+
+      <div class="summary">
+        <h4>第2章まとめ</h4>
+        <ul>
+          <li>クライアントの見込み客が使う「業種＋地域＋ニーズ」の複合キーワードを洗い出す</li>
+          <li>一ページ一キーワードの原則で、サービス・エリア・事例ページを細かく作る</li>
+          <li>タイトルタグとメタディスクリプションは制作者が丁寧に書く。クリック率に直結する</li>
+          <li>内部リンクの設計で、Googleがサイト構造を理解しやすくなる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER III</span>
+      <h2 class="chapter__title">Googleビジネスプロフィールとローカル集客<br><small style="font-size:0.6em;font-weight:400;">地図検索の一位が、予約を変える</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「近くの〇〇」で検索されたとき、Googleマップに正しく表示されることが、来店型ビジネスの最重要施策だ</p>
+    </header>
+
+    <div class="prose">
+      <p>来店型ビジネス（飲食店・美容室・クリニック・士業事務所など）にとって、Googleビジネスプロフィール（旧Googleマイビジネス）の最適化は、ウェブサイトのSEOと同等かそれ以上に重要な施策だ。「渋谷 カフェ」「近くの歯科」と検索されたとき、Googleマップに正しく・魅力的に表示されることが来店の前提になる。</p>
+
+      <h3>Googleビジネスプロフィールの基本設定</h3>
+      <p>プロフィールが未登録・未確認の場合、まず登録と電話または葉書による確認を行う。設定すべき情報は：正確な店舗名・住所・電話番号・営業時間・カテゴリ（できるだけ具体的に）・ウェブサイトURL・サービス一覧。これらが空欄のまま、または古いまま放置されているプロフィールは多い。</p>
+
+      <h3>写真の重要性</h3>
+      <p>Googleビジネスプロフィールにおいて、写真は掲載順位と選択率の両方に影響する。外観・内観・メニュー・スタッフ写真を揃え、定期的に更新する。Googleは「最近更新されたプロフィール」を優先的に表示する傾向がある。Web制作者として「クライアントの写真を撮影する」または「撮影を推奨する」ことが、実質的な集客支援になる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" aria-label="Googleビジネスプロフィールの最適化項目">
+          <defs>
+            <style>
+              .figmeo-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figmeo-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; }
+            </style>
+          </defs>
+          <!-- 中央アイコン代替 -->
+          <circle cx="300" cy="150" r="70" fill="#faf6ef" stroke="#b85c38" stroke-width="2"/>
+          <text x="300" y="143" class="figmeo-text" text-anchor="middle" font-size="14" font-weight="600">Google</text>
+          <text x="300" y="163" class="figmeo-text" text-anchor="middle" font-size="14" font-weight="600">ビジネス</text>
+          <!-- 六方向の要素 -->
+          <!-- 上 -->
+          <rect x="230" y="28" width="140" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="300" y="48" class="figmeo-text" text-anchor="middle">基本情報の正確さ</text>
+          <line x1="300" y1="64" x2="300" y2="80" stroke="#c9b99a" stroke-width="1"/>
+          <!-- 右上 -->
+          <rect x="440" y="68" width="130" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="505" y="88" class="figmeo-text" text-anchor="middle">写真の量・質</text>
+          <line x1="440" y1="86" x2="368" y2="120" stroke="#c9b99a" stroke-width="1"/>
+          <!-- 右下 -->
+          <rect x="440" y="196" width="130" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="505" y="216" class="figmeo-text" text-anchor="middle">口コミ数・評価</text>
+          <line x1="440" y1="214" x2="368" y2="180" stroke="#c9b99a" stroke-width="1"/>
+          <!-- 下 -->
+          <rect x="230" y="236" width="140" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="300" y="256" class="figmeo-text" text-anchor="middle">投稿の更新頻度</text>
+          <line x1="300" y1="236" x2="300" y2="220" stroke="#c9b99a" stroke-width="1"/>
+          <!-- 左下 -->
+          <rect x="30" y="196" width="130" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="95" y="216" class="figmeo-text" text-anchor="middle">Q&Aの活用</text>
+          <line x1="160" y1="214" x2="232" y2="180" stroke="#c9b99a" stroke-width="1"/>
+          <!-- 左上 -->
+          <rect x="30" y="68" width="130" height="36" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="95" y="88" class="figmeo-text" text-anchor="middle">サービス詳細記入</text>
+          <line x1="160" y1="86" x2="232" y2="120" stroke="#c9b99a" stroke-width="1"/>
+        </svg>
+        <p class="figure__caption">六つの要素を整えることで、地図検索での表示順位と選択率が改善する。</p>
+      </div>
+
+      <h3>投稿機能の活用</h3>
+      <p>Googleビジネスプロフィールには「投稿」機能がある。新メニューの告知、キャンペーン情報、イベント ── これを週1〜2回更新することで「アクティブなビジネス」とGoogleに認識される。クライアントがSNS感覚で更新できるよう、スマホでの操作方法を納品時に教えることも制作者の仕事だ。</p>
+
+      <h3>Q&A機能で検索前の不安を消す</h3>
+      <p>Googleビジネスプロフィールには「よくある質問（Q&A）」セクションがある。「駐車場はありますか？」「予約は必要ですか？」「クレジットカードは使えますか？」── これらを制作者が代わりに投稿・回答しておくことで、検索者の不安を事前に解消できる。</p>
+
+      <div class="summary">
+        <h4>第3章まとめ</h4>
+        <ul>
+          <li>来店型ビジネスにとってGoogleビジネスプロフィールは、サイトSEOと同等かそれ以上に重要</li>
+          <li>基本情報の正確さ・写真の充実・投稿の更新頻度が表示順位に直結する</li>
+          <li>Q&A機能で検索者の不安を先回りして解消する</li>
+          <li>更新方法をクライアントに教え、運用習慣をつけてもらうことが制作後の継続価値になる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IV</span>
+      <h2 class="chapter__title">SNS連携<br><small style="font-size:0.6em;font-weight:400;">サイトとソーシャルの往復経路を作る</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">SNSとWebサイトは競合しない。互いに送客し合う設計が、全体の認知を底上げする</p>
+    </header>
+
+    <div class="prose">
+      <p>クライアントがSNSを運用している場合、WebサイトとSNSを「連動」させることが重要だ。SNSはリアルタイムの情報発信と既存フォロワーへのリーチが強みで、Webサイトは信頼と詳細情報の提供が強みだ。この二つが互いに送客し合う設計を、制作時から組み込む。</p>
+
+      <h3>サイト→SNSの導線</h3>
+      <p>Webサイトに来たユーザーをSNSフォロワーに変える。フッターや「スタッフブログ」「インスタグラム」のリンクを目立たせる。美容室・飲食店なら、Instagramの最新投稿をサイトのトップページに埋め込む（最新感が演出できる）。これにより、サイト訪問者がSNSフォロワーに変換され、継続的なリーチが生まれる。</p>
+
+      <h3>SNS→サイトの導線</h3>
+      <p>SNS投稿に必ずWebサイトへの誘導を含める習慣をクライアントに教える。「詳細・予約はプロフィールのリンクから」「事例の詳細はウェブサイトで紹介しています」── 投稿の中でWebサイトを参照することで、SNSのフォロワーがサイト訪問者に変換される。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="サイトとSNSの往復設計">
+          <defs>
+            <style>
+              .figsnssitetext { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figsnssitelabel { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.06em; }
+            </style>
+          </defs>
+          <!-- Webサイト -->
+          <rect x="60" y="90" width="160" height="100" rx="6" fill="#faf6ef" stroke="#b85c38" stroke-width="2"/>
+          <text x="140" y="135" class="figsnssitetext" text-anchor="middle" font-size="14" font-weight="600">Webサイト</text>
+          <text x="140" y="155" class="figsnssitelabel" text-anchor="middle">信頼・詳細・予約</text>
+          <text x="140" y="170" class="figsnssitelabel" text-anchor="middle">検索経由の新規流入</text>
+          <!-- SNS -->
+          <rect x="380" y="90" width="160" height="100" rx="6" fill="#faf6ef" stroke="#4a7c59" stroke-width="2"/>
+          <text x="460" y="135" class="figsnssitetext" text-anchor="middle" font-size="14" font-weight="600">SNS</text>
+          <text x="460" y="155" class="figsnssitelabel" text-anchor="middle">リアルタイム・温度感</text>
+          <text x="460" y="170" class="figsnssitelabel" text-anchor="middle">既存フォロワーへのリーチ</text>
+          <!-- 上矢印：サイト→SNS -->
+          <path d="M 230 120 Q 300 80 375 120" fill="none" stroke="#b85c38" stroke-width="2" marker-end="url(#arrow1)"/>
+          <text x="300" y="88" class="figsnssitelabel" text-anchor="middle" fill="#b85c38">SNSリンク・投稿埋め込み</text>
+          <!-- 下矢印：SNS→サイト -->
+          <path d="M 375 165 Q 300 210 230 165" fill="none" stroke="#4a7c59" stroke-width="2" marker-end="url(#arrow2)"/>
+          <text x="300" y="218" class="figsnssitelabel" text-anchor="middle" fill="#4a7c59">「詳細はURLから」誘導</text>
+          <defs>
+            <marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#b85c38"/>
+            </marker>
+            <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#4a7c59"/>
+            </marker>
+          </defs>
+          <!-- 検索ユーザー -->
+          <ellipse cx="140" cy="40" rx="60" ry="20" fill="#f5ede0" stroke="#c9b99a" stroke-width="1"/>
+          <text x="140" y="45" class="figsnssitelabel" text-anchor="middle">検索ユーザー</text>
+          <line x1="140" y1="60" x2="140" y2="90" stroke="#c9b99a" stroke-width="1" stroke-dasharray="3,3"/>
+          <!-- フォロワー -->
+          <ellipse cx="460" cy="40" rx="60" ry="20" fill="#f5ede0" stroke="#c9b99a" stroke-width="1"/>
+          <text x="460" y="45" class="figsnssitelabel" text-anchor="middle">SNSフォロワー</text>
+          <line x1="460" y1="60" x2="460" y2="90" stroke="#c9b99a" stroke-width="1" stroke-dasharray="3,3"/>
+        </svg>
+        <p class="figure__caption">WebサイトとSNSが互いに送客し合う往復設計で、全体の認知とリーチが底上げされる。</p>
+      </div>
+
+      <h3>業種別のSNS使い分け</h3>
+      <p>全SNSを運用する必要はない。業種に合ったプラットフォームを一つ深くやる方が効果的だ。飲食・美容・アパレルなら<strong>Instagram</strong>（ビジュアル訴求）。士業・コンサルなら<strong>X・LinkedIn</strong>（知識の発信）。地域の工務店・リフォーム会社なら<strong>Facebook</strong>（地域コミュニティ）。クライアントの業種と見込み客層に合わせて、一つのSNSに集中するよう提案する。</p>
+
+      <h3>ハッシュタグ戦略</h3>
+      <p>Instagramにおいてハッシュタグは「検索に引っかかるためのキーワード」だ。地域ハッシュタグ（#渋谷美容室）＋業種ハッシュタグ（#ヘアカラー）＋ニーズハッシュタグ（#傷まないカラー）の組み合わせが基本形だ。投稿ごとに10〜20個程度、毎回ランダムに変えながら使う。固定のハッシュタグセットを複数パターン作っておくと、クライアントが運用しやすい。</p>
+
+      <div class="summary">
+        <h4>第4章まとめ</h4>
+        <ul>
+          <li>WebサイトとSNSを「競合」ではなく「往復する経路」として設計する</li>
+          <li>サイトへのSNS投稿埋め込みと、SNS投稿からのURL誘導で双方向の送客を作る</li>
+          <li>全SNSではなく業種に合った一つのプラットフォームに集中するよう提案する</li>
+          <li>ハッシュタグはテンプレート化しておき、クライアントが運用しやすい形にする</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER V</span>
+      <h2 class="chapter__title">リスティング・SNS広告の使いどころ<br><small style="font-size:0.6em;font-weight:400;">予算がなくても、使い方を知っていれば武器になる</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">広告は「認知が遅い時期の加速剤」として使う。SEOの代替にはならない</p>
+    </header>
+
+    <div class="prose">
+      <p>SEOやSNSの成果が出るまでには時間がかかる。そのギャップを埋めるのが広告だ。しかし中小企業・個人事業主のクライアントに対して、闇雲に広告を勧めることはしてはいけない。広告は費用対効果が可視化されやすい反面、止めた瞬間に効果がゼロになる。<strong>広告は「つなぎ」として使い、SEOと口コミで恒久的な集客の土台を作ることが本筋だ。</strong></p>
+
+      <h3>Google広告（リスティング）の基本</h3>
+      <p>Google広告はユーザーが検索したキーワードに対して広告を表示する。「渋谷 カフェ ランチ」と検索した人に、そのタイミングで表示できる。購買意欲の高い人に直接届くため、転換率が高い。ただし、クリック一回ごとに費用がかかる（クリック課金）。月3〜5万円の予算から始めることができる。</p>
+      <p>制作者として注意すべきは、<strong>広告の着地先（ランディングページ）の質が結果を左右する</strong>ことだ。広告費を払っても、着地したページが情報不足・操作しにくい・表示が遅いなら、ほとんどのユーザーが離脱する。広告運用と並行して、LP（ランディングページ）の改善提案ができると、制作者としての価値が上がる。</p>
+
+      <h3>Meta広告（Instagram・Facebook）の特性</h3>
+      <p>Meta広告は「需要を掘り起こす」広告だ。「渋谷の美容室を探していた」ユーザーではなく、「渋谷に住む20〜35歳の女性」という属性に対して表示する。まだ検索していないが、興味を持つ可能性がある層にリーチできる。ビジュアル重視の業種（美容・飲食・アパレル）に向いている。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" aria-label="広告種別の特性比較">
+          <defs>
+            <style>
+              .figad-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figad-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.05em; }
+            </style>
+          </defs>
+          <!-- ヘッダー行 -->
+          <rect x="40" y="40" width="160" height="36" fill="#2c2416"/>
+          <text x="120" y="64" class="figad-text" text-anchor="middle" fill="white">比較項目</text>
+          <rect x="210" y="40" width="160" height="36" fill="#b85c38"/>
+          <text x="290" y="64" class="figad-text" text-anchor="middle" fill="white">Google広告</text>
+          <rect x="380" y="40" width="180" height="36" fill="#4a7c59"/>
+          <text x="470" y="64" class="figad-text" text-anchor="middle" fill="white">Meta広告（IG/FB）</text>
+          <!-- 行1 -->
+          <rect x="40" y="86" width="160" height="36" fill="#faf6ef" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="120" y="110" class="figad-text" text-anchor="middle">ターゲティング</text>
+          <rect x="210" y="86" width="160" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="290" y="110" class="figad-text" text-anchor="middle">検索キーワード</text>
+          <rect x="380" y="86" width="180" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="470" y="110" class="figad-text" text-anchor="middle">属性・興味・行動</text>
+          <!-- 行2 -->
+          <rect x="40" y="132" width="160" height="36" fill="#faf6ef" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="120" y="156" class="figad-text" text-anchor="middle">需要との関係</text>
+          <rect x="210" y="132" width="160" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="290" y="156" class="figad-text" text-anchor="middle">需要に答える</text>
+          <rect x="380" y="132" width="180" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="470" y="156" class="figad-text" text-anchor="middle">需要を掘り起こす</text>
+          <!-- 行3 -->
+          <rect x="40" y="178" width="160" height="36" fill="#faf6ef" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="120" y="202" class="figad-text" text-anchor="middle">向いている業種</text>
+          <rect x="210" y="178" width="160" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="290" y="202" class="figad-text" text-anchor="middle">全業種・BtoB向き</text>
+          <rect x="380" y="178" width="180" height="36" fill="white" stroke="#e8dcc8" stroke-width="0.8"/>
+          <text x="470" y="202" class="figad-text" text-anchor="middle">美容・飲食・EC向き</text>
+          <!-- タイトル -->
+          <text x="300" y="24" class="figad-text" text-anchor="middle" font-size="13" font-weight="600">広告種別の特性比較</text>
+        </svg>
+        <p class="figure__caption">広告の種類を使い分けることで、投資対効果が変わる。クライアントの業種と目的に合わせた提案が必要だ。</p>
+      </div>
+
+      <h3>制作者が提案できる広告運用の範囲</h3>
+      <p>広告運用の専門家ではない制作者でも、「簡易なGoogle広告の初期設定支援」と「LP制作・改善」は提供できる。広告の本格的な運用管理は専門のリスティング業者や広告代理店に委ねる判断も重要だ。制作者としての役割は「良い着地先を作ること」と「広告の基本的な仕組みをクライアントに説明できること」だ。</p>
+
+      <div class="summary">
+        <h4>第5章まとめ</h4>
+        <ul>
+          <li>広告は「認知が遅い時期の加速剤」。SEOの代替ではなく補完として使う</li>
+          <li>Google広告は需要に答え、Meta広告は需要を掘り起こす。目的で使い分ける</li>
+          <li>広告の効果はLPの質に大きく左右される。着地先の改善が制作者の提供価値</li>
+          <li>本格的な広告運用は専門家に委ね、制作者は「良い着地先を作る役割」に徹する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VI</span>
+      <h2 class="chapter__title">コンテンツ更新戦略<br><small style="font-size:0.6em;font-weight:400;">サイトを生きた資産にする</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">公開後に更新されないサイトは、Googleにも訪問者にも「死んでいる」と判断される</p>
+    </header>
+
+    <div class="prose">
+      <p>多くのクライアントはサイトを作った後、更新をしない。「お知らせ」が3年前のまま、「スタッフブログ」が一度も更新されていない ── このようなサイトはGoogleに「管理されていないサイト」と評価され、徐々に検索順位が下がる。制作者として「更新の仕組み」をクライアントに提供することが、継続的な関係の基盤になる。</p>
+
+      <h3>クライアントが更新しやすいCMS設計</h3>
+      <p>WordPressのブロックエディタ（Gutenberg）は、非エンジニアでも直感的に更新できる。しかし「どのメニューをどう使うか」がわからないと結局触れない。納品時に「お知らせを追加する手順」「ブログ記事を書く手順」を動画で録画して渡すだけで、更新頻度は大幅に上がる。</p>
+
+      <h3>定期更新するべきコンテンツの種類</h3>
+      <p><strong>お知らせ・新着情報</strong>：営業時間変更、季節のキャンペーン、新メニュー。これだけで良い。月1〜2回で十分。<strong>事例・実績</strong>：仕事が完了するたびに一件追加する習慣をつける。事例が増えるほど信頼と検索流入が増える。<strong>FAQ・よくある質問</strong>：クライアントへの問い合わせで繰り返し来る質問を追加していく。これは直接、検索需要に答えるコンテンツだ。</p>
+
+      <div class="sidenote">
+        <p>ブログは「SEOのために書く」というより、「検索者の不安や疑問を先回りして解消するために書く」という視点で臨む方が長続きする。「うちの業種によくある誤解」「費用の内訳を正直に書いた記事」「他社と比較したとき選ぶべき基準」── こうした記事は検索流入だけでなく、商談中のクライアントの背中を押すコンテンツにもなる。</p>
+      </div>
+
+      <h3>制作者が提供する「コンテンツ保守」サービス</h3>
+      <p>クライアントが自分で更新するのが難しい場合、「月1〜2回のコンテンツ更新代行」を月額サービスとして提供することができる。事例追加・ブログ記事作成・お知らせ掲載 ── これを月2〜3万円の保守メニューに含めることで、制作後の継続収益になる。AIを使えば、一件のコンテンツ作成にかかる時間は大幅に短縮できる。</p>
+
+      <div class="key-concept">
+        <h4>コンテンツ更新のルーティン提案</h4>
+        <ul>
+          <li><strong>毎月</strong>：お知らせ1件・Googleビジネスプロフィール投稿2〜4件</li>
+          <li><strong>案件完了ごと</strong>：事例ページに1件追加（写真＋概要文で良い）</li>
+          <li><strong>季節ごと</strong>：キャンペーン情報・料金改定・新サービス告知</li>
+          <li><strong>年1〜2回</strong>：FAQの見直し・サービスページの加筆修正</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第6章まとめ</h4>
+        <ul>
+          <li>更新されないサイトはGoogleに「死んでいる」と判断され、検索順位が下がる</li>
+          <li>納品時に「更新の手順動画」を渡すことで、クライアントの更新頻度が上がる</li>
+          <li>お知らせ・事例・FAQ ── この三種の更新が最も効果的で、クライアントが続けやすい</li>
+          <li>コンテンツ更新代行を月額保守メニューに含めると、制作後の継続収益になる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VII</span>
+      <h2 class="chapter__title">口コミ・レビュー設計<br><small style="font-size:0.6em;font-weight:400;">第三者の声を集め、信頼を可視化する</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">自分で「良いサービスです」と言うより、お客さんに言ってもらう方が百倍信頼される</p>
+    </header>
+
+    <div class="prose">
+      <p>消費者の約90%が、購買前にオンラインレビューを確認する（BrightLocal調査）。Googleの星評価が3.5と4.5のクリニックでは、問い合わせ数に大きな差が生まれる。口コミ・レビューはSEOにも影響し、Googleビジネスプロフィールの検索順位を左右する要素の一つだ。制作者として、クライアントに「レビューを集める仕組み」を提案できることは大きな価値だ。</p>
+
+      <h3>Googleレビューを増やす具体的な方法</h3>
+      <p>Googleレビューを書いてもらうための最大の障壁は「書き方がわからない」「面倒」だ。これを解消するのが<strong>レビュー依頼QRコード</strong>だ。Googleビジネスプロフィールには「レビューを書くためのショートURL」が発行できる。これをQRコード化して、レジ横・名刺裏・請求書下部・LINE公式アカウントのメッセージに載せる。スキャンするだけでレビュー入力画面に飛ぶ仕組みだ。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="レビュー依頼の経路設計">
+          <defs>
+            <style>
+              .figrev-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figrev-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.06em; }
+            </style>
+          </defs>
+          <!-- 中央：Google口コミ -->
+          <rect x="210" y="100" width="180" height="80" rx="6" fill="#faf6ef" stroke="#b85c38" stroke-width="2"/>
+          <text x="300" y="136" class="figrev-text" text-anchor="middle" font-size="13" font-weight="600">Google口コミ</text>
+          <text x="300" y="155" class="figrev-label" text-anchor="middle">★★★★★ 積み上げ</text>
+          <!-- 各入口 -->
+          <rect x="20" y="50" width="130" height="44" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="85" y="70" class="figrev-text" text-anchor="middle">QRコード</text>
+          <text x="85" y="86" class="figrev-label" text-anchor="middle">レジ・名刺・請求書</text>
+          <path d="M 150 72 L 210 135" stroke="#c9b99a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrowrev)"/>
+
+          <rect x="20" y="140" width="130" height="44" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="85" y="160" class="figrev-text" text-anchor="middle">LINE公式</text>
+          <text x="85" y="176" class="figrev-label" text-anchor="middle">サンキューメッセージ</text>
+          <path d="M 150 162 L 210 145" stroke="#c9b99a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrowrev)"/>
+
+          <rect x="450" y="50" width="130" height="44" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="515" y="70" class="figrev-text" text-anchor="middle">メール署名</text>
+          <text x="515" y="86" class="figrev-label" text-anchor="middle">「ご感想はこちら」</text>
+          <path d="M 450 72 L 390 135" stroke="#c9b99a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrowrev)"/>
+
+          <rect x="450" y="140" width="130" height="44" rx="4" fill="#f5ede0" stroke="#c9b99a" stroke-width="1.2"/>
+          <text x="515" y="160" class="figrev-text" text-anchor="middle">SNS投稿</text>
+          <text x="515" y="176" class="figrev-label" text-anchor="middle">「口コミ大歓迎です」</text>
+          <path d="M 450 162 L 390 155" stroke="#c9b99a" stroke-width="1.2" stroke-dasharray="4,3" marker-end="url(#arrowrev)"/>
+
+          <!-- 口コミからの効果 -->
+          <rect x="230" y="210" width="140" height="44" rx="4" fill="#faf6ef" stroke="#4a7c59" stroke-width="1.5"/>
+          <text x="300" y="230" class="figrev-text" text-anchor="middle">検索順位向上</text>
+          <text x="300" y="246" class="figrev-label" text-anchor="middle">信頼・問い合わせ増加</text>
+          <path d="M 300 180 L 300 210" stroke="#4a7c59" stroke-width="1.5" marker-end="url(#arrowrev2)"/>
+
+          <defs>
+            <marker id="arrowrev" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#c9b99a"/>
+            </marker>
+            <marker id="arrowrev2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L6,3 z" fill="#4a7c59"/>
+            </marker>
+          </defs>
+        </svg>
+        <p class="figure__caption">複数の接点にレビュー依頼の経路を仕込むことで、口コミが自然に積み上がる仕組みになる。</p>
+      </div>
+
+      <h3>レビューに返信する重要性</h3>
+      <p>Googleレビューにはオーナー返信ができる。すべてのレビュー（高評価も低評価も）に丁寧に返信することは、二つの効果がある。一つは検索者への印象改善（「丁寧に対応している」）。もう一つはGoogleへのシグナル（「アクティブに運営されているビジネス」）。特に低評価のレビューへの冷静で誠実な返信は、むしろ信頼感を高める場合がある。</p>
+
+      <h3>業種別のレビューサイト</h3>
+      <p>Googleレビュー以外にも、業種によって重要なプラットフォームが異なる。飲食店なら<strong>食べログ・ホットペッパー</strong>。美容室なら<strong>ホットペッパービューティー</strong>。クリニックなら<strong>エキテン</strong>。これらへの登録・最適化も、初動設計の一部として提案できる。</p>
+
+      <div class="summary">
+        <h4>第7章まとめ</h4>
+        <ul>
+          <li>Googleレビューの星評価と件数が、検索順位と問い合わせ転換率の両方に直結する</li>
+          <li>QRコードで「レビューを書く摩擦」を最小化する仕組みを作る</li>
+          <li>全レビューへの返信がGoogleへのアクティブシグナルと、訪問者への信頼感を同時に高める</li>
+          <li>業種別レビューサイト（食べログ・ホットペッパービューティーなど）の最適化も合わせて提案する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VIII</span>
+      <h2 class="chapter__title">アクセス解析と成果報告<br><small style="font-size:0.6em;font-weight:400;">数字で語れる制作者になる</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">「サイトを作った人」から「サイトの成果に責任を持つ人」へ。数字がその橋渡しをする</p>
+    </header>
+
+    <div class="prose">
+      <p>クライアントにとって、Webサイトは「目的達成のための投資」だ。問い合わせを増やしたい、予約を増やしたい、採用を増やしたい ── その成果が出ているかを数字で報告できる制作者は、圧倒的に少ない。逆に言えば、数字で報告できるようになるだけで、「また頼みたい」「継続してほしい」という信頼の土台が大きく変わる。</p>
+
+      <h3>月次レポートの作り方</h3>
+      <p>GA4とSearch Consoleのデータを組み合わせて、月に一度クライアントに報告する。レポートで伝えるべきは「先月より何が改善したか」「何が課題か」「次の一手は何か」の三点だ。数字の羅列ではなく、<strong>「先月の問い合わせは8件で、先々月の5件より60%増加しました。増えた理由はブログ記事からの流入増加です」</strong>というストーリーで話す。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" aria-label="月次レポートの構成">
+          <defs>
+            <style>
+              .figana-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figana-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.06em; }
+              .figana-num { font-family: 'Cormorant Garamond', serif; font-size: 22px; fill: #b85c38; font-weight: 600; }
+            </style>
+          </defs>
+          <!-- 四象限 -->
+          <rect x="40" y="50" width="240" height="100" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <rect x="310" y="50" width="250" height="100" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <rect x="40" y="175" width="240" height="100" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <rect x="310" y="175" width="250" height="100" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <!-- 各ブロックの内容 -->
+          <text x="160" y="80" class="figana-num" text-anchor="middle">①</text>
+          <text x="160" y="105" class="figana-text" text-anchor="middle" font-weight="600">サマリー（1枚）</text>
+          <text x="160" y="122" class="figana-text" text-anchor="middle">先月比：訪問数・コンバージョン</text>
+          <text x="160" y="138" class="figana-text" text-anchor="middle">「良かった点と課題」を3行で</text>
+
+          <text x="435" y="80" class="figana-num" text-anchor="middle">②</text>
+          <text x="435" y="105" class="figana-text" text-anchor="middle" font-weight="600">流入チャネル内訳</text>
+          <text x="435" y="122" class="figana-text" text-anchor="middle">検索・SNS・直接・広告</text>
+          <text x="435" y="138" class="figana-text" text-anchor="middle">どこから来たかの比率変化</text>
+
+          <text x="160" y="205" class="figana-num" text-anchor="middle">③</text>
+          <text x="160" y="230" class="figana-text" text-anchor="middle" font-weight="600">コンバージョン詳細</text>
+          <text x="160" y="247" class="figana-text" text-anchor="middle">問い合わせ・電話・予約の件数</text>
+          <text x="160" y="263" class="figana-text" text-anchor="middle">どのページから多く発生したか</text>
+
+          <text x="435" y="205" class="figana-num" text-anchor="middle">④</text>
+          <text x="435" y="230" class="figana-text" text-anchor="middle" font-weight="600">翌月の提案</text>
+          <text x="435" y="247" class="figana-text" text-anchor="middle">「この記事を追加しましょう」</text>
+          <text x="435" y="263" class="figana-text" text-anchor="middle">「このページを改善しましょう」</text>
+
+          <!-- タイトル -->
+          <text x="300" y="30" class="figana-text" text-anchor="middle" font-size="13" font-weight="600">月次レポートの四つのブロック構成</text>
+        </svg>
+        <p class="figure__caption">数字の羅列ではなく「良かった点・課題・次の提案」をセットで伝えることが、クライアントとの継続関係を作る。</p>
+      </div>
+
+      <h3>報告が保守契約の土台になる</h3>
+      <p>月次レポートを続けることは、単なる情報提供ではない。「このサイト、成果が出ている」「もっとここを改善できる」という継続的な会話が生まれ、追加施策の依頼・保守契約の継続・新規サイトの依頼に繋がる。報告をしない制作者は「作って終わり」に見られ、報告をする制作者は「パートナー」として認識される。</p>
+
+      <h3>Search Consoleで検索キーワードを確認する</h3>
+      <p>Search Consoleの「検索パフォーマンス」レポートには、クライアントのサイトが実際に表示されているキーワードの一覧が出る。「このキーワードで表示されているが、クリック率が低い（＝タイトルを改善すれば流入が増える）」「このキーワードは順位が10位圏外なので、記事を強化すれば上がる」── こうした具体的な改善提案の根拠として使える。</p>
+
+      <div class="key-concept">
+        <h4>制作者が持つべき基本的な解析スキル</h4>
+        <ul>
+          <li><strong>GA4</strong>：ユーザー獲得チャネルの確認、ページ別閲覧数、コンバージョンイベントの集計</li>
+          <li><strong>Search Console</strong>：表示回数・クリック数・クリック率・平均掲載順位の推移確認</li>
+          <li><strong>Googleビジネスプロフィール</strong>：インプレッション数、ルート検索数、電話タップ数の確認</li>
+          <li><strong>報告の形式</strong>：月1回、A4一枚のサマリー＋翌月の提案を添えてメールまたはSlackで送る</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第8章まとめ</h4>
+        <ul>
+          <li>数字で成果を報告できる制作者は少ない。だからこそ差別化になる</li>
+          <li>月次レポートは「数字」より「良かった点・課題・次の提案」のストーリーで伝える</li>
+          <li>報告の継続が「作って終わり」ではなく「パートナー」として認識される土台を作る</li>
+          <li>Search ConsoleのキーワードデータがSEO改善提案の具体的な根拠になる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">「作る人」から「育てる人」へ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">制作の価値の半分は、公開後に作られる</p>
+    </header>
+
+    <div class="prose">
+      <p>この教科書を通じて、Webサイトの認知・集客は「作ること」とは別の技術体系であることが見えてきたはずだ。SEO設計、ローカル集客、SNS連携、広告、コンテンツ更新、レビュー設計、アクセス解析 ── これらは制作とは異なる知識だが、制作者として「知っている」だけで、クライアントへの提供価値は劇的に変わる。</p>
+
+      <h3>「サイトを作る人」の限界</h3>
+      <p>「サイトを作る人」は、いつも次の案件を探し続けなければならない。一件完了すれば終わりで、また新規のクライアントを探す。しかし「サイトを育てる人」は、既存のクライアントから継続的に収益が生まれる。保守費用・SEO支援・コンテンツ更新代行・月次レポート・広告設定支援 ── これらが積み重なると、案件一件の単価より大きな収益を生む。</p>
+
+      <h3>制作後の提案が、次の案件を生む</h3>
+      <p>月次レポートで「このページを改善すれば問い合わせが増える可能性があります」と伝えれば、それがリニューアルの依頼になる。「新しいサービスが追加されたなら、専用ページを作りましょう」という提案が、追加制作の依頼になる。<strong>公開後も関係を続ける制作者が、最終的に最も多くの仕事と信頼を得る。</strong></p>
+
+      <p>AIで制作のスピードが上がった今、制作者の差は「作る速さ」ではなく「作った後にクライアントの成果を出せるかどうか」で決まる時代になっている。本書で学んだ八つの施策を、一つずつクライアントとの仕事に組み込んでいこう。最初の一歩は、次のクライアントのサイト公開後に「GA4とSearch Consoleを設定してあげること」から始まる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参 考 文 献</h2>
+      <div class="chapter__rule"></div>
+    </header>
+
+    <div class="bibliography">
+      <ul>
+        <li>Google, <em>Google Search Central Documentation</em> ── SEOスターターガイド・検索品質評価者ガイドライン（公式）</li>
+        <li>Google, <em>Google Analytics Help Center</em> ── GA4の設定とコンバージョン計測の公式ドキュメント</li>
+        <li>Google, <em>Google Business Profile Help</em> ── ビジネスプロフィール最適化の公式ガイド</li>
+        <li>BrightLocal, <em>Local Consumer Review Survey</em> (年次) ── 消費者のオンラインレビュー利用行動調査</li>
+        <li>Neil Patel, <em>The Advanced Guide to SEO</em> ── ローカルSEOとコンテンツ戦略の実践解説</li>
+        <li>Ann Handley, <em>Everybody Writes</em> (2014) ── コンテンツの書き方と更新戦略の基礎</li>
+        <li>Luke Wroblewski, <em>Mobile First</em> (2011) ── モバイル優先の設計思想とユーザー体験</li>
+        <li>Rand Fishkin, <em>Lost and Founder</em> (2018) ── SEOとコンテンツマーケティングの現場知見</li>
+        <li>Perry Marshall, <em>Ultimate Guide to Google AdWords</em> (第6版) ── Google広告の実践的運用戦略</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__link chapter-nav__link--prev" href="./web-creator-recognition-strategy-textbook.html">← Vol.XI 届ける技術（自己認知編）</a>
+      <a class="chapter-nav__link chapter-nav__link--next" href="./index.html">↑ 目録へ戻る</a>
+    </nav>
+  </div>
+</section>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>

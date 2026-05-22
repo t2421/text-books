@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>届ける技術 ── 個人Web制作者の認知・集客戦略</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">届ける技術 ── <em>個人Web制作者の認知・集客戦略</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 「作れる」は出発点に過ぎない</a></li>
+    <li><a href="#ch1">第1章 ── ポートフォリオ設計：仕事を語る入口を作る</a></li>
+    <li><a href="#ch2">第2章 ── SEOの本質：探されている言葉で見つかる</a></li>
+    <li><a href="#ch3">第3章 ── SNS戦略：場所を選び、人格を統一する</a></li>
+    <li><a href="#ch4">第4章 ── コンテンツ発信：信頼は記事で積み上がる</a></li>
+    <li><a href="#ch5">第5章 ── 口コミ設計：顧客を最強の紹介者に変える</a></li>
+    <li><a href="#ch6">第6章 ── コミュニティ戦略：同業者と顧客の間に立つ</a></li>
+    <li><a href="#ch7">第7章 ── 数字で改善する：認知の経路を可視化する</a></li>
+    <li><a href="#ch8">第8章 ── 認知資産の設計：長く積み上がる仕組み</a></li>
+    <li><a href="#epilogue">エピローグ ── 認知は一日にして成らず</a></li>
+    <li><a href="#bibliography">参 ── 参考文献一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">RECOGNITION STRATEGY FOR THE SOLO WEB CREATOR</div>
+  <h1 class="hero__title">届ける技術<em>個人Web制作者の認知・集客戦略</em></h1>
+  <p class="hero__subtitle">作ることと届けることは、まったく別の技術だ。優れたWebサイトを作っても、誰にも知られなければ存在しないに等しい。SEO・SNS・コンテンツ発信・口コミ設計・コミュニティ戦略 ── 八つの経路から認知を積み上げ、仕事が継続的に入る仕組みを設計する</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">55 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">8 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">SOLO CREATORS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">「作れる」は出発点に過ぎない</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">世界一美しいWebサイトも、誰にも見られなければ存在しないのと変わらない</p>
+    </header>
+
+    <div class="prose">
+      <p>あなたはAIを使いこなし、高品質なWebサイトを短時間で作れるようになった。クライアントの要望を形にし、デザインを磨き、コードを書く技術を持っている。それは本物の力だ。しかし今、個人事業主としてその技術を売ろうとしたとき、最初の壁にぶつかる。</p>
+
+      <p><strong>「誰も知らない」という壁だ。</strong></p>
+
+      <p>Web制作の世界では、技術力と認知度は別の軸で存在する。あなたより技術が低くても、認知が高い競合が案件を取る。あなたより高価でも、信頼が積み上がっているフリーランサーが選ばれる。これは不公平ではなく、市場の合理的な判断だ。発注者は「良い仕事をしてもらえるか」を判断するとき、実績・評判・見える形での存在感を頼りにするしかない。</p>
+
+      <p>この教科書が扱うのは、その「見える形での存在感」をどう作るか、という技術だ。作る技術がある人が、届ける技術を身につけるための地図を提供したい。</p>
+
+      <h3>認知の三つの段階</h3>
+      <p>認知には段階がある。まず「知ってもらう」。次に「信頼してもらう」。最後に「選んでもらう」。多くの個人Web制作者が詰まるのは第一段階だが、実は第二・第三段階の設計なしに、第一段階だけ頑張っても効果は薄い。フォロワーが増えても仕事に繋がらない、という悩みはここから来る。</p>
+
+      <p>本書では八つの戦略チャネルを扱う。しかし全てを同時にやる必要はない。あなたの性格・強み・現状のリソースに応じて、どのチャネルを優先するかを選ぶための判断軸も提供する。</p>
+
+      <div class="key-concept">
+        <h4>本書の前提</h4>
+        <ul>
+          <li>個人事業主としてWeb制作（受託）を始めた、または始めようとしている</li>
+          <li>技術的な能力はある。しかし案件獲得・認知の作り方がわからない</li>
+          <li>大きな広告費はかけられない。時間と知恵で認知を積み上げたい</li>
+          <li>長期的に継続する仕組みを作りたい（単発の営業活動ではなく）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER I</span>
+      <h2 class="chapter__title">ポートフォリオ設計<br><small style="font-size:0.6em;font-weight:400;">仕事を語る入口を作る</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">ポートフォリオは「実績の展示」ではなく「採用可否の判断材料」として設計する</p>
+    </header>
+
+    <div class="prose">
+      <p>ポートフォリオサイトを持っている個人Web制作者は多い。しかし「機能している」ポートフォリオを持っている人は少ない。多くの場合、ポートフォリオは「自分がどんな仕事をしてきたか」の記録になっており、発注者が本当に知りたい「この人に頼んでいいか」への答えが不足している。</p>
+
+      <h3>発注者が見ているもの</h3>
+      <p>発注者がポートフォリオを訪れたとき、心の中にある問いは次の三つだ。</p>
+      <p>①「自分の業界・規模感の仕事をやったことがあるか？」②「コミュニケーションに問題はなさそうか？」③「価格に見合う品質か？」この三つに答えられるポートフォリオが、機能するポートフォリオだ。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg" aria-label="ポートフォリオが答えるべき三つの問い">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 13px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; fill: #8b7355; letter-spacing: 0.1em; }
+              .fig-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; fill: #b85c38; font-weight: 600; }
+            </style>
+          </defs>
+          <!-- 三つの柱 -->
+          <rect x="40" y="80" width="160" height="180" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <rect x="220" y="80" width="160" height="180" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <rect x="400" y="80" width="160" height="180" rx="4" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <!-- 番号 -->
+          <text x="120" y="130" class="fig-num" text-anchor="middle">①</text>
+          <text x="300" y="130" class="fig-num" text-anchor="middle">②</text>
+          <text x="480" y="130" class="fig-num" text-anchor="middle">③</text>
+          <!-- 問い -->
+          <text x="120" y="160" class="fig-text" text-anchor="middle">自分の業界の</text>
+          <text x="120" y="180" class="fig-text" text-anchor="middle">仕事実績があるか</text>
+          <text x="300" y="160" class="fig-text" text-anchor="middle">コミュニケーションに</text>
+          <text x="300" y="180" class="fig-text" text-anchor="middle">問題はないか</text>
+          <text x="480" y="160" class="fig-text" text-anchor="middle">価格に見合う</text>
+          <text x="480" y="180" class="fig-text" text-anchor="middle">品質があるか</text>
+          <!-- ラベル -->
+          <text x="120" y="230" class="fig-label" text-anchor="middle">EXPERIENCE</text>
+          <text x="300" y="230" class="fig-label" text-anchor="middle">TRUST</text>
+          <text x="480" y="230" class="fig-label" text-anchor="middle">VALUE</text>
+          <!-- タイトル -->
+          <text x="300" y="44" class="fig-text" text-anchor="middle" font-size="15" font-weight="600">発注者がポートフォリオで確認する三つの問い</text>
+          <line x1="100" y1="54" x2="500" y2="54" stroke="#c9b99a" stroke-width="0.8"/>
+        </svg>
+        <p class="figure__caption">ポートフォリオは「実績の記録」ではなく、この三つの問いへの回答として設計する。</p>
+      </div>
+
+      <h3>事例の選び方と書き方</h3>
+      <p>事例は数より質だ。一件の深い事例が、十件の薄い掲載より力がある。一件の事例には次の構造を持たせる。</p>
+      <p><strong>背景</strong>（クライアントの業種・規模・課題）→ <strong>提案の方向性</strong>（なぜこのデザイン・設計にしたか）→ <strong>成果</strong>（制作後に何が変わったか）→ <strong>クライアントの声</strong>（可能であれば）。この構造で語られた事例は、「技術の証明」ではなく「思考プロセスの証明」になる。発注者は思考プロセスを信頼する。</p>
+
+      <h3>特化か総合か</h3>
+      <p>参入初期は「何でもできます」より「〇〇に特化しています」の方が問い合わせが来やすい。医療クリニック専門、飲食店専門、士業事務所専門 ── 特化することで「この人なら自分の業界のことをわかっている」という安心感が生まれる。最初の数件の実績を同じ業種で積み、特化のストーリーを作ることを意識しよう。</p>
+
+      <div class="key-concept">
+        <h4>ポートフォリオ設計のチェックリスト</h4>
+        <ul>
+          <li>実績ページに「課題 → 提案 → 成果」の構造で書かれた事例が最低3件ある</li>
+          <li>「どんな仕事を受けているか」が30秒で理解できる</li>
+          <li>問い合わせフォームへの動線が明確（CTAが見える）</li>
+          <li>自分の顔・名前・簡単な自己紹介がある（人格の可視化）</li>
+          <li>料金の目安、または「まず相談」の入口がある</li>
+          <li>SNSや実績サイトへのリンクがある（外部での活動が確認できる）</li>
+        </ul>
+      </div>
+
+      <h3>ポートフォリオを定期的に更新する</h3>
+      <p>ポートフォリオは作って終わりではない。最終更新が2年前、という状態は「今も活動しているのか？」という不安を生む。仕事を一件完了するたびに事例を追加する習慣を作ろう。更新すること自体がGoogleへの新鮮なシグナルにもなる。</p>
+
+      <div class="summary">
+        <h4>第1章まとめ</h4>
+        <ul>
+          <li>ポートフォリオは「実績の展示」ではなく「採用可否の判断材料」として設計する</li>
+          <li>一件の深い事例（背景・提案・成果）が十件の薄い掲載より価値がある</li>
+          <li>参入初期は特化することで「自分の業界の人」という安心感を作る</li>
+          <li>更新頻度がポートフォリオの鮮度を保ち、Googleへのシグナルにもなる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER II</span>
+      <h2 class="chapter__title">SEOの本質<br><small style="font-size:0.6em;font-weight:400;">探されている言葉で見つかる</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">SEOとは「自分が言いたいことを書く」ことではなく「相手が探している言葉に答える」ことだ</p>
+    </header>
+
+    <div class="prose">
+      <p>「SEOをやっている」と言う人の多くが、実際には「キーワードを散りばめたページを作っている」にとどまっている。しかしGoogleが本当に評価するのは、検索者の問いに対して誠実かつ詳細に答えているコンテンツだ。個人Web制作者がSEOを使うとき、まず理解すべきは「誰が、何を検索して、自分を見つけるか」という経路の設計だ。</p>
+
+      <h3>個人Web制作者が狙うべきキーワード</h3>
+      <p>「ホームページ制作」というキーワードで上位表示しようとするのは無謀だ。大手の制作会社やクラウドソーシングのプラットフォームが競合になり、個人が戦えるフィールドではない。個人が勝てるのは<strong>ロングテールキーワード</strong>、つまり検索ボリュームは小さいが意図が明確な複合キーワードだ。</p>
+      <p>「東京 小規模 飲食店 ホームページ 制作」「美容室 予約システム付き ホームページ 個人」── こうした具体的なキーワードで上位を取ることが、実際の発注に繋がりやすい。なぜなら、このような具体的な検索をしている人は「今すぐ頼みたい人」に近いからだ。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="キーワードと競合・意欲の関係">
+          <defs>
+            <style>
+              .fig2-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .fig2-axis { stroke: #c9b99a; stroke-width: 1.2; }
+              .fig2-label { font-family: 'Cormorant Garamond', serif; font-size: 11px; fill: #8b7355; letter-spacing: 0.05em; }
+            </style>
+          </defs>
+          <!-- 軸 -->
+          <line x1="80" y1="260" x2="560" y2="260" class="fig2-axis"/>
+          <line x1="80" y1="260" x2="80" y2="40" class="fig2-axis"/>
+          <!-- X軸ラベル -->
+          <text x="80" y="285" class="fig2-label" text-anchor="middle">短い</text>
+          <text x="560" y="285" class="fig2-label" text-anchor="middle">具体的（長い）</text>
+          <text x="320" y="302" class="fig2-label" text-anchor="middle">キーワードの具体性</text>
+          <!-- Y軸ラベル -->
+          <text x="60" y="260" class="fig2-label" text-anchor="middle">低</text>
+          <text x="60" y="50" class="fig2-label" text-anchor="middle">高</text>
+          <text x="30" y="160" class="fig2-label" text-anchor="middle" transform="rotate(-90 30 160)">競合 / 購買意欲</text>
+          <!-- 競合曲線（下降） -->
+          <path d="M 90 60 Q 250 80 400 180 T 550 250" fill="none" stroke="#b85c38" stroke-width="2" stroke-dasharray="none"/>
+          <text x="200" y="95" class="fig2-text" fill="#b85c38">競合の強さ</text>
+          <!-- 購買意欲曲線（上昇） -->
+          <path d="M 90 250 Q 250 230 400 140 T 550 60" fill="none" stroke="#4a7c59" stroke-width="2"/>
+          <text x="380" y="120" class="fig2-text" fill="#4a7c59">購買意欲</text>
+          <!-- ポイント -->
+          <circle cx="430" cy="155" r="8" fill="#b85c38" opacity="0.2"/>
+          <circle cx="430" cy="155" r="5" fill="#b85c38"/>
+          <text x="450" y="145" class="fig2-text" font-weight="600">個人の</text>
+          <text x="450" y="160" class="fig2-text" font-weight="600">勝ち筋</text>
+          <!-- タイトル -->
+          <text x="320" y="28" class="fig2-text" text-anchor="middle" font-size="14" font-weight="600">ロングテールキーワードに個人の活路がある</text>
+        </svg>
+        <p class="figure__caption">短いビッグキーワードは競合が強く勝てない。具体的なロングテールは競合が少なく、購買意欲も高い検索者が来る。</p>
+      </div>
+
+      <h3>SEOで最も重要な三要素</h3>
+      <p><strong>コンテンツの質</strong>（検索者の問いに丁寧に答えているか）、<strong>被リンク</strong>（他のサイトから参照されているか）、<strong>技術的健全性</strong>（ページの読み込み速度、モバイル対応、構造化データ）── この三つがSEOの柱だ。</p>
+      <p>個人が最も投資すべきはコンテンツの質だ。被リンクは短期的に作れないが、質の高いコンテンツは自然と参照される。そして技術的健全性は、Web制作者なら自分で対処できる強みでもある。自分のポートフォリオサイトをCore Web Vitalsで90点以上に保つことは、「仕事の質の証明」でもある。</p>
+
+      <h3>地域SEOという武器</h3>
+      <p>「渋谷 ホームページ制作 個人」「名古屋 中小企業 Web制作 フリーランス」── 地域名を加えることで、競合が一気に減る。Googleビジネスプロフィールへの登録も忘れてはならない。地域の中小企業は、地元のWeb制作者に頼みたいという心理がある。距離の近さは信頼の一形態だ。</p>
+
+      <div class="sidenote">
+        <p>Googleのクローラーは「この人はどんな専門家か」を理解しようとする。特定の業種・地域・課題に関するコンテンツを継続的に発信することで、その領域の専門家として認識される。これをE-E-A-T（経験・専門性・権威性・信頼性）という。一つのテーマで深く書き続けることが、最も効果的なSEO戦略だ。</p>
+      </div>
+
+      <div class="summary">
+        <h4>第2章まとめ</h4>
+        <ul>
+          <li>ビッグキーワードで戦わず、業種・地域・課題を絞ったロングテールで上位を狙う</li>
+          <li>SEOの本質は「検索者の問いに誠実に答えること」であり、テクニックの前に内容が来る</li>
+          <li>地域SEO（Googleビジネスプロフィール含む）は個人にとって効果的な差別化戦略</li>
+          <li>自分のポートフォリオのCore Web Vitalsを高く保つことが技術力の証明にもなる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER III</span>
+      <h2 class="chapter__title">SNS戦略<br><small style="font-size:0.6em;font-weight:400;">場所を選び、人格を統一する</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">全てのSNSに同時参入しない。一つを深くやった方が、全部を浅くやるより遥かに効果がある</p>
+    </header>
+
+    <div class="prose">
+      <p>「SNSで発信すべき」とわかっていても、何を発信すればいいかわからない ── この状態で多くの人が止まる。あるいは全SNSに同時参入して全部中途半端になる。SNS戦略で最初に決めるべきは「どこで誰に向けて発信するか」だ。</p>
+
+      <h3>プラットフォーム別の特性と使い分け</h3>
+      <p>X（旧Twitter）はWebクリエイター同士のネットワークが濃く、同業者からの認知を得やすい。ただし直接の発注者（中小企業経営者など）はX上に少ない。<strong>Xは「業界内での認知」「紹介のきっかけ」を作る場だ。</strong></p>
+      <p>Instagramは飲食・美容・アパレルなどのビジュアル重視の業種の経営者が多い。デザインの過程やビフォーアフターを見せることで、直接の発注者に届きやすい。<strong>Instagramは「見込み発注者への直接訴求」の場だ。</strong></p>
+      <p>note・ブログは検索との親和性が高く、一本の記事が数年間にわたって集客し続ける。<strong>長期的な認知資産として機能するのはnote・ブログだ。</strong>（詳細は第4章で扱う）</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" aria-label="SNSプラットフォーム別の特性マップ">
+          <defs>
+            <style>
+              .figsns-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figsns-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.08em; }
+              .figsns-box { rx: 4; ry: 4; }
+            </style>
+          </defs>
+          <!-- 軸線 -->
+          <line x1="300" y1="30" x2="300" y2="255" stroke="#c9b99a" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="60" y1="142" x2="545" y2="142" stroke="#c9b99a" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- 軸ラベル -->
+          <text x="300" y="22" class="figsns-label" text-anchor="middle">同業者向け</text>
+          <text x="300" y="268" class="figsns-label" text-anchor="middle">発注者向け</text>
+          <text x="52" y="146" class="figsns-label" text-anchor="middle">短期</text>
+          <text x="548" y="146" class="figsns-label" text-anchor="middle">長期</text>
+          <!-- プラットフォームノード -->
+          <!-- X: 同業者向け・短期 -->
+          <rect x="150" y="55" width="100" height="50" fill="#faf6ef" stroke="#b85c38" stroke-width="1.5" rx="4"/>
+          <text x="200" y="76" class="figsns-text" text-anchor="middle" font-weight="600">X (Twitter)</text>
+          <text x="200" y="93" class="figsns-text" text-anchor="middle" font-size="10">業界内認知・紹介</text>
+          <!-- note: 発注者向け・長期 -->
+          <rect x="360" y="165" width="100" height="50" fill="#faf6ef" stroke="#4a7c59" stroke-width="1.5" rx="4"/>
+          <text x="410" y="186" class="figsns-text" text-anchor="middle" font-weight="600">note / Blog</text>
+          <text x="410" y="203" class="figsns-text" text-anchor="middle" font-size="10">長期・検索集客</text>
+          <!-- Instagram: 発注者向け・短期 -->
+          <rect x="150" y="165" width="100" height="50" fill="#faf6ef" stroke="#8b7355" stroke-width="1.5" rx="4"/>
+          <text x="200" y="186" class="figsns-text" text-anchor="middle" font-weight="600">Instagram</text>
+          <text x="200" y="203" class="figsns-text" text-anchor="middle" font-size="10">ビジュアル業種向け</text>
+          <!-- LinkedIn: 同業者向け・長期 -->
+          <rect x="360" y="55" width="100" height="50" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5" rx="4"/>
+          <text x="410" y="76" class="figsns-text" text-anchor="middle" font-weight="600">LinkedIn</text>
+          <text x="410" y="93" class="figsns-text" text-anchor="middle" font-size="10">BtoB・信頼蓄積</text>
+        </svg>
+        <p class="figure__caption">目的と時間軸でSNSを選ぶ。全部やるより、一つを深くやる方が効果は高い。</p>
+      </div>
+
+      <h3>発信内容の三本柱</h3>
+      <p>何を発信すれば良いか迷う人は、次の三種類のコンテンツを7：2：1の割合で混ぜると良い。<strong>7割：価値提供（知識・ノウハウ・事例）</strong>。<strong>2割：過程の共有（制作の様子・学び・試行錯誤）</strong>。<strong>1割：告知・PR（仕事募集・実績報告）</strong>。</p>
+      <p>発信を「営業ツール」と捉えると、告知ばかりになって読者が離れる。発信の大部分は「読んで良かった」と感じさせる価値提供にする。信頼が溜まった先に、仕事の依頼が来る。</p>
+
+      <h3>人格の統一という原則</h3>
+      <p>複数のSNSを運用するときは、プロフィール写真・名前・一言紹介を統一する。どこで見ても「同じ人」だとわかる状態を作る。名前が違う、写真が違う、紹介文が全然違う ── これは認知の分散を招く。一度見た人の記憶に残るためには、一貫したキャラクターが必要だ。</p>
+
+      <div class="summary">
+        <h4>第3章まとめ</h4>
+        <ul>
+          <li>全SNSに参入せず、目的に合ったプラットフォームを一つ選んで深く耕す</li>
+          <li>発信は「価値提供7：過程共有2：告知1」の割合で。告知過多はフォロワーを遠ざける</li>
+          <li>プロフィール写真・名前・紹介文を全SNSで統一し、認知を分散させない</li>
+          <li>Xは業界内認知、Instagramは発注者直接訴求、note/ブログは長期資産</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IV</span>
+      <h2 class="chapter__title">コンテンツ発信<br><small style="font-size:0.6em;font-weight:400;">信頼は記事で積み上がる</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">一本の良い記事は、三年間にわたって見込み客を連れてくる営業マンになる</p>
+    </header>
+
+    <div class="prose">
+      <p>SNSの投稿は数時間で流れる。しかし検索に最適化された記事は、何年も検索結果に残り続け、継続的に新しい読者を連れてくる。コンテンツマーケティングとは、この「腐らない資産」を積み上げていく戦略だ。</p>
+
+      <h3>個人Web制作者が書くべき記事の種類</h3>
+      <p><strong>ノウハウ記事</strong>（「飲食店がホームページを作るときに気をつけること5つ」）は、まさにあなたの見込み客が検索しているトピックだ。技術的な記事（「WordPressで予約システムを実装する方法」）は同業者には読まれるが、発注者には届きにくい。視点を発注者側に寄せることが重要だ。</p>
+      <p><strong>事例・制作実績の深掘り記事</strong>は、SEOとポートフォリオの両方の機能を持つ。「〇〇業の△△さんのサイトを作った話 ── 課題からデザインの意図まで」という形式で書かれた記事は、同じ業種・同じ課題を抱える見込み客の心に刺さる。</p>
+      <p><strong>比較・選び方記事</strong>（「フリーランスのWeb制作者を選ぶ5つのポイント」）は、「これから頼もうとしている人」の検索に直接答える記事だ。自分が見込み客の目線で書くことで、信頼の先行投資ができる。</p>
+
+      <h3>記事の更新頻度より質</h3>
+      <p>月に20本の薄い記事より、月に2本の深い記事の方が効果がある。Googleは「薄いコンテンツ」を低く評価するようになっている。2,000字の記事を量産するより、一つのトピックを徹底的に掘り下げた5,000字の記事を書く方が、長期的な集客力は高い。</p>
+
+      <div class="sidenote sidenote--quote">
+        <p>"Content is king, but distribution is queen, and she wears the pants."</p>
+        <cite>── Jonathan Perelman (BuzzFeed VP)</cite>
+      </div>
+
+      <h3>コンテンツの配信チャネルを広げる</h3>
+      <p>一つのコンテンツを複数チャネルで活かす「コンテンツのリパーパシング」という考え方がある。ブログ記事を書いたら、その要点をXでスレッドにする。その図解をInstagramで投稿する。その話題をYouTubeショートで話す。同じ内容を形を変えて複数の場所に置くことで、発見の入口が増える。</p>
+
+      <h3>継続のための仕組み</h3>
+      <p>コンテンツ発信を長続きさせる最大の課題は「ネタ切れ」ではなく「書く時間がない」だ。解決策は二つ。一つ目は<strong>週一回、必ず書く時間をカレンダーに確保する</strong>。二つ目は<strong>クライアントとのやり取りからネタを拾う</strong>。「この質問、三回聞かれた」と気づいたらそれが記事のテーマだ。</p>
+
+      <div class="summary">
+        <h4>第4章まとめ</h4>
+        <ul>
+          <li>記事は「腐らない資産」。SNS投稿と違い、数年間にわたって集客し続ける</li>
+          <li>技術解説より「発注者の目線」で書かれたノウハウ記事が、見込み客に届く</li>
+          <li>量より質。5,000字の深い記事1本が、1,000字記事10本より長期的な効果がある</li>
+          <li>クライアントから繰り返し聞かれた質問が、最良の記事テーマになる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER V</span>
+      <h2 class="chapter__title">口コミ設計<br><small style="font-size:0.6em;font-weight:400;">顧客を最強の紹介者に変える</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">最も費用対効果が高い集客は、紹介だ。しかし紹介は「待つもの」ではなく「設計するもの」だ</p>
+    </header>
+
+    <div class="prose">
+      <p>フリーランスのWeb制作者の多くは、案件の半分以上を「紹介」で獲得している。SNSや広告より転換率が高く、信頼コストも低い。紹介はただ質の高い仕事をすれば自然に来るものだが、「設計」することでその頻度と質を高められる。</p>
+
+      <h3>紹介が起きる条件</h3>
+      <p>紹介が起きるのは、クライアントが次の二つを持っているときだ。①「この人は信頼できる」という確信。②「今まさに紹介できる相手がいる」という文脈。①は仕事の質とコミュニケーションで作れるが、②は偶発的に任せてはいけない。</p>
+
+      <h3>「紹介してください」と言う勇気</h3>
+      <p>仕事終了後の振り返りミーティングで、「もし同じような課題をお持ちの方がいれば、ご紹介いただけると嬉しいです」と伝えること。これだけで紹介率は大幅に上がる。日本人の文化的に言いにくい気持ちはわかるが、クライアントは「言われて不快」より「言ってもらって良かった」と感じることの方が多い。相手も喜んで紹介できる機会を提供されたと感じる。</p>
+
+      <h3>紹介しやすくする仕組みを作る</h3>
+      <p>「紹介してください」と伝えるだけでなく、<strong>紹介を具体的にしやすくする仕組み</strong>が必要だ。例えば「私はこういった仕事が得意です」という一枚の資料（紹介用シート）を渡す。これがあると、「誰かに紹介したいけど何と説明すればいいか…」という摩擦が消える。</p>
+      <p>また、仕事の実績をまとめた事例紹介メールを定期的に既存顧客に送ることも効果的だ。「この人は今もこういう仕事をしている」という認知が継続され、「そういえばこういう仕事が…」という想起が起きやすくなる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" aria-label="口コミ設計のサイクル">
+          <defs>
+            <style>
+              .figkm-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figkm-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.08em; }
+            </style>
+          </defs>
+          <!-- サイクル矢印 -->
+          <circle cx="300" cy="150" r="100" fill="none" stroke="#c9b99a" stroke-width="1.5" stroke-dasharray="6,4"/>
+          <!-- 各ノード -->
+          <circle cx="300" cy="50" r="32" fill="#faf6ef" stroke="#b85c38" stroke-width="1.5"/>
+          <text x="300" y="44" class="figkm-text" text-anchor="middle">質の高い</text>
+          <text x="300" y="60" class="figkm-text" text-anchor="middle">仕事</text>
+          <circle cx="390" cy="200" r="32" fill="#faf6ef" stroke="#b85c38" stroke-width="1.5"/>
+          <text x="390" y="194" class="figkm-text" text-anchor="middle">紹介依頼</text>
+          <text x="390" y="210" class="figkm-text" text-anchor="middle">+ 資料</text>
+          <circle cx="210" cy="200" r="32" fill="#faf6ef" stroke="#b85c38" stroke-width="1.5"/>
+          <text x="210" y="194" class="figkm-text" text-anchor="middle">定期的な</text>
+          <text x="210" y="210" class="figkm-text" text-anchor="middle">存在想起</text>
+          <!-- 矢印 -->
+          <path d="M 326 72 L 376 175" stroke="#b85c38" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <path d="M 358 218 L 242 218" stroke="#b85c38" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <path d="M 224 172 L 274 72" stroke="#b85c38" stroke-width="1.5" marker-end="url(#arrow)"/>
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#b85c38"/>
+            </marker>
+          </defs>
+          <!-- 中央テキスト -->
+          <text x="300" y="144" class="figkm-text" text-anchor="middle" font-size="13" font-weight="600">紹介の</text>
+          <text x="300" y="162" class="figkm-text" text-anchor="middle" font-size="13" font-weight="600">好循環</text>
+        </svg>
+        <p class="figure__caption">口コミは「待つもの」ではなく「設計するもの」。三つのアクションでサイクルを回す。</p>
+      </div>
+
+      <h3>紹介者への感謝の可視化</h3>
+      <p>紹介が成立したとき、紹介者への感謝を丁寧に伝えること。これは次の紹介への布石でもある。感謝の言葉だけでなく、仕事が完了した後の経過報告を紹介者に送ることも、「自分の紹介が役に立った」という実感を与え、また紹介したいという気持ちを醸成する。</p>
+
+      <div class="summary">
+        <h4>第5章まとめ</h4>
+        <ul>
+          <li>紹介は待つものではなく設計するもの。「紹介してください」と直接伝えることから始まる</li>
+          <li>紹介用シートを渡し、「誰かを紹介する」という摩擦を最小化する</li>
+          <li>既存顧客への定期的な近況・実績報告が、想起タイミングを作り紹介につながる</li>
+          <li>紹介が成立したら丁寧な感謝と経過報告を。次の紹介サイクルへの投資になる</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VI</span>
+      <h2 class="chapter__title">コミュニティ戦略<br><small style="font-size:0.6em;font-weight:400;">同業者と顧客の間に立つ</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">コミュニティは「人脈を広げる場」ではなく「信頼を可視化する場」だ</p>
+    </header>
+
+    <div class="prose">
+      <p>「ネットワーキング」という言葉に苦手意識を持つ人は多い。名刺を交換して、すぐ仕事に繋がらないとわかると続かない ── そういう体験をした人もいるだろう。しかし、コミュニティへの参加を「即効性のある営業」として見るから辛くなる。コミュニティは<strong>長期的な信頼の蓄積と、相互送客の土台</strong>として機能する場だ。</p>
+
+      <h3>参加すべきコミュニティの種類</h3>
+      <p><strong>同業者コミュニティ</strong>（Web制作者が集まる勉強会・Slackグループ・connpassイベント）は、技術向上と補完関係の構築に使う。自分一人では受けられない大きな案件を、仲間と分担するための土台がここで作られる。</p>
+      <p><strong>ターゲット業種のコミュニティ</strong>（飲食店経営者の会、士業のコミュニティなど）は、直接の見込み客と繋がれる場だ。Web制作者として「デジタル化に詳しい人」として認識されれば、信頼の先行投資ができる。</p>
+      <p><strong>地域のビジネスコミュニティ</strong>（商工会議所、地域の起業家コミュニティなど）は、地域SEOと組み合わせて強い。地域で「Webのことならあの人」という存在になることが目標だ。</p>
+
+      <h3>コミュニティでの振る舞い</h3>
+      <p>コミュニティで「仕事をください」と言わないこと。これが大原則だ。代わりに、<strong>自分の専門知識で他者の問いに答える</strong>ことを繰り返す。「うちのHPどうすればいいか」という相談に丁寧に答えることで、「この人は頼れる」という評判が自然と広まる。</p>
+
+      <div class="sidenote">
+        <p>「Give before you take（先に与えよ）」── コミュニティでの行動原則として、まず自分のリソース（知識・紹介・コネクション）を提供することを習慣にする。与えた分だけ、いつか返ってくるという感覚がコミュニティ参加を長続きさせる秘訣だ。</p>
+      </div>
+
+      <h3>オンラインとオフラインの使い分け</h3>
+      <p>オンラインコミュニティは広くつながれるが、信頼の深さは物理的な接触に劣る。できれば年に数回、オフラインで会う機会を作ることで、信頼の深度が一気に増す。オフラインで会った後にオンラインでフォローし続けるという組み合わせが最も効果的だ。</p>
+
+      <h3>補完関係の構築</h3>
+      <p>同業者との関係で重要なのは「競合しない補完関係」を作ることだ。あなたがWordPress専門なら、Shopify専門の人と繋がっておく。あなたがデザイン寄りなら、SEO専門の人と繋がっておく。お互いに「守備範囲外の仕事」を送り合える関係は、双方の案件数を増やす。</p>
+
+      <div class="summary">
+        <h4>第6章まとめ</h4>
+        <ul>
+          <li>コミュニティは「即効営業の場」ではなく「長期的信頼の蓄積と補完関係の土台」</li>
+          <li>「仕事をください」と言わず、専門知識で他者の問いに答えることで評判が生まれる</li>
+          <li>ターゲット業種のコミュニティに入ることで、直接の見込み客に届ける経路ができる</li>
+          <li>得意領域が異なる同業者との補完関係が、双方の案件数を増やす</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VII</span>
+      <h2 class="chapter__title">数字で改善する<br><small style="font-size:0.6em;font-weight:400;">認知の経路を可視化する</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">感覚で動かず、データで判断する。認知戦略も、作ったサイトと同じく計測・改善のサイクルで回す</p>
+    </header>
+
+    <div class="prose">
+      <p>認知戦略を実行している人の多くが、「どれが効いているか」を把握していない。SNSのフォロワーが増えたが仕事に繋がっていない、という状態でも続けてしまう。逆に、ブログの一本の記事が毎月5件の問い合わせを生んでいるのに気づかず、他の施策に力を入れてしまう。データを見ることで、力の入れ所がわかる。</p>
+
+      <h3>計測すべき指標</h3>
+      <p>ポートフォリオサイトにはGoogle Analytics（GA4）とGoogle Search Consoleを必ず入れる。</p>
+      <p><strong>GA4で見るべきこと</strong>：ユーザー獲得チャネル（どこからの流入が多いか）、ページ別の閲覧数とコンバージョン（問い合わせフォーム到達率）、デバイス別の行動（モバイルユーザーが直帰していないか）。</p>
+      <p><strong>Search Consoleで見るべきこと</strong>：実際に自分のサイトを表示させている検索キーワード、クリック率（CTR）の低いキーワード（上位表示しているのにクリックされていないなら、タイトル・説明文を改善する余地がある）。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" aria-label="認知の経路と計測ポイント">
+          <defs>
+            <style>
+              .figdata-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .figdata-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.06em; }
+            </style>
+          </defs>
+          <!-- ファネル形状 -->
+          <polygon points="100,40 500,40 440,130 160,130" fill="#faf6ef" stroke="#c9b99a" stroke-width="1.5"/>
+          <polygon points="160,140 440,140 390,210 210,210" fill="#f5ede0" stroke="#c9b99a" stroke-width="1.5"/>
+          <polygon points="210,220 390,220 350,280 250,280" fill="#eddfc9" stroke="#c9b99a" stroke-width="1.5"/>
+          <!-- テキスト各段 -->
+          <text x="300" y="75" class="figdata-text" text-anchor="middle" font-size="13" font-weight="600">認知（知ってもらう）</text>
+          <text x="300" y="92" class="figdata-text" text-anchor="middle">SEO / SNS / 紹介 / コミュニティ</text>
+          <text x="300" y="170" class="figdata-text" text-anchor="middle" font-size="13" font-weight="600">興味（読んでもらう）</text>
+          <text x="300" y="186" class="figdata-text" text-anchor="middle">ポートフォリオ / ブログ / 事例</text>
+          <text x="300" y="250" class="figdata-text" text-anchor="middle" font-size="13" font-weight="600">行動（問い合わせ）</text>
+          <!-- 計測マーク -->
+          <text x="530" y="90" class="figdata-label" fill="#b85c38">← Search Console</text>
+          <text x="530" y="106" class="figdata-label" fill="#b85c38">SNS Analytics</text>
+          <text x="530" y="178" class="figdata-label" fill="#4a7c59">← GA4 行動計測</text>
+          <text x="530" y="258" class="figdata-label" fill="#4a7c59">← GA4 コンバージョン</text>
+        </svg>
+        <p class="figure__caption">認知ファネルの各段階に計測点を置く。どこで止まっているかがわかれば、改善すべき箇所が明確になる。</p>
+      </div>
+
+      <h3>問い合わせ後の経路も記録する</h3>
+      <p>問い合わせが来たとき「どこで知りましたか？」と必ず聞く習慣をつける。Googleで検索、SNS、紹介 ── この情報を6ヶ月積み上げると、「自分に仕事をもたらしているチャネル」が明確になる。力を入れるべき場所が、感覚ではなくデータで判断できるようになる。</p>
+
+      <h3>指標の罠：フォロワー数より問い合わせ数</h3>
+      <p>SNSのフォロワー数は「虚栄の指標（Vanity Metrics）」になりやすい。1,000人フォロワーがいても問い合わせゼロのアカウントより、100人しかフォロワーがいなくても毎月1件の問い合わせが来るアカウントの方が事業的には価値がある。追うべき指標は「問い合わせ数」と「問い合わせの質（受注率）」だ。</p>
+
+      <div class="summary">
+        <h4>第7章まとめ</h4>
+        <ul>
+          <li>GA4とSearch Consoleを必ず入れ、月1回は数字を見る習慣を作る</li>
+          <li>問い合わせ時に「どこで知りましたか？」を必ず聞き、効いているチャネルを把握する</li>
+          <li>フォロワー数より「問い合わせ数」と「受注率」を追う。虚栄の指標に惑わされない</li>
+          <li>データが示す「効いているチャネル」に力を集中し、効いていないチャネルは縮小する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VIII</span>
+      <h2 class="chapter__title">認知資産の設計<br><small style="font-size:0.6em;font-weight:400;">長く積み上がる仕組み</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">毎日の営業活動ではなく、自動的に認知を積み上げ続ける「資産」を作る</p>
+    </header>
+
+    <div class="prose">
+      <p>認知戦略を「活動」として捉えると、続けるのが辛くなる。SNSを毎日更新し続けることも、ブログを毎週書き続けることも、それ単体では持続が難しい。しかし「資産」として捉えると、長期的な視点が生まれる。今書いた記事は三年後も読まれ、今作ったポートフォリオの事例は五年後の説得材料になる。</p>
+
+      <h3>認知資産の三分類</h3>
+      <p><strong>コンテンツ資産</strong>：ブログ記事、YouTube動画、note、podcast。一度作ったら継続的に集客する。検索・推薦・シェアによって長期間流入し続ける。</p>
+      <p><strong>評判資産</strong>：Googleレビュー、クラウドソーシングの評価、SNSでの言及、メディア掲載。第三者の声は自分で言うより信頼性が高く、時間とともに積み上がる。</p>
+      <p><strong>関係性資産</strong>：紹介してくれるクライアント、補完関係の同業者、影響力のある人からの信頼。関係性は一度築くと維持コストが低く、強力な紹介経路になる。</p>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg" aria-label="認知資産の三分類と積み上がり方">
+          <defs>
+            <style>
+              .figasset-text { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; }
+              .figasset-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.08em; }
+            </style>
+          </defs>
+          <!-- 時間軸 -->
+          <line x1="60" y1="240" x2="560" y2="240" stroke="#c9b99a" stroke-width="1.5"/>
+          <text x="60" y="262" class="figasset-label" text-anchor="middle">開始</text>
+          <text x="560" y="262" class="figasset-label" text-anchor="middle">3年後</text>
+          <text x="310" y="278" class="figasset-label" text-anchor="middle">TIME →</text>
+          <!-- コンテンツ資産（緩やかに増加） -->
+          <path d="M 60 230 Q 200 220 300 180 T 560 80" fill="none" stroke="#b85c38" stroke-width="2.5"/>
+          <text x="480" y="72" class="figasset-text" fill="#b85c38">コンテンツ</text>
+          <!-- 評判資産（階段状に増加） -->
+          <path d="M 60 235 L 150 235 L 150 210 L 270 210 L 270 180 L 390 180 L 390 140 L 560 140" fill="none" stroke="#4a7c59" stroke-width="2.5"/>
+          <text x="480" y="132" class="figasset-text" fill="#4a7c59">評判</text>
+          <!-- 関係性資産（急激に成長後安定） -->
+          <path d="M 60 238 Q 160 200 280 140 T 560 100" fill="none" stroke="#8b7355" stroke-width="2.5"/>
+          <text x="480" y="95" class="figasset-text" fill="#8b7355">関係性</text>
+          <!-- Y軸ラベル -->
+          <text x="40" y="244" class="figasset-label" text-anchor="middle">低</text>
+          <text x="40" y="60" class="figasset-label" text-anchor="middle">高</text>
+          <text x="30" y="160" class="figasset-label" text-anchor="middle" transform="rotate(-90 30 160)">認知・集客力</text>
+          <!-- タイトル -->
+          <text x="310" y="28" class="figasset-text" text-anchor="middle" font-size="14" font-weight="600">三つの認知資産は時間とともに積み上がる</text>
+        </svg>
+        <p class="figure__caption">どの資産も初期は効果が低いが、時間とともに複利的に機能し始める。早く始めた分だけ先に使える。</p>
+      </div>
+
+      <h3>最初の1年で積むべきもの</h3>
+      <p>参入1年目にやるべきことは絞れる。<strong>実績事例を最低5件深く書く</strong>（コンテンツ＆評判資産）。<strong>Googleレビューを5件以上集める</strong>（評判資産）。<strong>補完関係の同業者を3人作る</strong>（関係性資産）。<strong>ブログ・noteを月2本書く</strong>（コンテンツ資産）。これだけで、1年後には継続的に問い合わせが来る土台が整う。</p>
+
+      <h3>AIによる認知活動の加速</h3>
+      <p>本書を通じて、あなたはAIを制作に活用していることが前提だ。しかしAIは認知活動の加速にも使える。ブログ記事の構成案生成、SNS投稿のアイデア出し、事例ページのコピーライティング補助 ── AIを「制作の道具」だけでなく「認知活動の道具」として使うことで、一人でも高頻度のコンテンツ発信が可能になる。</p>
+      <p>ただし、AIで生成したコンテンツをそのまま公開しないこと。あなたの経験・事例・視点を必ず盛り込む。Googleは「実際の経験に基づくコンテンツ（E-E-A-T）」を評価する。経験のない話をAIで膨らませても、検索者には届かない。</p>
+
+      <div class="key-concept">
+        <h4>認知戦略の優先度マトリクス</h4>
+        <p>時間とお金のリソースが限られているとき、何から手をつけるか：</p>
+        <ul>
+          <li><strong>最優先（今すぐ）</strong>：ポートフォリオの事例充実、Googleビジネスプロフィール登録、問い合わせ経路の整備</li>
+          <li><strong>第二優先（最初の3ヶ月）</strong>：ブログ・note開始、1つのSNS選定と週3投稿、既存顧客への紹介依頼</li>
+          <li><strong>中期（3〜12ヶ月）</strong>：ロングテールSEO記事の蓄積、コミュニティへの定期参加、補完関係の同業者構築</li>
+          <li><strong>長期（1年以降）</strong>：特化領域の専門家としての評判確立、メディア掲載・登壇の機会探索</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第8章まとめ</h4>
+        <ul>
+          <li>認知は「活動」ではなく「資産」として設計する。資産は時間とともに複利的に機能する</li>
+          <li>三種の資産：コンテンツ（記事・動画）、評判（レビュー・掲載）、関係性（紹介者・補完同業者）</li>
+          <li>1年目の目標：事例5件・Googleレビュー5件・補完同業者3人・ブログ月2本</li>
+          <li>AIを認知活動にも使う。ただし自分の経験と視点を必ず加えること</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">認知は一日にして成らず</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">継続できるものが、最終的に勝つ</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまで八つの認知チャネルを見てきた。SEO、ポートフォリオ、SNS、コンテンツ発信、口コミ、コミュニティ、データ計測、そして資産設計。どれも「やれば効果がある」と感じた戦略だろう。しかし同時に「これを全部やるのは無理だ」という現実的な感覚も持ったはずだ。</p>
+
+      <p>それで正しい。全部を同時にやる必要はないし、やろうとすると燃え尽きる。大切なのは<strong>「継続できる量」でやり続けること</strong>だ。週に一本のブログ記事が三年続けば150本の記事資産になる。月に一度の既存顧客への近況報告が五年続けば、信頼関係の深度は別物になる。</p>
+
+      <h3>最初の三ヶ月で決まること</h3>
+      <p>認知活動を始めた最初の三ヶ月は、効果がほとんど見えない。これが最も危険な時期だ。「やっても無駄だ」と感じて止める人が多い。しかし認知の種は、見えないところで育っている。Googleはあなたのサイトをクロールし始め、SNSのアルゴリズムはあなたのコンテンツを少しずつ配信し、紹介のネットワークの中にあなたの名前が少しずつ登録されていく。</p>
+
+      <p>最初の三ヶ月をどう乗り越えるか。答えは一つ：<strong>成果指標ではなく、行動指標で測る</strong>。問い合わせ数ではなく「記事を書いたか」「コミュニティに参加したか」「既存顧客に連絡したか」。行動できていれば、成果は後からついてくる。</p>
+
+      <h3>作る技術と届ける技術</h3>
+      <p>あなたはAIの力を借りて、一人でも大きな仕事ができる時代にいる。しかしAIが強力になればなるほど、「誰が作ったか」という人格と信頼の価値は増す。技術が均質化するほど、認知・信頼・専門性が差別化の軸になる。</p>
+
+      <p>作る技術を持ったあなたが、届ける技術を身につけたとき。それは単に案件が増えるということではない。<strong>あなたが本当に作りたいものを作れる、選ばれる存在になる</strong>ということだ。</p>
+
+      <p>今日から一つだけ始めよう。ポートフォリオに一件の事例を深く書く。Googleビジネスプロフィールに登録する。一人の既存顧客に「ありがとうございました、また何かあれば」と連絡する。認知の旅は、その一歩から始まる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参 考 文 献</h2>
+      <div class="chapter__rule"></div>
+    </header>
+
+    <div class="bibliography">
+      <ul>
+        <li>Seth Godin, <em>Permission Marketing</em> (1999) ── 割り込み型広告から許可型マーケティングへの転換を論じた先駆的著作</li>
+        <li>Gary Vaynerchuk, <em>Jab, Jab, Jab, Right Hook</em> (2013) ── SNS時代の「与えてから求める」コンテンツ戦略</li>
+        <li>Jay Baer, <em>Youtility: Why Smart Marketing Is About Help Not Hype</em> (2013) ── 役立つコンテンツが信頼を生む、という現代マーケティングの原則</li>
+        <li>Google, <em>Search Quality Evaluator Guidelines</em> (最新版) ── E-E-A-Tの概念と検索品質評価の基準</li>
+        <li>Brian Dean, <em>Backlinko Blog</em> ── SEOのデータドリブンな研究と実践的知見</li>
+        <li>Malcolm Gladwell, <em>The Tipping Point</em> (2000) ── アイデアや評判が「爆発的に広まる」臨界点の分析</li>
+        <li>Robert B. Cialdini, <em>Influence: The Psychology of Persuasion</em> (1984) ── 社会的証明・権威・一貫性など、信頼と説得の心理原則</li>
+        <li>Andy Crestodina, <em>Content Chemistry</em> (2012) ── コンテンツマーケティングとSEOを統合した実践的ガイド</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__link chapter-nav__link--prev" href="./sun-tzu-strategy-for-web-creators-textbook.html">← Vol.X 孫氏の兵法に学ぶ戦略</a>
+      <a class="chapter-nav__link chapter-nav__link--next" href="./index.html">↑ 目録へ戻る</a>
+    </nav>
+  </div>
+</section>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>
