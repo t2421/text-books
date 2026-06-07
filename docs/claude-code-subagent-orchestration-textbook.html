@@ -34,6 +34,10 @@
     <li><a href="#ch8">第8章 ── 失敗パターン六選：起動しない・暴走・形骸化</a></li>
     <li><a href="#ch9">第9章 ── フリート運用：エージェントを「組織」として扱う</a></li>
     <li><a href="#ch10">第10章 ── 指揮の作法：委譲と非委譲の判断</a></li>
+    <li><a href="#ch11">第11章 ── Agent Teamsという別物：サブエージェントとの境界</a></li>
+    <li><a href="#ch12">第12章 ── Agent Teamsを起動する：環境設定とチーム編成</a></li>
+    <li><a href="#ch13">第13章 ── チーム調整の作法：共有タスク・メッセージング・hooks</a></li>
+    <li><a href="#ch14">第14章 ── 効果的なユースケースと制限の理解</a></li>
     <li><a href="#epilogue">エピローグ ── 編成は思考である</a></li>
     <li><a href="#bibliography">参 ── 参考文献一覧</a></li>
   </ol>
@@ -45,15 +49,15 @@
 <section class="hero">
   <div class="hero__ornament">DELEGATION ARCHITECTURE FOR CLAUDE CODE AGENT TEAMS</div>
   <h1 class="hero__title">分業の設計<em>Claude Codeサブエージェントを「チーム」として動かす</em></h1>
-  <p class="hero__subtitle">「ひとり」のClaudeに全部やらせる時代は終わった。役割を切り、descriptionで呼び出しを契約し、tools権限を絞り、モデルを使い分け、並列で走らせ、コンテキストを節約する ── サブエージェントとは、思考を分業するための装置である。自作agentを運用しはじめた人のための、編成の体系</p>
+  <p class="hero__subtitle">「ひとり」のClaudeに全部やらせる時代は終わった ── Taskツールで呼ぶサブエージェントから、公式実験機能Agent Teamsまで。役割を切り、呼び出しを契約し、tools権限を絞り、モデルを使い分け、共有タスクで並列に走らせ、コンテキストを節約する。自作agent運用フェーズの開発者のための、編成と指揮の体系</p>
   <div class="hero__meta">
     <div class="hero__meta-item">
       <span class="hero__meta-label">読了目安</span>
-      <span class="hero__meta-value">65 MIN</span>
+      <span class="hero__meta-value">90 MIN</span>
     </div>
     <div class="hero__meta-item">
       <span class="hero__meta-label">構成</span>
-      <span class="hero__meta-value">10 CHAPTERS</span>
+      <span class="hero__meta-value">14 CHAPTERS</span>
     </div>
     <div class="hero__meta-item">
       <span class="hero__meta-label">想定読者</span>
@@ -1180,6 +1184,516 @@ Task(...)  // また結果を待つ
 </section>
 
 <!-- ============================================
+     第11章
+     ============================================ -->
+<section class="chapter" id="ch11">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER XI</span>
+      <h2 class="chapter__title">Agent Teamsという別物<br><small style="font-size:0.6em;font-weight:400;">サブエージェントとの境界</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">同じ「チーム」という言葉でも、Claude Codeには二つの異なる機構が存在する。混同したまま運用すると、選び損ねる</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまでの十章は<strong>「サブエージェント（subagents）」</strong>機構を扱ってきた。Taskツールでメインから生成し、独立したコンテキストで作業させ、結果だけメインに返してもらう仕組みだ。これは安定した正式機能で、本書冒頭から扱っているものだ。</p>
+
+      <p>一方、Claude Codeにはもう一つ「チーム」を作る正式な機構がある ── 公式に <strong>「Agent Teams（エージェントチーム）」</strong>と呼ばれる、v2.1.32 以降の<strong>実験的機能</strong>だ。こちらは複数のClaude Codeインスタンスを協調動作させる、根本的に違うアーキテクチャを持つ。本章以降の4章では、このAgent Teamsを扱う。</p>
+
+      <h3>二つの「チーム」を分けて理解する</h3>
+      <p>サブエージェントとAgent Teamsは、どちらも「複数のClaudeで作業する」点で似ている。だが内部の仕組みは大きく異なる。混同するとどちらも上手く使えないので、まず正確な区別から始める。</p>
+
+      <p><strong>サブエージェント</strong>は、メインのClaude Codeセッション<em>内部</em>でTaskツールから生成される子エージェントだ。生成されると独立したコンテキストで動き、結果をメインに返して終わる。子は親（メイン）にしか報告できず、他のサブエージェントと直接通信することはない。子同士は互いの存在を知らない。</p>
+
+      <p><strong>Agent Teams</strong>は、複数のClaude Codeインスタンスそれぞれが独立して走り、共有タスクリストとメールボックスを介して<em>互いに直接通信</em>する仕組みだ。一つのセッションが「リーダー」となり、他のセッションが「チームメンバー」として並走する。メンバー同士はリーダーを経由せずに直接メッセージを交わせる。あなた自身も、リーダーを経由せず特定のチームメンバーに直接話しかけられる。</p>
+
+      <div class="key-concept">
+        <h4>本質的な違いの一行</h4>
+        <p><strong>サブエージェント</strong>＝メインから生成して結果だけ受け取る「使い捨ての専門家」。<br><strong>Agent Teams</strong>＝独立したClaudeセッション同士が並走して相談し合う「協働組織」。</p>
+      </div>
+
+      <h3>比較表 ── 五つの軸で違いを掴む</h3>
+
+      <div class="figure">
+        <svg viewBox="0 0 600 320" xmlns="http://www.w3.org/2000/svg" aria-label="サブエージェントとAgent Teamsの比較">
+          <defs>
+            <style>
+              .fig-text { font-family: 'Noto Serif JP', serif; font-size: 11px; fill: #2c2416; }
+              .fig-label { font-family: 'Cormorant Garamond', serif; font-size: 10px; fill: #8b7355; letter-spacing: 0.1em; }
+              .fig-h { font-family: 'Noto Serif JP', serif; font-size: 12px; fill: #2c2416; font-weight: 600; }
+            </style>
+          </defs>
+          <text x="300" y="32" class="fig-h" text-anchor="middle">二つの機構の比較</text>
+          <line x1="180" y1="42" x2="420" y2="42" stroke="#c9b99a" stroke-width="0.8"/>
+
+          <text x="80" y="78" class="fig-label">AXIS</text>
+          <text x="290" y="78" class="fig-label">SUBAGENTS</text>
+          <text x="480" y="78" class="fig-label">AGENT TEAMS</text>
+          <line x1="40" y1="88" x2="560" y2="88" stroke="#5a4e2e" stroke-width="0.5"/>
+
+          <text x="80" y="112" class="fig-text">コンテキスト</text>
+          <text x="290" y="112" class="fig-text" text-anchor="middle">独立、結果は親に返る</text>
+          <text x="480" y="112" class="fig-text" text-anchor="middle">独立、完全に分離</text>
+          <line x1="40" y1="124" x2="560" y2="124" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="80" y="148" class="fig-text">通信</text>
+          <text x="290" y="148" class="fig-text" text-anchor="middle">メイン → 子 のみ</text>
+          <text x="480" y="148" class="fig-text" text-anchor="middle">メンバー同士で直接</text>
+          <line x1="40" y1="160" x2="560" y2="160" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="80" y="184" class="fig-text">調整</text>
+          <text x="290" y="184" class="fig-text" text-anchor="middle">メインが全制御</text>
+          <text x="480" y="184" class="fig-text" text-anchor="middle">共有タスクで自己調整</text>
+          <line x1="40" y1="196" x2="560" y2="196" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="80" y="220" class="fig-text">最適用途</text>
+          <text x="290" y="220" class="fig-text" text-anchor="middle">結果重視の焦点絞り</text>
+          <text x="480" y="220" class="fig-text" text-anchor="middle">議論・相互検証が必要</text>
+          <line x1="40" y1="232" x2="560" y2="232" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="80" y="256" class="fig-text">トークン</text>
+          <text x="290" y="256" class="fig-text" text-anchor="middle">低 (要約して返却)</text>
+          <text x="480" y="256" class="fig-text" text-anchor="middle">高 (各メンバー独立)</text>
+          <line x1="40" y1="268" x2="560" y2="268" stroke="#c9b99a" stroke-width="0.3"/>
+
+          <text x="80" y="292" class="fig-text">機能成熟度</text>
+          <text x="290" y="292" class="fig-text" text-anchor="middle">正式機能</text>
+          <text x="480" y="292" class="fig-text" text-anchor="middle">実験的 (要有効化)</text>
+        </svg>
+        <p class="figure__caption">どちらも「並列化」を実現するが、設計思想が根本的に異なる。混同せず、状況に応じて選び分ける。</p>
+      </div>
+
+      <h3>どちらを選ぶか ── 判断基準</h3>
+      <p>同じタスクに対しても、どちらの機構を選ぶかで結果と運用負荷が変わる。判断軸は次の三つだ。</p>
+
+      <p><strong>①ワーカー同士が話す必要があるか</strong>。互いの仮説をぶつけ合う、調査結果を交換して詰める、議論しながら結論に向かう ── これらが必要ならAgent Teams。結果だけ集めて統合すれば足りるならサブエージェント。</p>
+
+      <p><strong>②調整オーバーヘッドを許容できるか</strong>。Agent Teamsは追加のトークンコストと、リーダーが指揮する手間を生む。短時間で済む単純な並列調査なら、サブエージェントの方が軽い。</p>
+
+      <p><strong>③タスクの構造が独立分割可能か</strong>。本当に独立した複数モジュール、複数の独立仮説、複数視点のレビュー ── 並列性が本物ならどちらでも機能する。だが議論や相互検証で品質が上がる種類の問題なら、Agent Teamsが優位。</p>
+
+      <h3>実験的機能であることの含意</h3>
+      <p>Agent Teamsは「experimental」のラベルが付いている。公式ドキュメントは、セッション再開、タスク調整、シャットダウン動作に既知の制限があると明記している。本書で扱う内容も、Claude Codeのバージョンアップで変わる可能性が高い。</p>
+
+      <p>これを「使うな」と読むべきではない。<strong>実験的機能こそ、早期に触って勘所を掴むことで、安定化したときに先行者になれる</strong>。ただし本番運用の重要パスにAgent Teamsを置くのは慎重に。プロトタイピング、調査、レビューといった「失敗が許容できる」用途から入るのが妥当だ。</p>
+
+      <div class="sidenote">
+        <p><strong>バージョン要件と有効化</strong></p>
+        <p>Agent Teamsは Claude Code v2.1.32 以降が必須。<code>claude --version</code> で確認できる。さらにデフォルトでは無効化されており、環境変数 <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> を設定して初めて使えるようになる（詳細は次章）。</p>
+      </div>
+
+      <h3>本書での扱い方</h3>
+      <p>本章以降の4章では、Agent Teamsを正面から扱う。前提として、第1章〜第10章で扱ったサブエージェント運用の知見の多くは、Agent Teamsにも応用できる ── 役割設計、descriptionの作法、tools権限の絞り方、モデル選択、コンテキスト経済学。これらは普遍的に有効だ。</p>
+
+      <p>一方、Agent Teams特有の運用知識もある。共有タスクリストの設計、メールボックス経由のメッセージング、表示モード（in-process / 分割ペイン）の選択、hooks による品質ゲート、トークンコストの線形スケール、現時点の制限事項。これらを順に見ていく。</p>
+
+      <div class="key-concept">
+        <h4>サブエージェント vs Agent Teams 選択フロー</h4>
+        <ul>
+          <li>ワーカー同士の議論や相互検証が要る → <strong>Agent Teams</strong></li>
+          <li>結果だけ集めて統合すれば足りる → <strong>サブエージェント</strong></li>
+          <li>順序依存・同一ファイル編集が多い → <strong>単一セッション</strong></li>
+          <li>本番クリティカルなパス → 当面は<strong>サブエージェント</strong>（実験的機能を避ける）</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第11章まとめ</h4>
+        <ul>
+          <li>Claude Codeには「サブエージェント」と「Agent Teams」という二つのチーム機構がある</li>
+          <li>サブエージェント＝親から生成して結果を返す。Agent Teams＝独立インスタンス同士が相互通信</li>
+          <li>選択軸：ワーカー同士が話す必要があるか／調整オーバーヘッドを許容できるか／独立分割可能か</li>
+          <li>Agent Teamsは実験的機能。プロトタイピング・調査・レビュー用途から入るのが妥当</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第12章
+     ============================================ -->
+<section class="chapter" id="ch12">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER XII</span>
+      <h2 class="chapter__title">Agent Teamsを起動する<br><small style="font-size:0.6em;font-weight:400;">環境設定とチーム編成</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">設定の三つ ── 環境変数、表示モード、チームメンバーの指定 ── を押さえれば、立ち上げで詰まることはない</p>
+    </header>
+
+    <div class="prose">
+      <p>Agent Teamsを実際に動かすには、まず有効化が要る。次に表示モードを選ぶ。最後に、自然言語でリーダーに「こういうチームを作って」と頼む。本章ではこの起動の作法を順に見る。</p>
+
+      <h3>有効化 ── 環境変数を立てる</h3>
+      <p>Agent Teamsはデフォルトでは無効。<code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS</code> を <code>1</code> にセットして初めて使えるようになる。shell環境変数として渡してもよいが、<code>~/.claude/settings.json</code> に書いておくのが恒久的で楽だ。</p>
+
+      <pre><code>// ~/.claude/settings.json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+</code></pre>
+
+      <p>シェルで一時的に有効化したいときは：</p>
+
+      <pre><code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude
+</code></pre>
+
+      <p>有効化が済んでいないと、Claude にチーム作成を頼んでも作成されない。最初に「動かない」と感じたら、まずこの設定を確認する。</p>
+
+      <h3>表示モード ── in-process と分割ペイン</h3>
+      <p>Agent Teamsは二つの表示モードを持つ。それぞれメリット・デメリットがあるので、好みと環境で選ぶ。</p>
+
+      <p><strong>in-process モード</strong>は、すべてのチームメンバーが一つのメインターミナル内で動く。<code>Shift+Down</code> でアクティブメンバーを順送りし、選択中のメンバーに直接メッセージを打ち込める。最後のメンバーの次はリーダーに戻る。追加のセットアップなしで任意のターミナルで動作する手軽さが取り柄だ。</p>
+
+      <p><strong>分割ペイン モード</strong>は、各メンバーが独自のペインを持つ。全員のターミナル出力を一画面で同時に見られるので、状況把握が圧倒的に楽になる。ただし <code>tmux</code> または <code>iTerm2</code>（および <code>it2</code> CLI）が必要。VS Code統合ターミナル、Windows Terminal、Ghostty では分割ペインは動かない。</p>
+
+      <p>設定での切り替えは <code>~/.claude/settings.json</code> の <code>teammateMode</code> で行う：</p>
+
+      <pre><code>// ~/.claude/settings.json
+{
+  "teammateMode": "in-process"    // または "tmux" / "auto"
+}
+</code></pre>
+
+      <p>デフォルトは <code>"auto"</code>。すでにtmuxセッション内で実行していれば分割ペイン、そうでなければin-processを選ぶ。単発で強制したいときはフラグ：</p>
+
+      <pre><code>claude --teammate-mode in-process
+</code></pre>
+
+      <div class="sidenote">
+        <p><strong>tmux環境のセットアップ</strong></p>
+        <p>tmuxはOSのパッケージマネージャで導入できる（macOSなら <code>brew install tmux</code>）。iTerm2を使うなら <code>it2</code> CLI を別途インストールし、iTerm2の Settings → General → Magic → Enable Python API を有効化する。iTerm2 で <code>tmux -CC</code> を使うのが最も安定するエントリポイントだ。Linuxは tmux 単体で問題ない。</p>
+      </div>
+
+      <h3>チームを立ち上げる ── 自然言語の指示</h3>
+      <p>有効化と表示モードの準備ができたら、リーダーに自然言語でチーム作成を依頼する。Claude が役割の数、生成するメンバー、モデル、初期タスクの分配までやってくれる。</p>
+
+      <pre><code>I'm designing a CLI tool that helps developers track TODO comments across
+their codebase. Create an agent team to explore this from different angles:
+one teammate on UX, one on technical architecture, one playing devil's
+advocate.
+</code></pre>
+
+      <p>この例では「UX担当」「アーキテクチャ担当」「悪魔の代弁者」という三つの独立した視点が走る。互いに待たずに探索できる役割の組み合わせは、Agent Teamsで効果が出やすい。</p>
+
+      <h3>メンバー数とモデルを指定する</h3>
+      <p>Claude に任せると、タスクから判断して人数を決める。明示したい場合は依頼文に書く。</p>
+
+      <pre><code>Create a team with 4 teammates to refactor these modules in parallel.
+Use Sonnet for each teammate.
+</code></pre>
+
+      <p>注意点として、チームメンバーは<strong>デフォルトでリーダーの <code>/model</code> 設定を継承しない</strong>。プロンプトでモデル指定がない場合の既定値は <code>/config</code> の <em>Default teammate model</em> で決まる。リーダーと同じモデルを使わせたければ「Default (leader's model)」を選んでおく。</p>
+
+      <h3>サブエージェント定義をチームメンバーに再利用する</h3>
+      <p>すでにフリートとして育てたサブエージェント定義（第9章で扱った <code>~/.claude/agents/</code> 配下のMarkdown群）は、Agent Teamsのメンバータイプとしても流用できる。これが運用上の大きな利点だ。役割を一度定義すれば、状況に応じて「Taskツールでのサブエージェント」としても「Agent Teamsのメンバー」としても呼べる。</p>
+
+      <pre><code>Spawn a teammate using the security-reviewer agent type to audit the
+auth module.
+</code></pre>
+
+      <p>このとき、サブエージェント定義の <code>tools</code> 許可リストと <code>model</code> はそのまま尊重される。本文（システムプロンプト）はチームメンバーのシステムプロンプトに追加指示として注入される。ただし、チーム調整用のツール（<code>SendMessage</code> やタスク管理ツール）は、たとえ <code>tools</code> 制限があっても常に利用可能になる。これが「サブエージェント単独」と「Agent Teamsメンバー」の振る舞いの違いの一つだ。</p>
+
+      <p>注意：サブエージェント定義の <code>skills</code> と <code>mcpServers</code> のフロントマター指定は、Agent Teamsメンバーとして実行する場合は適用されない。skillsとMCP serversは通常のセッションと同じく、プロジェクト・ユーザー設定からロードされる。</p>
+
+      <h3>Plan承認ワークフロー ── リスク高タスクの安全装置</h3>
+      <p>複雑またはリスクの高い作業では、チームメンバーが実装前に「プラン」を立て、リーダーの承認を経てから手を動かす仕組みを使える。リーダーがプランを承認するまで、メンバーは読み取り専用プランモードで動作する。</p>
+
+      <pre><code>Spawn an architect teammate to refactor the authentication module.
+Require plan approval before they make any changes.
+</code></pre>
+
+      <p>メンバーがプランを完成させると、リーダーに承認リクエストを送信する。リーダーは承認 or 却下（フィードバック付き）を選択する。却下された場合、メンバーはプランモードのままフィードバックを反映して再提出する。承認されればプランモードを抜けて実装に入る。</p>
+
+      <p>リーダーは自律的に承認判断する。判断基準を方向づけたければ、依頼プロンプトに「テストカバレッジを含むプランのみ承認」「DBスキーマ変更を伴うプランは却下」のように明示的に書く。<strong>リーダーの承認判断は、プロンプトで与える基準で操舵できる</strong>。</p>
+
+      <h3>メンバーに直接話しかける</h3>
+      <p>Agent Teamsの特徴の一つが、リーダーを経由せず特定のチームメンバーに直接話しかけられること。サブエージェントでは不可能だった対話形態だ。</p>
+
+      <ul>
+        <li><strong>in-process モード</strong>：<code>Shift+Down</code> でメンバーを順送り、選択した状態でメッセージを入力。<code>Enter</code> でそのメンバーのセッションを表示、<code>Escape</code> で現在のターンを中断、<code>Ctrl+T</code> でタスクリスト表示。</li>
+        <li><strong>分割ペイン モード</strong>：対象メンバーのペインをクリックして直接操作。各メンバーは独自の完全なターミナルビューを持つ。</li>
+      </ul>
+
+      <p>追加指示、フォローアップ質問、アプローチの軌道修正など、メンバーごとの個別介入が容易になる。チームを「ひとつのモノ」ではなく「複数の独立した同僚」として扱うインターフェースが、ここに用意されている。</p>
+
+      <div class="key-concept">
+        <h4>起動チェックリスト</h4>
+        <ul>
+          <li><code>claude --version</code> で v2.1.32 以降を確認</li>
+          <li><code>~/.claude/settings.json</code> に <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code></li>
+          <li>表示モードを決める（auto / in-process / tmux）</li>
+          <li>分割ペインなら tmux または iTerm2+it2 を準備</li>
+          <li>既存のサブエージェント定義をメンバータイプとして流用検討</li>
+          <li>リスク高タスクには Plan 承認要求を明示</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第12章まとめ</h4>
+        <ul>
+          <li>環境変数 <code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> で有効化する</li>
+          <li>表示モードは in-process（手軽）／分割ペイン（俯瞰しやすい）／auto から選ぶ</li>
+          <li>自然言語でチーム作成を依頼。人数・モデル・役割を明示するほど精度が上がる</li>
+          <li>既存サブエージェント定義をメンバータイプに流用できる ── tools・modelは尊重される</li>
+          <li>Plan承認はリスク高タスクの安全装置。リーダーの判断基準もプロンプトで操舵する</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第13章
+     ============================================ -->
+<section class="chapter" id="ch13">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER XIII</span>
+      <h2 class="chapter__title">チーム調整の作法<br><small style="font-size:0.6em;font-weight:400;">共有タスク・メッセージング・hooks</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Agent Teamsの「協調」を支えるのは、共有タスクリストとメールボックスという二つのプリミティブである</p>
+    </header>
+
+    <div class="prose">
+      <p>サブエージェントが「親が子に仕事を渡し、結果を受け取る」一方通行の関係だったのに対し、Agent Teamsは<strong>「共有された作業空間で複数のClaudeが自律的に動く」</strong>関係だ。この自律的協調を成り立たせているのが、二つの仕組み ── 共有タスクリストとメールボックス ── である。本章でこれらの作法を扱う。</p>
+
+      <h3>共有タスクリスト ── 三状態と依存関係</h3>
+      <p>すべてのチームメンバーは、同じタスクリストを見ている。リーダーがタスクを作成し、メンバーがそれを処理する。タスクは <code>~/.claude/tasks/{team-name}/</code> 配下にローカル保存される。</p>
+
+      <p>タスクは三つの状態を取る：</p>
+
+      <ul>
+        <li><strong>pending</strong>：未着手。依存関係がブロック解除されていれば、メンバーが要求できる</li>
+        <li><strong>in_progress</strong>：誰かが進めている。要求済みでロックされている</li>
+        <li><strong>completed</strong>：完了。これに依存していたタスクがブロック解除される</li>
+      </ul>
+
+      <p>タスクは他のタスクへの<strong>依存関係</strong>を持てる。「テスト追加（タスクB）は実装完了（タスクA）に依存する」と書いておけば、AがcompletedになるまでBは要求できない。これによりリーダーが手作業で順序制御する必要がなくなる。</p>
+
+      <p>複数メンバーが同時に同じタスクを要求しようとしたときの競合は<strong>ファイルロック</strong>で防がれている。先に取った方の勝ち、後から来たメンバーは別のタスクを探す。</p>
+
+      <h3>リーダー割り当て vs 自己要求</h3>
+      <p>タスクの渡し方は二通り：</p>
+
+      <p><strong>リーダーが明示的に割り当てる</strong>：「タスクXは Alice に、タスクYは Bob に」とリーダーに指示する。役割と能力が明確にマッピングできる場合に有効。</p>
+
+      <p><strong>メンバーが自己要求する</strong>：あるタスクを完了したメンバーは、自律的に次の未割り当て・ブロック解除されたタスクを取りに行く。チーム全体が「働き続ける」状態を維持するのに有効。タスクを多めに用意しておけば、誰も手持ち無沙汰にならない。</p>
+
+      <p>運用の定石は、初期の重要タスクはリーダーが指名し、残りは自己要求に任せる<strong>ハイブリッド</strong>だ。完全に放任すると「全員が同じ簡単なタスクから取り始める」ような偏りが出ることがある。重要な分担は手で指定する。</p>
+
+      <h3>メールボックス ── 自動配信されるメッセージング</h3>
+      <p>もう一つの中核機構が、エージェント間メッセージング用の<strong>メールボックス</strong>だ。あるメンバーが他のメンバー（あるいはリーダー）にメッセージを送ると、受信者に自動配信される。<strong>受信側がポーリングしたり手動で確認したりする必要はない</strong>。</p>
+
+      <p>関連する自動通知も走る：</p>
+      <ul>
+        <li><strong>アイドル通知</strong>：メンバーが作業を完了して停止すると、リーダーに自動的に通知される</li>
+        <li><strong>共有タスクステータス</strong>：全エージェントが現在のタスク状況を見ている</li>
+        <li><strong>名前指定メッセージング</strong>：メンバーには生成時にリーダーから名前が割り当てられ、その名前で他メンバーを呼べる</li>
+      </ul>
+
+      <p>メンバーに予測可能な名前を付けたいなら、生成プロンプトで指示する。「研究員役を <code>researcher</code> と呼ぶ」のように指定しておくと、後から「<code>researcher</code> に追加指示を」のようにスクリプト的な扱いができる。</p>
+
+      <h3>ファイル競合の回避 ── 同一ファイル編集を分割する</h3>
+      <p>共有タスクリストとロックがあるとはいえ、<strong>同じファイルを複数メンバーが並行編集する状況は防げない</strong>。生産系メンバー同士が同じファイルに書き込むと、互いの変更を上書きしてしまう。</p>
+
+      <p>原則として、生成段階で<strong>「各メンバーが異なるファイル群を担当する」</strong>分担を明確にする。「frontendメンバーは <code>src/components/</code> 配下のみ」「backendメンバーは <code>src/api/</code> 配下のみ」のように物理的に切り分ける。タスク粒度も、ファイル単位で完結する大きさに調整する。</p>
+
+      <p>同じファイルへの変更が避けられない設計なら、それはそもそもAgent Teams向きではない。サブエージェントで直列処理するか、単一セッションで進める。</p>
+
+      <h3>hooks で品質ゲートを敷く</h3>
+      <p>Claude Code の<strong>hooks機構</strong>を使うと、Agent Teamsの調整に追加の規律を埋め込める。Agent Teams専用のhooksは三つある。</p>
+
+      <ul>
+        <li><code>TeammateIdle</code>：メンバーがアイドル状態に入ろうとしたときに発火。終了コード 2 でフィードバックを送れば、メンバーを動かし続けられる。「まだやることが残っている」という判定を外部から差し込める</li>
+        <li><code>TaskCreated</code>：タスクが新規作成されようとしたときに発火。終了コード 2 で作成を阻止しつつフィードバックを返せる。「このタスクは粒度が大きすぎる、分割せよ」など</li>
+        <li><code>TaskCompleted</code>：タスクが完了マークされようとしたときに発火。終了コード 2 で完了を阻止しつつフィードバック。「テストが通っていない」「ドキュメント更新が漏れている」など</li>
+      </ul>
+
+      <p>hooksを使うことで、品質ゲートが<strong>「リーダーの判断」だけに依存しなくなる</strong>。リーダーが見落としても、機械的なチェックが入る。長時間運用するチームでは特に有効だ。</p>
+
+      <h3>シャットダウンとクリーンアップの作法</h3>
+      <p>Agent Teamsを使い終えたら、後始末が要る。これを怠ると、孤立したtmuxセッションやリソースが残る。</p>
+
+      <p><strong>シャットダウン</strong>はメンバー単位の終了。リーダーに「researcher を停止させて」と頼むと、対象メンバーにシャットダウン要求が送られる。メンバーは受諾して終了するか、理由付きで却下できる（「まだ完了していない作業がある」など）。</p>
+
+      <p><strong>クリーンアップ</strong>はチーム全体のリソース削除。リーダーに「Clean up the team」と頼む。アクティブなメンバーが残っているとクリーンアップは失敗するので、先に全員をシャットダウンする。<strong>クリーンアップは必ずリーダーに実行させる</strong> ── メンバーから実行するとチームコンテキストが不整合になる恐れがある。</p>
+
+      <pre><code>// 終了の標準手順
+1. Ask each teammate to shut down  (順次)
+2. Clean up the team               (リーダーが実行)
+</code></pre>
+
+      <h3>権限の継承</h3>
+      <p>すべてのチームメンバーは、<strong>リーダーの権限モードで開始</strong>する。リーダーが <code>--dangerously-skip-permissions</code> で走っているなら、メンバーもそうなる。生成後に個別メンバーの権限モードは変更できるが、生成時にメンバーごとの権限モードを設定する手段はない。</p>
+
+      <p>これは安全と運用の両面で重要な制約だ。リスク高タスクを含むチームを立ち上げるときは、リーダーを保守的な権限で起動し、後から個別メンバーに必要な権限を付与する設計が安全。</p>
+
+      <div class="key-concept">
+        <h4>調整プリミティブの相互作用</h4>
+        <ul>
+          <li><strong>共有タスク</strong>＝何を、誰が、いつやるか</li>
+          <li><strong>メールボックス</strong>＝誰が誰に何を伝えるか</li>
+          <li><strong>hooks</strong>＝何をやらせない／やらせ続けるか</li>
+          <li><strong>シャットダウン／クリーンアップ</strong>＝終わり方の規律</li>
+          <li>四つを揃えて初めて、自律協調が事故なく回る</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第13章まとめ</h4>
+        <ul>
+          <li>共有タスクリスト（pending / in_progress / completed + 依存）が自律調整を支える</li>
+          <li>タスクの渡し方は「リーダー割り当て」と「メンバー自己要求」のハイブリッド</li>
+          <li>メールボックスでメッセージは自動配信。ポーリング不要</li>
+          <li>同一ファイル編集はファイル分担の物理的切り分けで回避する</li>
+          <li>hooks (TeammateIdle / TaskCreated / TaskCompleted) で品質ゲートを敷ける</li>
+          <li>終了時は メンバー個別シャットダウン → リーダーがクリーンアップ の順</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第14章
+     ============================================ -->
+<section class="chapter" id="ch14">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER XIV</span>
+      <h2 class="chapter__title">効果的なユースケースと制限の理解<br><small style="font-size:0.6em;font-weight:400;">どこで光り、どこで諦めるか</small></h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">Agent Teamsは万能ではない。光る場所と諦めるべき場所を見極めることで、過剰投資を避けられる</p>
+    </header>
+
+    <div class="prose">
+      <p>Agent Teamsは強力だが、適切に使わないとトークン浪費装置にしかならない。本章ではユースケースの代表例と、現時点での制限事項・トラブルシューティング、そしてチームサイズの実用範囲を扱う。</p>
+
+      <h3>効果的なユースケース四選</h3>
+      <p>公式が推す高効率ユースケースは四つに集約される。</p>
+
+      <p><strong>①並列調査とレビュー</strong>。一つの問題を多角的に検討する作業はAgent Teamsの典型応用だ。PR レビューでメンバーをセキュリティ／パフォーマンス／テストカバレッジの三観点に分けるなど。各観点に独立した深さで取り組ませ、結果を統合する。</p>
+
+      <pre><code>Create an agent team to review PR #142. Spawn three reviewers:
+- One focused on security implications
+- One checking performance impact
+- One validating test coverage
+Have them each review and report findings.
+</code></pre>
+
+      <p><strong>②新規モジュール／機能の並列実装</strong>。互いに干渉しないモジュール群（=ファイルが分かれる単位）を、各メンバーに割り当てて並行開発させる。frontend / backend / tests の三層構成などはこの典型。</p>
+
+      <p><strong>③競合する仮説でのデバッグ</strong>。原因が不明な不具合に対して、複数の仮説をそれぞれ別のメンバーに調べさせ、互いに反証し合わせる。Agent Teamsの「メンバー同士が議論できる」という特徴が最大限活きる用途だ。</p>
+
+      <pre><code>Users report the app exits after one message instead of staying connected.
+Spawn 5 agent teammates to investigate different hypotheses. Have them talk
+to each other to try to disprove each other's theories, like a scientific
+debate. Update the findings doc with whatever consensus emerges.
+</code></pre>
+
+      <p>順序付き調査だと「最初に出た仮説」にアンカリングされやすい。複数の独立した調査官が能動的に反証し合う構造を取ると、生き残った仮説は真の根本原因である可能性が高い。<strong>議論構造そのものが品質向上の鍵</strong>になる、Agent Teams ならではの応用だ。</p>
+
+      <p><strong>④クロスレイヤー調整</strong>。フロントエンド、バックエンド、テスト基盤など複数レイヤーにまたがる変更で、各レイヤーを別メンバーが担当しながら、メールボックスでインターフェース合意を取る。</p>
+
+      <h3>チームサイズの実用範囲</h3>
+      <p>チームメンバー数に厳密な上限はないが、実用上のスイートスポットは<strong>3〜5人</strong>だ。公式ドキュメントもこの範囲を推奨している。</p>
+
+      <p>制約は三つから来る：</p>
+
+      <ul>
+        <li><strong>トークンコストは線形にスケール</strong>：メンバーが増えるほどコストが比例増加する</li>
+        <li><strong>調整オーバーヘッドが増える</strong>：メッセージング、タスク調整、競合の可能性</li>
+        <li><strong>収穫逓減</strong>：ある時点を超えると追加メンバーは比例的な高速化を生まない</li>
+      </ul>
+
+      <p>タスク数の目安は<strong>「メンバーあたり 5〜6 個」</strong>。15個の独立タスクなら 3人が良いスタート。タスクを多めに持たせることで、誰かが詰まったときにリーダーが再割り当てしやすくなる。逆にメンバーに対してタスクが少なすぎると、すぐにアイドル状態になって調整コストが浮く。</p>
+
+      <p><strong>3人の集中したメンバーは、5人の散漫なメンバーより優れている</strong>。Agent Teamsで実力を出すなら、人数を増やすより「各メンバーが本当に独立して動けるか」の設計に時間を使う。</p>
+
+      <h3>避けるべき使い方</h3>
+      <p>逆に、次のような用途ではAgent Teamsを使うべきではない。</p>
+
+      <ul>
+        <li><strong>順序付きタスク</strong>：A→B→C と直列に進む作業は、並列化のうま味がない。単一セッションかサブエージェントで足りる</li>
+        <li><strong>同一ファイル編集が多い作業</strong>：上書き合戦になる。ファイル単位で分割できない設計には不向き</li>
+        <li><strong>依存関係が多すぎる作業</strong>：依存解決でほとんどのメンバーが待ち状態になり、並列性が出ない</li>
+        <li><strong>定型反復処理</strong>：単一セッションで十分速い。コスト効率が悪い</li>
+      </ul>
+
+      <h3>現時点の制限事項 ── 実験的機能の制約</h3>
+      <p>Agent Teamsは実験的機能なので、いくつかの「まだできないこと」を抱えている。本書執筆時点（Claude Code v2.1.x 系）の制限を整理する。</p>
+
+      <ul>
+        <li><strong>セッション再開の不完全さ</strong>：<code>/resume</code> や <code>/rewind</code> はin-processチームメンバーを復元しない。再開後、リーダーは存在しないメンバーにメッセージを送ろうとすることがある。新規メンバーを生成し直す必要がある</li>
+        <li><strong>タスクステータスの遅延</strong>：メンバーがタスクをcompletedにマークし忘れて、依存タスクが永遠にブロック解除されないことがある。詰まったタスクは手動でステータス更新するか、リーダーにナッジさせる</li>
+        <li><strong>シャットダウンの遅さ</strong>：現在のリクエストやツール呼び出しを完了してから停止するので、即時終了しない</li>
+        <li><strong>1セッション1チーム</strong>：リーダーが管理できるチームは同時に一つだけ。新規チームを始める前に、既存チームをクリーンアップする</li>
+        <li><strong>ネスト不可</strong>：チームメンバーは独自のチームやメンバーを生成できない。チーム階層は作れない</li>
+        <li><strong>リーダー固定</strong>：チームを作ったセッションが生涯のリーダー。リーダーシップは譲渡できない</li>
+        <li><strong>権限は生成時固定</strong>：すべてのメンバーはリーダーの権限モードで開始する。生成時にメンバーごとの権限モードは設定できない</li>
+        <li><strong>分割ペインは tmux / iTerm2 のみ</strong>：VS Code 統合ターミナル、Windows Terminal、Ghostty では分割ペインモードは動かない</li>
+      </ul>
+
+      <p>これらの制限は時間とともに解消されていくはずだ。実験的機能の常として、本書の記述も古くなる。<code>claude --version</code> と公式ドキュメントを定期的に確認する習慣を持つこと。</p>
+
+      <h3>トラブルシューティング ── よくある詰まり方</h3>
+
+      <p><strong>メンバーが表示されない</strong>：in-processモードでは「実行中だが見えていない」だけのことが多い。<code>Shift+Down</code> でアクティブメンバーを順送りして探す。分割ペインで出ないなら <code>which tmux</code> でtmuxの存在確認。</p>
+
+      <p><strong>権限プロンプトが多すぎる</strong>：メンバーの権限要求はリーダーにバブルアップするので、複数メンバーが居ると承認の連打になる。チーム生成前に <code>~/.claude/settings.json</code> の <code>permissions</code> で常用操作を事前承認しておく。</p>
+
+      <p><strong>メンバーがエラーで止まる</strong>：エラー後に自己回復できず停止することがある。Shift+Down または分割ペインのクリックでそのメンバーの出力を見て、追加指示するか、代替メンバーを新規生成する。</p>
+
+      <p><strong>リーダーが委任せず自分でやり始める</strong>：「メンバーが完了するまで待って」と明示的に指示する。あるいは「メンバーを待ってから次に進む」をプロンプトに最初から書いておく。</p>
+
+      <p><strong>孤立したtmuxセッション</strong>：チーム終了後にtmuxが残ったら、手動で掃除する：</p>
+
+      <pre><code>tmux ls
+tmux kill-session -t &lt;session-name&gt;
+</code></pre>
+
+      <h3>監視と操舵 ── 放任しない</h3>
+      <p>Agent Teamsを長時間無人で走らせると、無駄な努力のリスクが増える。メンバーが見当違いの方向に進んでいたり、互いに同じ仮説を追っていたりすることがある。</p>
+
+      <p>運用の指針は次の三つ：</p>
+
+      <ul>
+        <li><strong>進捗を定期的にチェック</strong>：分割ペインで全員の動きを眺める、in-processなら <code>Ctrl+T</code> でタスクリスト確認</li>
+        <li><strong>機能していないアプローチをリダイレクト</strong>：個別メンバーに直接話しかけて方針修正</li>
+        <li><strong>調査結果が入ってきたら早期統合</strong>：全員完了を待たず、見えてきた結論をリーダー側で部分統合していく</li>
+      </ul>
+
+      <p><strong>「指揮官は同席している必要がある」</strong>。Agent Teamsは自律的に動くが、放任して良いほどには成熟していない。あなたの判断と統合が、最終的な品質を決める。</p>
+
+      <div class="key-concept">
+        <h4>使う／使わないの判断早見</h4>
+        <ul>
+          <li><strong>使う</strong>：並列調査、多視点レビュー、競合仮説デバッグ、クロスレイヤー新機能</li>
+          <li><strong>使わない</strong>：順序付き、同一ファイル編集、依存多い、定型反復、本番クリティカル</li>
+          <li><strong>サイズ</strong>：3〜5人、メンバーあたり5〜6タスク</li>
+          <li><strong>運用</strong>：放任せず、進捗チェック・軌道修正・部分統合を続ける</li>
+        </ul>
+      </div>
+
+      <div class="summary">
+        <h4>第14章まとめ</h4>
+        <ul>
+          <li>効果的なユースケース四つ：並列調査・並列実装・競合仮説デバッグ・クロスレイヤー調整</li>
+          <li>チームサイズは3〜5人、メンバーあたり5〜6タスクが実用スイートスポット</li>
+          <li>避けるべき：順序付き・同一ファイル・依存多い・定型反復</li>
+          <li>制限：セッション再開、ネスト不可、リーダー固定、権限生成時固定、分割ペインのターミナル制約</li>
+          <li>放任せず、進捗チェック・軌道修正・部分統合を続けることが品質を決める</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
      エピローグ
      ============================================ -->
 <section class="chapter" id="epilogue">
@@ -1192,7 +1706,9 @@ Task(...)  // また結果を待つ
     </header>
 
     <div class="prose">
-      <p>本書を通じて見てきたのは、表面的にはClaude Codeのサブエージェント機構の使い方だった。しかし本質的には、もっと深いものを扱ってきた ── <strong>「思考を分業する」</strong>という、知的作業そのものの設計だ。</p>
+      <p>本書を通じて見てきたのは、表面的にはClaude Codeの二つのチーム機構 ── サブエージェントとAgent Teams ── の使い方だった。しかし本質的には、もっと深いものを扱ってきた ── <strong>「思考を分業する」</strong>という、知的作業そのものの設計だ。</p>
+
+      <p>サブエージェントが「専門家に仕事を投げて結果を受け取る」分業だとすれば、Agent Teamsは「同僚と並走して相談しながら進める」分業だ。どちらも「ひとり」を超える設計だが、向く場面と運用コストが違う。あなたは状況に応じて、両方を使い分ける指揮官になる。</p>
 
       <p>あなたがエージェントを作るとき、「どの作業を切り出すか」「どんな観点を焼き付けるか」「いつ呼ぶべきか」を考える。これらの問いに答えることは、自分自身の作業フローを言語化し、構造化する作業に他ならない。エージェント定義ファイルは、あなたの<strong>思考過程が外化された姿</strong>だ。</p>
 
@@ -1234,7 +1750,10 @@ Task(...)  // また結果を待つ
     <div class="bibliography">
       <ul>
         <li>Anthropic, <em>Claude Code Documentation: Subagents</em> ── サブエージェント機構の公式仕様。definition file format、tools、modelのリファレンス</li>
+        <li>Anthropic, <em>Claude Code Documentation: Agent Teams</em> (<a href="https://code.claude.com/docs/ja/agent-teams">code.claude.com/docs/ja/agent-teams</a>) ── 実験的Agent Teams機構の公式ドキュメント。表示モード、共有タスク、メールボックス、hooks、制限事項のリファレンス</li>
         <li>Anthropic, <em>Claude Code Documentation: Task Tool</em> ── サブエージェント呼び出しの基本API</li>
+        <li>Anthropic, <em>Claude Code Documentation: Hooks</em> ── TeammateIdle / TaskCreated / TaskCompleted などAgent Teams連携用hooksの公式仕様</li>
+        <li>Anthropic, <em>Claude Code Documentation: Settings</em> ── <code>teammateMode</code> など Agent Teams 関連の設定項目リファレンス</li>
         <li>Anthropic, <em>Building Effective Agents</em> (Engineering Blog) ── エージェント設計の一般原則 ── 単機能エージェント、並列化、コンテキスト管理</li>
         <li>Anthropic, <em>Claude Agent SDK Documentation</em> ── サブエージェント機構を支える設計思想の理解に有用</li>
         <li>Fred Brooks, <em>The Mythical Man-Month</em> (1975) ── 分業と統合のコストに関する古典。エージェントチームでも本質は同じ</li>

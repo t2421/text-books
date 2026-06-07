@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>抽象化の技術 ── 具体から普遍を取り出し、未知へ運ぶ思考法</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./textbook-ds.css">
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-bar__fill" id="progressFill"></div></div>
+
+<nav class="top-nav">
+  <div class="top-nav__title">抽象化の技術 ── <em>具体から普遍を取り出し、未知へ運ぶ</em></div>
+  <button class="top-nav__toc-toggle" id="tocToggle">目次 / INDEX</button>
+</nav>
+
+<div class="toc-backdrop" id="tocBackdrop"></div>
+<aside class="toc-drawer" id="tocDrawer">
+  <button class="toc-drawer__close" id="tocClose">×</button>
+  <h3>目 次</h3>
+  <ol>
+    <li><a href="#prologue">プロローグ ── 一を聞いて十を知る人は、何をしているのか</a></li>
+    <li><a href="#ch1">第1章 ── 抽象化とは何か：捨てることで本質を残す</a></li>
+    <li><a href="#ch2">第2章 ── 抽象のはしご：具体と抽象を往復する</a></li>
+    <li><a href="#ch3">第3章 ── 構造を見る目：表面ではなく関係を写し取る</a></li>
+    <li><a href="#ch4">第4章 ── アナロジー：構造を借りて未知を解く</a></li>
+    <li><a href="#ch5">第5章 ── モデル化：世界を縮約して操作可能にする</a></li>
+    <li><a href="#ch6">第6章 ── 名付けと圧縮：概念を思考の部品にする</a></li>
+    <li><a href="#ch7">第7章 ── 抽象化の失敗学：一般化が壊れる四つの形</a></li>
+    <li><a href="#ch8">第8章 ── 転移の技術：学びを別の領域へ運ぶ</a></li>
+    <li><a href="#ch9">第9章 ── 抽象化の鍛錬：日常でできる訓練プログラム</a></li>
+    <li><a href="#epilogue">エピローグ ── 具体と抽象を自由に行き来する人へ</a></li>
+    <li><a href="#bibliography">参 ── 参考文献一覧</a></li>
+  </ol>
+</aside>
+
+<!-- ============================================
+     ヒーロー
+     ============================================ -->
+<section class="hero">
+  <div class="hero__ornament">THE ART OF ABSTRACTION ── FROM PARTICULARS TO PRINCIPLES</div>
+  <h1 class="hero__title">抽象化の技術<em>具体から普遍を取り出し、未知へ運ぶ</em></h1>
+  <p class="hero__subtitle">同じ経験から、ある人は一つの教訓を、ある人は十の原理を取り出す。その差は才能ではなく、訓練可能な「操作」の差だ。事例から構造を抜き出し、名前を与え、遠く離れた問題に当てはめる ── 認知科学と思考の古典が解き明かす、応用力の正体。九章で身につける、知の汎用化技術</p>
+  <div class="hero__meta">
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">読了目安</span>
+      <span class="hero__meta-value">75 MIN</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">構成</span>
+      <span class="hero__meta-value">9 CHAPTERS</span>
+    </div>
+    <div class="hero__meta-item">
+      <span class="hero__meta-label">想定読者</span>
+      <span class="hero__meta-value">PATTERN SEEKERS</span>
+    </div>
+  </div>
+  <div class="hero__scroll-cue">scroll</div>
+</section>
+
+<!-- ============================================
+     プロローグ
+     ============================================ -->
+<section class="chapter" id="prologue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">PROLOGUE</span>
+      <h2 class="chapter__title">一を聞いて十を知る人は、何をしているのか</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">応用力の正体は、ひらめきではない。再現可能な「操作」である</p>
+    </header>
+
+    <div class="prose">
+      <p>同じ研修を受け、同じ本を読み、同じ失敗を経験したのに、一年後にまるで違う場所に立っている二人がいる。一人はその経験を「あのときのあの話」として記憶し、似た状況が来たときだけ思い出す。もう一人は経験から原理を取り出し、まったく別の場面 ── 違う業界、違う人間関係、違う種類の問題 ── にまで応用してしまう。</p>
+
+      <p>『論語』はこの二人目のような人を「一を聞いて以て十を知る」と評した。私たちはそれを地頭の良さ、センス、ひらめきと呼んで、生まれつきの才能の側に分類しがちだ。しかし認知科学が過去半世紀かけて明らかにしてきたのは、その逆だ。<strong>「一を聞いて十を知る」は、分解可能で、訓練可能な、一連の操作である。</strong>その操作の名前が、抽象化だ。</p>
+
+      <div class="key-concept">
+        <strong>本書が扱う二つの操作</strong><br>
+        抽象化 ── 個別の事例から、事例を超えて通用する構造を取り出す操作<br>
+        転移（転用） ── 取り出した構造を、別の文脈の問題に当てはめる操作<br>
+        前者だけでは評論家になり、後者だけでは模倣で終わる。価値は二つの往復にある
+      </div>
+
+      <p>抽象化は、知的な営みのほとんどすべての土台にある。数学は量と空間から構造だけを取り出した学問だし、法律は無数の紛争から「ルール」を取り出した体系だ。ことわざは何世代分もの失敗を一文に圧縮した抽象化であり、優れた経営者の「筋の良い判断」は、過去の事例群から取り出したパターンの高速適用だ。プログラミングにおける関数も、デザインにおけるパターンも、科学における法則も、すべて同じ操作 ── 個別を捨てて構造を残す ── の産物である。</p>
+
+      <div class="sidenote sidenote--quote">
+        "回や、一を聞いて以て十を知る。賜や、一を聞いて以て二を知る"<br>
+        ── 『論語』公冶長第五
+      </div>
+
+      <p>そして今、この技術の価値は歴史上もっとも高くなっている。理由は単純で、<em>具体的な知識そのものの価格が暴落した</em>からだ。検索エンジンとAIは、個別の事実・手順・前例を即座に取り出してくる。「知っていること」の優位は薄れ続けている。残るのは、目の前の状況が「何の事例なのか」を見抜き、どの構造を当てはめるべきかを判断する力 ── つまり抽象化と転移の力だ。AIに良い問いを立てられる人とそうでない人の差も、突き詰めればここに帰着する。問いを立てるとは、状況を一段抽象化して、構造として言い直すことだからだ。</p>
+
+      <p>本書は九つの章で、この技術を分解して提供する。前半（第1〜3章）は抽象化という操作そのものの解剖 ── 何を捨て、何を残し、どこに目をつけるのか。中盤（第4〜6章）は取り出した構造の運用 ── アナロジー、モデル化、名付け。第7章はこの技術が壊れる典型パターンの失敗学。後半（第8〜9章）は転移の科学と、日常でできる訓練プログラムだ。</p>
+
+      <p>各章は、抽象的な原理をまず提示し、必ず複数の領域の具体例 ── 科学史、ビジネス、数学、言語、日常 ── に降ろして見せる構成をとる。これは本書のテーマの実演でもある。一つの事例だけで語られた原理は、まだ原理ではない。複数の遠い事例を貫いたとき、初めて構造は構造として見えてくる。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     第1章
+     ============================================ -->
+<section class="chapter" id="ch1">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER I</span>
+      <h2 class="chapter__title">抽象化とは何か ── 捨てることで本質を残す</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">抽象化の第一原理：それは情報を「失う」操作であり、失うことにこそ価値がある</p>
+    </header>
+
+    <div class="prose">
+      <h3>「抽象」という言葉の解剖</h3>
+
+      <p>抽象の「抽」は「抜き出す」、「象」は「すがた・特徴」を意味する。つまり抽象とは「特徴を抜き出すこと」だ。英語の abstract も、ラテン語の abstrahere ── 「引き離す（trahere＝引く、ab＝離れて）」に由来する。どちらの言語でも、抽象化とは対象から何かを<em>引き剥がして取り出す</em>操作として名付けられている。</p>
+
+      <p>そして、この操作には必ず影の相棒がいる。<strong>捨象</strong> ── 抜き出さなかった特徴を捨てること ── だ。哲学の用語では、抽象と捨象は同じ一つの操作の表と裏である。「リンゴとミカンはどちらも果物だ」と言うとき、私たちは「植物の実であり食べられる」という特徴を抽出すると同時に、色・形・味・産地という膨大な情報を捨てている。<em>抽象化とは、選択的に忘れる技術なのだ。</em></p>
+
+      <div class="sidenote">
+        「抽象的」という言葉は日常会話では「曖昧でわかりにくい」の同義語として使われるが、これは正確ではない。優れた抽象は曖昧どころか、余計なものを削ぎ落とした分だけ鋭利になる。E=mc² は極度に抽象的だが、曖昧さは一切ない。
+      </div>
+
+      <h3>人類最初の偉大な抽象化 ── 数</h3>
+
+      <p>抽象化の威力を理解するために、人類が最初に成し遂げた偉大な抽象化を見てみよう。<strong>数の発明</strong>だ。</p>
+
+      <p>リンゴが3個ある。旅が3日続く。子どもが3人いる。この三つの状況は、具体物としては何一つ共通点がない。果物と時間と人間だ。しかしどこかの時点で人類は、リンゴであること・日であること・人であることを<em>捨てれば</em>、そこに共通の「3」というすがたが残ることに気づいた。この瞬間、人類は個別の物の世話から解放されて、「3＋4は、それが何の3と4であっても7である」という、あらゆる対象に通用する操作を手に入れた。</p>
+
+      <p>ここに抽象化の本質的な取引が現れている。<strong>個別性を支払い、汎用性を受け取る。</strong>「3」はリンゴの赤さも旅の疲れも語らない。その代わり、世界のあらゆる「3個のなにか」に対して一度に成立する。一回の学習が、無限の場面で再利用できる ── 抽象化とは、知識に対するレバレッジ（てこ）なのだ。</p>
+
+      <h3>抽象のはしご ── 高さの感覚を持つ</h3>
+
+      <p>言語学者S.I.ハヤカワは、この「抽象度」が連続的な階層をなすことを「抽象のはしご」という比喩で示した。彼の有名な例を借りよう。農場にいる一頭の牛、ベッシーがいる。</p>
+
+      <ul>
+        <li><strong>段1：</strong>科学が捉える原子と細胞の集合体としてのその個体（言語以前の存在そのもの）</li>
+        <li><strong>段2：</strong>「ベッシー」── 固有名。この一頭だけを指す</li>
+        <li><strong>段3：</strong>「牛」── ベッシー固有の特徴を捨て、牛一般と共有する特徴だけを残す</li>
+        <li><strong>段4：</strong>「家畜」── 牛であることを捨て、飼育されている動物という特徴だけを残す</li>
+        <li><strong>段5：</strong>「農場資産」── 動物であることすら捨て、経済的価値だけを残す</li>
+        <li><strong>段6：</strong>「資産」「富」── 農場の文脈すら捨てた、ほぼ純粋な経済概念</li>
+      </ul>
+
+      <p>はしごを一段上がるたびに、情報が失われ、適用範囲が広がる。「ベッシー」について言えることは一頭分の真実でしかないが、「資産」について言えること ── 例えば「資産は流動性とリスクのトレードオフを持つ」── は、牛にも株式にも特許にも通用する。</p>
+
+      <h3>抽象化は一意ではない ── 目的が刃の向きを決める</h3>
+
+      <p>ここで、多くの人が見落とす決定的な性質を押さえたい。<strong>同じ対象から、複数の異なる抽象化が可能である。</strong>一匹の犬は、家族にとっては「ペット」であり、生物学者にとっては「哺乳類」であり、税務署にとっては（盲導犬なら）「経費」であり、アレルギー患者にとっては「アレルゲン」だ。どれも正しい抽象化であり、どれが適切かは<em>目的</em>だけが決める。</p>
+
+      <p>つまり抽象化には「何のために抜き出すのか」という問いが先行する。地図がよい例だ。路線図は距離と地形を捨てて接続だけを残す ── 乗り換えという目的に最適化された抽象化だ。登山地図は逆に等高線を細かく残す。「正しい地図」は存在せず、「目的に合った捨て方をした地図」が存在するだけだ。</p>
+
+      <div class="key-concept">
+        <strong>抽象化の定義（本書の作業定義）</strong><br>
+        抽象化とは、目的に照らして本質的な特徴を残し、それ以外を意図的に捨てる操作である。<br>
+        ① 必ず情報を失う ── 失うからこそ汎用性を得る<br>
+        ② 必ず目的に依存する ── 万能の抽象化は存在しない<br>
+        ③ 高さは連続的 ── 「具体か抽象か」ではなく「どの高さか」を問う
+      </div>
+
+      <h3>「本質」とは何かを操作的に定義する</h3>
+
+      <p>「本質を見抜け」という助言は世にあふれているが、本質という言葉自体が曖昧では役に立たない。本書では本質を操作的に定義する。<strong>本質とは、それを取り除くと対象が目的を果たさなくなる特徴のことだ。</strong>椅子から色を取り除いても椅子だが、「座れる」を取り除いたらもう椅子ではない。だから「座面がある」は椅子の本質に属し、色は属さない ── ただし、インテリアの調和が目的なら色こそが本質になる。本質は対象に内在するのではなく、対象と目的の<em>あいだ</em>に立ち上がる。</p>
+
+      <p>この定義を持つと、「本質を見抜く」という捉えどころのない営みが、二つの問いに分解される。「私は何のためにこれを見ているのか？」「その目的にとって、削っても壊れないものはどれか？」── 抽象化の訓練とは、この二つの問いを高速に回す訓練に他ならない。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure I ── The Ladder of Abstraction</span>
+        <h4 class="figure__title">抽象のはしご ── 一段上がるごとに、情報を失い適用範囲を得る</h4>
+        <svg class="figure__svg" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- Ladder rungs -->
+          <rect x="60" y="40" width="330" height="44" rx="2" fill="#1c1917"/>
+          <text x="80" y="62" font-size="12" fill="#faf7f2" font-weight="600">富・資産</text>
+          <text x="80" y="76" font-size="9" fill="#d6cfc1">経済的価値という特徴だけが残る</text>
+
+          <rect x="60" y="96" width="330" height="44" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="80" y="118" font-size="12" fill="#1c1917" font-weight="600">農場資産</text>
+          <text x="80" y="132" font-size="9" fill="#6b6359">動物であることを捨てる</text>
+
+          <rect x="60" y="152" width="330" height="44" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="80" y="174" font-size="12" fill="#1c1917" font-weight="600">家畜</text>
+          <text x="80" y="188" font-size="9" fill="#6b6359">牛であることを捨てる</text>
+
+          <rect x="60" y="208" width="330" height="44" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="80" y="230" font-size="12" fill="#1c1917" font-weight="600">牛</text>
+          <text x="80" y="244" font-size="9" fill="#6b6359">個体の固有性を捨てる</text>
+
+          <rect x="60" y="264" width="330" height="44" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="80" y="286" font-size="12" fill="#1c1917" font-weight="600">ベッシー（固有名）</text>
+          <text x="80" y="300" font-size="9" fill="#6b6359">言葉で指せる最も具体的な段</text>
+
+          <rect x="60" y="320" width="330" height="44" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="80" y="342" font-size="12" fill="#1c1917" font-weight="600">存在そのもの</text>
+          <text x="80" y="356" font-size="9" fill="#6b6359">言語以前の個体 ── 無限の詳細</text>
+
+          <!-- Vertical axis arrows -->
+          <line x1="470" y1="330" x2="470" y2="70" stroke="#8b6914" stroke-width="1.5"/>
+          <polygon points="470,58 464,72 476,72" fill="#8b6914"/>
+          <text x="488" y="90" font-size="11" fill="#8b6914" font-weight="600">上るほど</text>
+          <text x="488" y="108" font-size="10" fill="#6b6359">・適用範囲が広がる</text>
+          <text x="488" y="124" font-size="10" fill="#6b6359">・操作（計算・比較）が可能に</text>
+          <text x="488" y="140" font-size="10" fill="#6b6359">・個別の手触りが消える</text>
+
+          <line x1="640" y1="80" x2="640" y2="340" stroke="#a01c1c" stroke-width="1.5"/>
+          <polygon points="640,352 634,338 646,338" fill="#a01c1c"/>
+          <text x="658" y="290" font-size="11" fill="#a01c1c" font-weight="600">下るほど</text>
+          <text x="658" y="308" font-size="10" fill="#6b6359">・手触りと検証可能性</text>
+          <text x="658" y="324" font-size="10" fill="#6b6359">・行動に直結する</text>
+
+          <!-- Discarded info annotations -->
+          <text x="410" y="64" font-size="14" fill="#a01c1c">✂</text>
+          <text x="410" y="120" font-size="14" fill="#a01c1c">✂</text>
+          <text x="410" y="176" font-size="14" fill="#a01c1c">✂</text>
+          <text x="410" y="232" font-size="14" fill="#a01c1c">✂</text>
+          <text x="410" y="288" font-size="14" fill="#a01c1c">✂</text>
+        </svg>
+        <p class="figure__caption">ハヤカワの「抽象のはしご」。各段の間で必ず何かが切り捨てられる（✂）。捨てた量に比例して、その言葉が通用する範囲は広がる。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第1章のまとめ</h4>
+      <ul>
+        <li>抽象化は「特徴を抜き出す」操作であり、必ず「それ以外を捨てる」捨象を伴う</li>
+        <li>個別性を支払って汎用性を得る ── 数の発明が示す、抽象化という知のレバレッジ</li>
+        <li>抽象化は目的に依存し、一意ではない。「本質」とは目的に照らして削れない特徴のこと</li>
+        <li>「具体か抽象か」ではなく「いまどの高さで話しているか」を意識する</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <span></span>
+      <a class="chapter-nav__next" href="#ch2">次章：抽象のはしご ──&thinsp;具体と抽象を往復する</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第2章
+     ============================================ -->
+<section class="chapter" id="ch2">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER II</span>
+      <h2 class="chapter__title">抽象のはしご ── 具体と抽象を往復する</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">価値は高い場所にも低い場所にもない。上り下りの「運動」にある</p>
+    </header>
+
+    <div class="prose">
+      <h3>抽象だけの人、具体だけの人</h3>
+
+      <p>思考力の議論ではしばしば「抽象的に考えられる人が優秀だ」と語られる。しかしこれは半分しか正しくない。ビジネス書の細谷功が『具体と抽象』で鮮やかに示したとおり、抽象の高みに登ったきり降りてこられない人は「話が大きいだけで何も実行できない人」になり、具体の地面から離れられない人は「目の前の仕事はできるが応用が利かない人」になる。</p>
+
+      <p><strong>知的な生産性は、はしごのどこに立つかではなく、どれだけ自在に上り下りできるかで決まる。</strong>原理を語れて、かつ明日の行動に翻訳できる。現場の細部を見て、かつそれを構造として言い直せる。この往復運動こそが本書の中心テーマであり、以降のすべての章はこの運動の部分技術だと言ってよい。</p>
+
+      <h3>上りの技術 ── 複数の具体から共通構造を見る</h3>
+
+      <p>はしごを上る基本動作は、<strong>複数の事例を並べて、共通する構造を言葉にする</strong>ことだ。ここで重要なのは「複数の」という条件だ。一つの事例だけから一般化することは可能だが、極めて危険でもある（第7章で詳述する）。事例が一つしかないとき、どの特徴が本質でどの特徴が偶然なのか、原理的に区別できないからだ。</p>
+
+      <p>たとえば、ある飲食店が「メニューを減らしたら売上が伸びた」という事例を見たとする。これ一つでは「メニューを減らすべし」という表面的な教訓しか取れない。しかし「Appleが製品ラインを4象限に絞って復活した」「あるSaaSが機能を削って解約率を下げた」という事例を並べると、共通構造が浮かび上がる ── <em>選択肢の多さはユーザーの認知コストであり、提供側の品質管理コストでもある。絞ることは価値の凝縮である</em>。ここまで上れば、この原理は自分のポートフォリオ設計にも、会議の議題数にも、文章の論点数にも降ろせる。</p>
+
+      <div class="sidenote">
+        上りの動作を支える口癖は「要するに何が起きているのか？」「これは何の一例か？」。下りの動作を支える口癖は「たとえば？」「具体的には？」「明日の行動で言うと？」。会議でこの二種類の問いを意識的に使い分けられる人は、議論の高度を操縦できる。
+      </div>
+
+      <h3>下りの技術 ── 原理を新しい文脈に着地させる</h3>
+
+      <p>はしごを下る基本動作は、<strong>抽象的な原理に、固有名詞と数字を与える</strong>ことだ。「顧客視点が大事」は抽象のまま宙に浮いている。「来週、解約した顧客3人に30分ずつ電話する」まで降ろして初めて、原理は現実と接触する。</p>
+
+      <p>下りには独特の困難がある。抽象的な原理は常に複数の降り方を許すため、<em>どこに降りるかの判断</em>が必要になるのだ。「絞ることは価値の凝縮である」という原理は、メニューを減らすことにも、ターゲット顧客を絞ることにも、一日の作業を3つに限定することにも降ろせる。この判断を支えるのは目的（第1章）であり、文脈の条件を読む力（第7章）だ。つまり上り下りは機械的な操作ではなく、毎回が小さな設計行為である。</p>
+
+      <h3>理解しているかどうかの試金石</h3>
+
+      <p>この往復運動は、「理解」とは何かについて強力な判定基準を与えてくれる。物理学者リチャード・ファインマンは、専門用語を使わず平易な言葉で説明できないなら、それは理解していないのだと考え、新しい概念を学ぶたびに「初学者に教えるつもりで再構成する」ことを習慣にしていた。これは本書の言葉で言えば、<strong>高い段で受け取った知識を、自力で低い段まで降ろせるかのテスト</strong>だ。</p>
+
+      <p>逆向きのテストもある。具体的な経験を語れる人が、それを一段上の言葉でも言い直せるか。「あのプロジェクトは大変だった」で止まる人と、「あれは<em>意思決定者が多すぎて誰も拒否権を手放さない構造</em>の事例だった」と言える人。後者だけが、その経験を次の違う場面で使える。</p>
+
+      <div class="key-concept">
+        <strong>理解の二方向テスト</strong><br>
+        下りテスト ── その原理に、自分の言葉で具体例を3つ与えられるか（うち1つは自分の経験から）<br>
+        上りテスト ── その経験を、固有名詞を一つも使わずに説明できるか<br>
+        両方に合格して初めて、知識は「使える」状態にある
+      </div>
+
+      <h3>すれ違いの正体は「高度の不一致」</h3>
+
+      <p>往復の感覚を持つと、コミュニケーションの失敗の多くが新しい目で見えてくる。議論がかみ合わないとき、対立しているように見える二人は、実は<em>違う高度で話している</em>だけのことが多い。一人は「今期の施策」（具体）の話をしており、もう一人は「事業の方向性」（抽象）の話をしている。どちらも正しいことを言っているのに、はしごの段がずれているために、互いに「話が通じない人だ」と感じる。</p>
+
+      <p>このとき必要なのは説得ではなく、高度合わせだ。「いま私たちは方針の話をしていますか、それとも来週の行動の話をしていますか」── この一言は、抽象のはしごを共有装置として使う技術であり、ファシリテーションと呼ばれるものの中核はここにある。優れた聞き手は、相手の話を一段上で要約し（「つまり◯◯ということですね」）、一段下で確認する（「たとえば△△のような場面ですか」）。この上下動が、理解されているという感覚を作る。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure II ── The Round Trip of Abstraction</span>
+        <h4 class="figure__title">往復運動 ── 具体Aで学び、原理に上げ、具体Bに降ろす</h4>
+        <svg class="figure__svg" viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+          <!-- Abstract layer -->
+          <rect x="230" y="30" width="340" height="64" rx="2" fill="#1c1917"/>
+          <text x="400" y="56" text-anchor="middle" font-size="12" fill="#faf7f2" font-weight="600">原理（抽象層）</text>
+          <text x="400" y="76" text-anchor="middle" font-size="10" fill="#d6cfc1">「絞ることは価値の凝縮である」</text>
+
+          <!-- Concrete A -->
+          <rect x="40" y="220" width="220" height="70" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="150" y="246" text-anchor="middle" font-size="11" fill="#1c1917" font-weight="600">具体A（学んだ場所）</text>
+          <text x="150" y="264" text-anchor="middle" font-size="10" fill="#6b6359">メニューを減らした飲食店の</text>
+          <text x="150" y="278" text-anchor="middle" font-size="10" fill="#6b6359">売上が伸びた</text>
+
+          <!-- Concrete A' -->
+          <rect x="290" y="220" width="220" height="70" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="400" y="246" text-anchor="middle" font-size="11" fill="#1c1917" font-weight="600">具体A'（検証の事例）</text>
+          <text x="400" y="264" text-anchor="middle" font-size="10" fill="#6b6359">Appleの製品ライン整理、</text>
+          <text x="400" y="278" text-anchor="middle" font-size="10" fill="#6b6359">SaaSの機能削減</text>
+
+          <!-- Concrete B -->
+          <rect x="540" y="220" width="220" height="70" rx="2" fill="#faf7f2" stroke="#8b6914" stroke-width="1.5"/>
+          <text x="650" y="246" text-anchor="middle" font-size="11" fill="#8b6914" font-weight="600">具体B（運んだ先）</text>
+          <text x="650" y="264" text-anchor="middle" font-size="10" fill="#6b6359">自分の提案資料の論点を</text>
+          <text x="650" y="278" text-anchor="middle" font-size="10" fill="#6b6359">3つに絞る</text>
+
+          <!-- Up arrow from A -->
+          <line x1="150" y1="218" x2="280" y2="100" stroke="#a01c1c" stroke-width="1.5"/>
+          <polygon points="288,93 274,98 282,110" fill="#a01c1c"/>
+          <text x="160" y="150" font-size="11" fill="#a01c1c" font-weight="600">上り（抽象化）</text>
+          <text x="160" y="166" font-size="9" fill="#6b6359">「要するに何が起きた？」</text>
+
+          <!-- Up-dashed from A' -->
+          <line x1="400" y1="218" x2="400" y2="100" stroke="#6b6359" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="412" y="150" font-size="9" fill="#6b6359">複数事例で構造を確認</text>
+
+          <!-- Down arrow to B -->
+          <line x1="520" y1="100" x2="650" y2="218" stroke="#8b6914" stroke-width="1.5"/>
+          <polygon points="657,226 643,221 651,209" fill="#8b6914"/>
+          <text x="560" y="150" font-size="11" fill="#8b6914" font-weight="600">下り（具体化）</text>
+          <text x="560" y="166" font-size="9" fill="#6b6359">「明日の行動で言うと？」</text>
+        </svg>
+        <p class="figure__caption">具体Aだけからの一般化は危険なので、別の事例A'で構造を確認してから上る。原理は固有名詞と数字を与えて具体Bに着地させて初めて価値になる。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第2章のまとめ</h4>
+      <ul>
+        <li>知的生産性は抽象度の高さではなく、具体と抽象の往復の自在さで決まる</li>
+        <li>上り＝複数の事例から共通構造を言葉にする。下り＝原理に固有名詞と数字を与える</li>
+        <li>理解の試金石：具体例を3つ出せるか（下り）、固有名詞なしで語れるか（上り）</li>
+        <li>議論のすれ違いの多くは意見の対立ではなく「高度の不一致」。まず高度を合わせる</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch1">前章：抽象化とは何か</a>
+      <a class="chapter-nav__next" href="#ch3">次章：構造を見る目 ──&thinsp;表面ではなく関係を写し取る</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第3章
+     ============================================ -->
+<section class="chapter" id="ch3">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER III</span>
+      <h2 class="chapter__title">構造を見る目 ── 表面ではなく関係を写し取る</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">似ているとは、属性が同じことではない。関係の網目が同じことだ</p>
+    </header>
+
+    <div class="prose">
+      <h3>二種類の「似ている」</h3>
+
+      <p>「太陽系と原子は似ている」と言われて、私たちは納得する。だが冷静に考えれば、太陽は巨大で熱く、原子核は極小で冷たい。色も大きさも材質も、属性はことごとく違う。それでも「似ている」と感じるのはなぜか。</p>
+
+      <p>認知科学者デドレ・ゲントナーは1983年の「構造写像理論」でこの問いに決定的な答えを与えた。アナロジーにおいて写し取られているのは、対象の<em>属性</em>（大きい、熱い、黄色い）ではなく、対象間の<em>関係</em>（AがBの周りを回る、AがBを引きつける）である。太陽系と原子が似ているのは、「中心にある重い物体が、周囲の軽い物体を力で束縛し、軽い物体がその周りを回る」という<strong>関係の網目（構造）</strong>が共通しているからだ。</p>
+
+      <div class="sidenote sidenote--quote">
+        "Analogy is a mapping of relations, not attributes."（アナロジーとは属性ではなく関係の写像である）<br>
+        ── Dedre Gentner, "Structure-Mapping: A Theoretical Framework for Analogy" (1983)
+      </div>
+
+      <p>この区別は、抽象化の技術全体の心臓部にあたる。<strong>表面的特徴で「似ている」を判定する人は、似たものからしか学べない。関係的構造で「似ている」を判定できる人は、見た目がまるで違う領域から学べる。</strong>応用力の差は、ほぼこの一点に集約される。</p>
+
+      <h3>ニュートンのリンゴ ── 構造視の最高峰</h3>
+
+      <p>科学史でもっとも有名な構造視の事例は、ニュートンのリンゴと月だろう。落ちるリンゴと、夜空に浮かぶ月。表面的にはこれほど違うものもない。一方は手元に落ちてきて、一方は永遠に空にある。だがニュートンは問うた ── 月もまた、リンゴと同じように地球に向かって「落ち続けている」のではないか。月が地面に届かないのは、落ちながら横に動き続けているからではないか。</p>
+
+      <p>「落ちる」という関係を、リンゴという具体物から引き剥がし、天体にまで拡張する。この一手で、地上の力学と天上の運動という、二千年間別物とされてきた二つの領域が、一つの構造 ── 万有引力 ── に統一された。<em>抽象化の最高の仕事は、別々に見えていた世界を「同じものの二つの現れ」として見せることだ。</em></p>
+
+      <h3>数学という「構造の科学」</h3>
+
+      <p>構造視を組織的に推し進めた学問が数学だ。たとえば次の三つを考えてみる。①時計の文字盤の上での足し算（10時の3時間後は1時）。②正三角形を120度ずつ回す操作。③3本のあみだくじの縦線の入れ替え。</p>
+
+      <p>素材はまったく違う。時間と図形とくじだ。しかし「操作を続けて行える」「何もしない操作がある」「どの操作にも元に戻す操作がある」という関係の網目に注目すると、三つは同じ構造 ── 数学者が<strong>群（group）</strong>と呼ぶもの ── の事例であることがわかる。そして群について一度証明された定理は、時計にも図形にもくじにも、さらにはルービックキューブにも素粒子物理にも、一度に適用される。</p>
+
+      <p>これが第1章で見た「知識のレバレッジ」の極限形だ。数学が「役に立つ」のは、計算ができるからではない。<em>構造だけを取り出して研究しておけば、その構造を持つ未来のあらゆる対象に成果が転用される</em>からだ。私たちが日常で行う抽象化は、この営みの小規模版である。</p>
+
+      <h3>ビジネスにおける構造視 ── ビジネスモデルという名の構造</h3>
+
+      <p>ビジネスの世界で「モデル」と呼ばれているものは、ほぼすべてが関係構造の抽象化だ。「サブスクリプション」を考えてみよう。新聞の定期購読、スポーツジムの月会費、Netflix、SaaS ── 商材は紙とサービスと動画とソフトウェアでバラバラだが、「都度の取引ではなく継続関係に課金し、解約されない限り収益が積み上がる」という関係構造が共通している。この構造に注目した人だけが、「ならば自動車も、歯ブラシの替えブラシも、この構造に載せられるのでは」という転用を思いつける。</p>
+
+      <p>「プラットフォーム」「フリーミアム」「マーケットプレイス」── これらの言葉はすべて、特定の企業の見た目ではなく、登場人物のあいだの<em>お金と価値の流れ方</em>という関係を名付けたものだ。優れた事業家が他業界の事例から学べるのは、業界という表面を透かして、この流れの構造を見ているからである。</p>
+
+      <div class="key-concept">
+        <strong>構造を見るための変数化の問い</strong><br>
+        「登場人物を全部、記号に置き換えたら、何と何の<em>関係</em>が残るか？」<br>
+        太陽系 → 「Xの周りをYが回り、XはYを引きつける」<br>
+        サブスク → 「XはYに継続的にZを提供し、関係の継続に課金する」<br>
+        固有名詞を消しても残るもの ── それが構造であり、転用可能な部分である
+      </div>
+
+      <h3>構造視の訓練 ── 「これは何と何の関係の話か」</h3>
+
+      <p>構造を見る目は、日常の中で訓練できる。ニュースでも社内の出来事でも、何かが起きたときに「誰が」「何が」という登場人物への興味を一拍こらえて、<strong>「これは何と何の、どういう関係の話か」</strong>と問い直してみる。価格競争のニュースは「差別化要因を失った供給者同士は、唯一比較可能な軸（価格）で消耗する」という関係の話であり、それは転職市場にも、SNSでの発信にも、まったく同じ形で現れる。</p>
+
+      <p>登場人物は毎回変わる。関係は驚くほど繰り返す。歴史が「韻を踏む」ように見えるのは、人間と資源と情報のあいだに成立しうる関係のパターンが、登場人物の数に比べてずっと少ないからだ。構造のレパートリーを増やすこと ── それが次章で扱うアナロジーの弾倉になる。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure III ── Structure Mapping</span>
+        <h4 class="figure__title">構造写像 ── 属性は写さない、関係だけを写す</h4>
+        <svg class="figure__svg" viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- Solar system side -->
+          <text x="190" y="36" text-anchor="middle" font-size="13" fill="#1c1917" font-weight="600">太陽系（ソース）</text>
+          <circle cx="190" cy="140" r="34" fill="#8b6914"/>
+          <text x="190" y="145" text-anchor="middle" font-size="11" fill="#faf7f2">太陽</text>
+          <ellipse cx="190" cy="140" rx="90" ry="58" fill="none" stroke="#6b6359" stroke-width="1" stroke-dasharray="3 3"/>
+          <circle cx="272" cy="112" r="12" fill="#1c1917"/>
+          <text x="272" y="94" text-anchor="middle" font-size="9" fill="#6b6359">惑星</text>
+          <text x="190" y="230" text-anchor="middle" font-size="10" fill="#6b6359">属性：巨大・高温・黄色</text>
+          <text x="190" y="248" text-anchor="middle" font-size="10" fill="#1c1917" font-weight="600">関係：中心が周囲を引力で束縛し</text>
+          <text x="190" y="264" text-anchor="middle" font-size="10" fill="#1c1917" font-weight="600">周囲が中心を回る</text>
+
+          <!-- Atom side -->
+          <text x="610" y="36" text-anchor="middle" font-size="13" fill="#1c1917" font-weight="600">原子（ターゲット）</text>
+          <circle cx="610" cy="140" r="20" fill="#a01c1c"/>
+          <text x="610" y="145" text-anchor="middle" font-size="9" fill="#faf7f2">原子核</text>
+          <ellipse cx="610" cy="140" rx="85" ry="52" fill="none" stroke="#6b6359" stroke-width="1" stroke-dasharray="3 3"/>
+          <ellipse cx="610" cy="140" rx="55" ry="70" fill="none" stroke="#6b6359" stroke-width="1" stroke-dasharray="3 3"/>
+          <circle cx="688" cy="116" r="8" fill="#1c1917"/>
+          <text x="688" y="100" text-anchor="middle" font-size="9" fill="#6b6359">電子</text>
+          <text x="610" y="230" text-anchor="middle" font-size="10" fill="#6b6359">属性：極小・低温・不可視</text>
+          <text x="610" y="248" text-anchor="middle" font-size="10" fill="#1c1917" font-weight="600">関係：中心が周囲を電気力で束縛し</text>
+          <text x="610" y="264" text-anchor="middle" font-size="10" fill="#1c1917" font-weight="600">周囲が中心を回る</text>
+
+          <!-- Mapping arrows -->
+          <line x1="300" y1="246" x2="490" y2="246" stroke="#8b6914" stroke-width="2"/>
+          <polygon points="500,246 486,239 486,253" fill="#8b6914"/>
+          <text x="400" y="234" text-anchor="middle" font-size="11" fill="#8b6914" font-weight="600">関係は写像される ◯</text>
+
+          <line x1="300" y1="227" x2="490" y2="227" stroke="#a01c1c" stroke-width="1" stroke-dasharray="5 4"/>
+          <text x="400" y="214" text-anchor="middle" font-size="11" fill="#a01c1c">属性は写像されない ✂</text>
+
+          <!-- Bottom: extracted structure -->
+          <rect x="200" y="296" width="400" height="48" rx="2" fill="#1c1917"/>
+          <text x="400" y="316" text-anchor="middle" font-size="11" fill="#faf7f2" font-weight="600">取り出された構造</text>
+          <text x="400" y="333" text-anchor="middle" font-size="10" fill="#d6cfc1">「中心Xが周囲Yを力Fで束縛し、YはXの周りを回る」</text>
+        </svg>
+        <p class="figure__caption">ゲントナーの構造写像理論。アナロジーが成立するとき、写し取られているのは「大きい・熱い」といった属性ではなく、要素間の関係の網目だけである。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第3章のまとめ</h4>
+      <ul>
+        <li>「似ている」には属性の類似と関係（構造）の類似がある。転用可能なのは後者だけ</li>
+        <li>ニュートンの万有引力も数学の群論も、「見た目を捨てて関係を残す」操作の産物</li>
+        <li>ビジネスモデルとは関係構造の名前。構造で見る人だけが他業界から学べる</li>
+        <li>訓練の問い：「登場人物を記号に置き換えたら、何と何の関係が残るか」</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch2">前章：抽象のはしご</a>
+      <a class="chapter-nav__next" href="#ch4">次章：アナロジー ──&thinsp;構造を借りて未知を解く</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第4章
+     ============================================ -->
+<section class="chapter" id="ch4">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IV</span>
+      <h2 class="chapter__title">アナロジー ── 構造を借りて未知を解く</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">人は知らないから解けないのではない。知っているのに「使えると気づかない」から解けない</p>
+    </header>
+
+    <div class="prose">
+      <h3>放射線問題 ── 認知科学が暴いた応用力の正体</h3>
+
+      <p>1945年、ゲシュタルト心理学者カール・ドゥンカーが考案した有名な問題がある。<strong>放射線問題</strong>だ。「患者の胃に悪性腫瘍がある。手術はできない。ある種の放射線を使えば腫瘍を破壊できるが、破壊に十分な強度で照射すると、途中の健康な組織まで破壊してしまう。弱くすれば組織は無事だが腫瘍も破壊できない。どうすればよいか？」</p>
+
+      <p>答えは、<em>弱い放射線を複数の方向から同時に照射し、腫瘍の位置でだけ強度が重なるようにする</em>こと。この問題をいきなり出されて解ける人は、実験ではおよそ10%しかいない。</p>
+
+      <p>1980年、メアリー・ジックとキース・ホリオークはこの問題を使って、認知科学史に残る実験を行った。被験者にまず、こんな物語を読ませる。「将軍が独裁者の要塞を攻めようとしている。要塞に通じる道は複数あるが、どの道も大部隊が通ると地雷が爆発する。そこで将軍は軍を小部隊に分け、別々の道から同時に進軍させ、要塞の前で合流させて攻略した」── 構造的には放射線問題とまったく同じ解法だ。</p>
+
+      <p>物語を読んだ直後に放射線問題を解かせると、正答率はどうなったか。<strong>約30%。</strong>事前に解法を「知っている」のに、70%の人はそれを使えなかった。ところが「さっき読んだ物語がヒントになりますよ」と一言告げると、正答率は約75%に跳ね上がった。</p>
+
+      <div class="key-concept">
+        <strong>ジック&amp;ホリオークの発見（1980）</strong><br>
+        ヒントなし：約10% ── ヒントになる物語を直前に読んでも：約30%<br>
+        「あの物語が使える」と告げられると：約75%<br>
+        → 応用のボトルネックは知識の<em>所有</em>ではなく<em>検索</em>。人は持っている構造に「気づけない」
+      </div>
+
+      <p>この実験が示すものは衝撃的だ。私たちの頭の中には、使われるのを待っている解法が大量に眠っている。読んだ本、過去の失敗、他業界の事例。問題は、目の前の問題と記憶の中の構造が<em>表面的に違いすぎる</em>と、検索がかからないことだ。軍隊と放射線。見た目が違うだけで、人は同じ構造を別物として素通りする。</p>
+
+      <h3>転用は四つのステップでできている</h3>
+
+      <p>アナロジーによる問題解決は、次の四つのステップに分解できる。それぞれが独立に訓練可能だ。</p>
+
+      <p><strong>① 符号化（encoding）</strong>── 経験や知識を、表面ではなく構造のレベルでも記憶する。「将軍が要塞を攻めた話」とだけ覚えた人は転用できない。「<em>一点に集中投下できない資源を、分割して多方向から到達させ、目標地点で合流させる話</em>」とも覚えた人だけが、後で引き出せる。第6章で扱う「名付け」はこのステップの技術だ。</p>
+
+      <p><strong>② 検索(retrieval)</strong>── 新しい問題に直面したとき、「これは何の仲間か？」と問うて記憶を探す。ここが最大のボトルネックだ。コツは、問題そのものを一段抽象化してから探すこと。「放射線をどう照射するか」ではなく「強すぎる一点投下を避けつつ目標に総量を届けるには」と言い直した瞬間、軍隊の話が検索に引っかかるようになる。</p>
+
+      <p><strong>③ 写像（mapping）</strong>── ソースとターゲットの要素を対応付ける。軍隊⇄放射線、要塞⇄腫瘍、道⇄照射方向、地雷⇄健康な組織の損傷。この対応表を明示的に書くと、写像の破れ（対応しない要素）も見えてくる。</p>
+
+      <p><strong>④ 適用と検証</strong>── 借りてきた解法をターゲットの文脈で動かし、成立条件を確かめる。アナロジーは発想の装置であって証明の装置ではない。「借りた構造はこの文脈でも成立するか」の検証を飛ばすと、第7章で見る表面アナロジーの罠に落ちる。</p>
+
+      <h3>歴史を動かしたアナロジーたち</h3>
+
+      <p>偉大な発見の多くは、この四ステップの実例として読み直せる。<strong>ダーウィン</strong>は、マルサスの『人口論』── 人口は資源より速く増えるため生存競争が起きる ── を読み、その構造を生物界に写像して自然選択説に到達した。経済学の本が、生物学の最重要理論のソースになった。<strong>グーテンベルク</strong>は、ワイン用のぶどう圧搾機の「均一に強い圧力をかける」構造を文字の印刷に写像し、活版印刷機を生んだ。</p>
+
+      <p>ビジネスでも同じだ。回転寿司の生みの親、白石義明は<strong>ビール工場のベルトコンベア</strong>を見て、「流れ作業で運ぶ」構造を寿司屋の接客に写像した。職人が注文を受けて握る寿司屋の constraint（人手がボトルネック）を、製造業の構造を借りて解いたのだ。ソフトバンクの孫正義が「タイムマシン経営」と呼んだ手法 ── 米国で成立したビジネス構造を、時差を利用して日本市場に写像する ── も、地理をまたいだ組織的アナロジーである。シリコンバレーで一時期量産された「Uber for X」── 遊休資産と需要をリアルタイムにマッチングする構造のX業界への写像 ── は、アナロジーが投資のテンプレートにすらなることを示した。</p>
+
+      <div class="sidenote">
+        ダグラス・ホフスタッターは著書『Surfaces and Essences』で、アナロジーは思考の特別な道具ではなく「思考そのもの」だと論じた。私たちが「椅子」という言葉を新しい椅子に使うとき、すでに過去の事例群からの類推が走っている。アナロジーの訓練とは、無意識に走っているこの能力を、遠い領域へ意識的に向け直すことだ。
+      </div>
+
+      <h3>遠くから借りるほど、新しい</h3>
+
+      <p>アナロジーには距離の感覚がある。同業他社から借りる（近いアナロジー）は、確実だが新しさがない ── 競合も同じものを見ているからだ。別業界から借りる（中距離）は、差別化になる。自然界や歴史や芸術から借りる（遠いアナロジー）は、当たれば革新になる ── 新幹線のパンタグラフがフクロウの羽から、500系の先頭形状がカワセミのくちばしから借りられたように。</p>
+
+      <p>ただし距離はリスクでもある。遠くから借りた構造ほど、写像の破れが大きくなりやすく、検証（ステップ④）の重要性が増す。<strong>発想は遠くから借り、検証は近くで行う</strong> ── これがアナロジー運用の基本姿勢だ。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure IV ── Four Steps of Analogical Transfer</span>
+        <h4 class="figure__title">アナロジー転移の四段階 ── ボトルネックは「検索」にある</h4>
+        <svg class="figure__svg" viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg">
+          <!-- Step 1 -->
+          <rect x="40" y="50" width="160" height="92" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="120" y="76" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#8b6914">1</text>
+          <text x="120" y="98" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="600">符号化</text>
+          <text x="120" y="116" text-anchor="middle" font-size="9" fill="#6b6359">経験を構造のレベルで</text>
+          <text x="120" y="130" text-anchor="middle" font-size="9" fill="#6b6359">も記憶する</text>
+
+          <!-- Step 2 (bottleneck) -->
+          <rect x="240" y="42" width="160" height="108" rx="2" fill="#1c1917"/>
+          <text x="320" y="70" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#8b6914">2</text>
+          <text x="320" y="92" text-anchor="middle" font-size="12" fill="#faf7f2" font-weight="600">検索</text>
+          <text x="320" y="110" text-anchor="middle" font-size="9" fill="#d6cfc1">「これは何の仲間か？」</text>
+          <text x="320" y="124" text-anchor="middle" font-size="9" fill="#d6cfc1">問題を一段抽象化して探す</text>
+          <text x="320" y="166" text-anchor="middle" font-size="10" fill="#a01c1c" font-weight="600">▲ 最大のボトルネック</text>
+
+          <!-- Step 3 -->
+          <rect x="440" y="50" width="160" height="92" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="520" y="76" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#8b6914">3</text>
+          <text x="520" y="98" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="600">写像</text>
+          <text x="520" y="116" text-anchor="middle" font-size="9" fill="#6b6359">要素の対応表を作り</text>
+          <text x="520" y="130" text-anchor="middle" font-size="9" fill="#6b6359">破れも確認する</text>
+
+          <!-- Step 4 -->
+          <rect x="640" y="50" width="120" height="92" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1.5"/>
+          <text x="700" y="76" text-anchor="middle" font-family="Cormorant Garamond, serif" font-style="italic" font-size="22" fill="#8b6914">4</text>
+          <text x="700" y="98" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="600">適用・検証</text>
+          <text x="700" y="116" text-anchor="middle" font-size="9" fill="#6b6359">成立条件をその文脈</text>
+          <text x="700" y="130" text-anchor="middle" font-size="9" fill="#6b6359">で確かめる</text>
+
+          <!-- Arrows -->
+          <line x1="202" y1="96" x2="234" y2="96" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="240,96 229,91 229,101" fill="#6b6359"/>
+          <line x1="402" y1="96" x2="434" y2="96" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="440,96 429,91 429,101" fill="#6b6359"/>
+          <line x1="602" y1="96" x2="634" y2="96" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="640,96 629,91 629,101" fill="#6b6359"/>
+
+          <!-- Experiment data -->
+          <rect x="60" y="206" width="680" height="100" rx="2" fill="#faf7f2" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="400" y="230" text-anchor="middle" font-size="11" fill="#1c1917" font-weight="600">ジック&amp;ホリオークの放射線問題実験（1980）</text>
+
+          <rect x="100" y="248" width="44" height="14" fill="#d6cfc1"/>
+          <text x="100" y="282" font-size="10" fill="#6b6359">ヒントなし</text>
+          <text x="152" y="259" font-size="10" fill="#1c1917">10%</text>
+
+          <rect x="300" y="248" width="132" height="14" fill="#8b6914"/>
+          <text x="300" y="282" font-size="10" fill="#6b6359">類似の物語を直前に読む</text>
+          <text x="440" y="259" font-size="10" fill="#1c1917">30%</text>
+
+          <rect x="530" y="248" width="160" height="14" fill="#1c1917"/>
+          <text x="530" y="282" font-size="10" fill="#6b6359">「あの話が使える」と告げる</text>
+          <text x="698" y="259" font-size="10" fill="#1c1917">75%</text>
+        </svg>
+        <p class="figure__caption">知識を持っていても（30%）、「使える」と気づくだけで75%まで跳ね上がる。検索を自力で起こす技術が、応用力の核心である。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第4章のまとめ</h4>
+      <ul>
+        <li>応用のボトルネックは知識の所有ではなく検索。人は持っている構造に気づけない</li>
+        <li>転用は符号化→検索→写像→適用・検証の四段階。それぞれ独立に訓練できる</li>
+        <li>検索のコツは、目の前の問題を一段抽象化して言い直してから記憶を探すこと</li>
+        <li>発想は遠くから借り、検証は近くで行う。アナロジーは発想装置であって証明ではない</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch3">前章：構造を見る目</a>
+      <a class="chapter-nav__next" href="#ch5">次章：モデル化 ──&thinsp;世界を縮約して操作可能にする</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第5章
+     ============================================ -->
+<section class="chapter" id="ch5">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER V</span>
+      <h2 class="chapter__title">モデル化 ── 世界を縮約して操作可能にする</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">地図は領土ではない。しかし領土を持ち歩くことはできない</p>
+    </header>
+
+    <div class="prose">
+      <h3>すべてのモデルは間違っている</h3>
+
+      <p>抽象化の成果物に、持ち運び可能な形を与えたものが<strong>モデル</strong>だ。地図、設計図、組織図、需要曲線、天気予報のシミュレーション、頭の中の「あの人はこういう人だ」という人物像 ── すべてモデルである。そしてモデルについて語るとき、二つの警句を出発点に置くべきだ。</p>
+
+      <p>一つは意味論学者アルフレッド・コージブスキーの「<em>地図は領土ではない</em>」。モデルは現実の代理物であって現実そのものではなく、両者の混同があらゆる誤謬の母になる。もう一つは統計学者ジョージ・ボックスの「<em>すべてのモデルは間違っている。しかし、いくつかは役に立つ</em>」。モデルが現実と違うのは欠陥ではなく定義だ ── 第1章で見たとおり、捨象してあるからこそモデルは使えるのだから。</p>
+
+      <div class="sidenote sidenote--quote">
+        "All models are wrong, but some are useful."<br>
+        ── George E. P. Box, "Science and Statistics" (1976)
+      </div>
+
+      <p>この二つを合わせると、モデルとの正しい付き合い方が見えてくる。<strong>モデルを信じすぎないこと、しかしモデルなしで考えられると思わないこと。</strong>「私は先入観なしに現実をありのまま見る」と言う人は、自覚のないモデルを使っているだけだ。選択肢は「モデルを使うか使わないか」ではなく、「モデルを自覚的に使い、点検し、更新するか、無自覚に使われるか」である。</p>
+
+      <h3>モデルを作る五つの手順</h3>
+
+      <p>モデル化は、借りるだけでなく自作できる。手順は次の五つだ。</p>
+
+      <ul>
+        <li><strong>① 目的を決める</strong>── このモデルで何を予測・判断したいのか。目的が捨象の基準になる（第1章）</li>
+        <li><strong>② 変数を選ぶ</strong>── 目的に効く要素を3〜5個に絞る。全部入りのモデルは現実と同じだけ扱いにくい</li>
+        <li><strong>③ 関係を仮定する</strong>── 変数同士がどう影響し合うか。増えると増える？　遅れて効く？　上限がある？</li>
+        <li><strong>④ 動かしてみる</strong>── 「もしXが2倍になったら」と頭の中（または紙の上）で実験する</li>
+        <li><strong>⑤ 現実と照合して更新する</strong>── 予測が外れた場所こそ、モデルが学習する場所だ</li>
+      </ul>
+
+      <p>たとえば「なぜうちのチームはいつも納期に遅れるのか」を考えるとき、メンバーの能力ややる気という変数で組んだモデルからは「がんばろう」しか出てこない。変数を「着手中のタスク数」「割り込みの頻度」「タスク間の依存関係」に取り替えて関係を仮定すると、「着手中タスクが多いほど切り替えコストが増え、すべてが遅くなる」という構造が見え、「同時着手数を制限する」という、やる気と無関係の打ち手が出てくる。<em>モデルの良し悪しは、変数の選び方でほぼ決まる。</em></p>
+
+      <h3>汎用モデルのレパートリー ── 思考の格子</h3>
+
+      <p>投資家チャーリー・マンガーは、「経験を整理するには、頭の中に<em>モデルの格子（latticework of mental models）</em>を持ち、複数の学問分野から主要モデルを借りてくるべきだ」と説き続けた。彼の警句はこうだ ── 「ハンマーしか持たない者には、すべてが釘に見える」。一つのモデルしか持たない人は、すべての問題をそのモデルで切ろうとして失敗する。</p>
+
+      <p>分野を横断して持ち歩く価値のある汎用モデルは、実はそれほど多くない。例を挙げる。</p>
+
+      <ul>
+        <li><strong>フィードバックループ</strong>（システム思考）── 結果が原因に戻って増幅（好循環・悪循環）または抑制（自己調整）する構造。人気が人気を呼ぶSNSも、価格が需給を調整する市場も同型</li>
+        <li><strong>ストックとフロー</strong>（システム思考）── 蓄積量と流量の区別。信頼も筋肉も貯金も「フローを止めてもストックはすぐには減らないが、確実に減っていく」</li>
+        <li><strong>ボトルネック</strong>（制約理論）── システム全体の速度は最も狭い一点が決める。そこ以外の改善は全体に寄与しない</li>
+        <li><strong>需要と供給</strong>（経済学）── 希少性が価値を決める。スキルの市場価値も「できる人の少なさ×必要とする人の多さ」</li>
+        <li><strong>進化（変異と選択）</strong>（生物学）── 多様なものを生成し、環境が選別し、生き残りが増殖する。A/Bテストも、組織内のアイデア競争も同型</li>
+        <li><strong>複利</strong>（数学）── 成長が成長を生む構造。知識・信頼・負債は足し算ではなく掛け算で増える</li>
+      </ul>
+
+      <p>これらが「汎用」なのは偶然ではない。どれも特定の素材から徹底的に捨象された、ほぼ純粋な<em>関係の構造</em>（第3章）だからだ。素材を含まないモデルだけが、あらゆる素材に適用できる。</p>
+
+      <div class="key-concept">
+        <strong>モデル運用の三原則</strong><br>
+        ① 複数持つ ── 一つのモデルは一つの切り口でしかない。最低二つのモデルで同じ問題を切る<br>
+        ② 適用条件ごと覚える ── モデルには「効く条件」がある。条件を忘れたモデルは迷信になる<br>
+        ③ 外れたら喜ぶ ── 予測が外れた地点はモデルの更新点。外れを無視するモデルは宗教になる
+      </div>
+
+      <h3>メンタルモデルの罠 ── 人間関係というモデル</h3>
+
+      <p>最後に、最も身近で最も点検されないモデルに触れたい。他者についてのモデル ── 「あの人はこういう人だ」── である。私たちは数回の接触から人物モデルを構築し、以後そのモデル越しに相手を見る。モデルだから当然、捨象されている。あなたが見た数回の場面という偏ったサンプルから外挿されている。</p>
+
+      <p>厄介なのは、人物モデルが<em>自己成就する</em>ことだ。「あの人は冷たい」というモデルを持つと、こちらの接し方が硬くなり、相手の応対も硬くなり、モデルが「確証」される。地図が領土を変えてしまうのだ。対人関係の技術と呼ばれるものの多くは、突き詰めれば「自分の人物モデルを仮説として保持し、反証に開いておく」というモデル運用の規律である。抽象化の技術は、ここでは知的生産の道具ではなく、他者への公正さの道具になる。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure V ── The Modeling Loop</span>
+        <h4 class="figure__title">モデル化のループ ── 縮約し、操作し、現実に戻して更新する</h4>
+        <svg class="figure__svg" viewBox="0 0 800 340" xmlns="http://www.w3.org/2000/svg">
+          <!-- Reality box -->
+          <rect x="50" y="110" width="220" height="120" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="160" y="140" text-anchor="middle" font-size="13" fill="#1c1917" font-weight="600">現実（領土）</text>
+          <text x="160" y="162" text-anchor="middle" font-size="10" fill="#6b6359">無限の詳細・ノイズ・</text>
+          <text x="160" y="178" text-anchor="middle" font-size="10" fill="#6b6359">直接は操作できない</text>
+          <text x="160" y="210" text-anchor="middle" font-size="9" fill="#a01c1c">そのままでは持ち運べない</text>
+
+          <!-- Model box -->
+          <rect x="530" y="110" width="220" height="120" rx="2" fill="#1c1917"/>
+          <text x="640" y="140" text-anchor="middle" font-size="13" fill="#faf7f2" font-weight="600">モデル（地図）</text>
+          <text x="640" y="162" text-anchor="middle" font-size="10" fill="#d6cfc1">少数の変数と関係・</text>
+          <text x="640" y="178" text-anchor="middle" font-size="10" fill="#d6cfc1">頭の中で動かせる</text>
+          <text x="640" y="210" text-anchor="middle" font-size="9" fill="#8b6914">「もしXなら」と実験できる</text>
+
+          <!-- Top arrow: abstraction -->
+          <path d="M 270 130 Q 400 60 530 130" fill="none" stroke="#8b6914" stroke-width="2"/>
+          <polygon points="530,130 515,124 519,138" fill="#8b6914"/>
+          <text x="400" y="72" text-anchor="middle" font-size="12" fill="#8b6914" font-weight="600">捨象・縮約（モデル化）</text>
+          <text x="400" y="90" text-anchor="middle" font-size="9" fill="#6b6359">目的を決め、変数を3〜5個選び、関係を仮定する</text>
+
+          <!-- Bottom arrow: application -->
+          <path d="M 530 212 Q 400 286 270 212" fill="none" stroke="#a01c1c" stroke-width="2"/>
+          <polygon points="270,212 285,218 281,204" fill="#a01c1c"/>
+          <text x="400" y="272" text-anchor="middle" font-size="12" fill="#a01c1c" font-weight="600">予測・適用</text>
+          <text x="400" y="290" text-anchor="middle" font-size="9" fill="#6b6359">モデルの結論を現実で試す</text>
+
+          <!-- Update loop -->
+          <text x="400" y="318" text-anchor="middle" font-size="10" fill="#1c1917" font-weight="600">予測が外れた地点 ＝ モデルの更新点（外れを無視するとモデルは迷信になる）</text>
+
+          <!-- Warning label -->
+          <rect x="300" y="146" width="200" height="40" rx="2" fill="#faf7f2" stroke="#a01c1c" stroke-width="1"/>
+          <text x="400" y="163" text-anchor="middle" font-size="10" fill="#a01c1c" font-weight="600">地図は領土ではない</text>
+          <text x="400" y="178" text-anchor="middle" font-size="9" fill="#6b6359">混同があらゆる誤謬の母</text>
+        </svg>
+        <p class="figure__caption">モデル化は一方通行ではなくループである。縮約→操作→適用→照合→更新を回し続けることで、地図は領土に少しずつ忠実になる。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第5章のまとめ</h4>
+      <ul>
+        <li>モデルは捨象の産物であり、「間違っている」のは定義。役に立つかだけを問う</li>
+        <li>モデル自作の手順：目的→変数選択→関係の仮定→思考実験→照合と更新</li>
+        <li>汎用モデル（ループ、ストックとフロー、ボトルネック、進化、複利）を格子として持つ</li>
+        <li>最も点検されないモデルは人物像。仮説として保持し、反証に開いておく</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch4">前章：アナロジー</a>
+      <a class="chapter-nav__next" href="#ch6">次章：名付けと圧縮 ──&thinsp;概念を思考の部品にする</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第6章
+     ============================================ -->
+<section class="chapter" id="ch6">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VI</span>
+      <h2 class="chapter__title">名付けと圧縮 ── 概念を思考の部品にする</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">名前のない構造は運べない。名付けは抽象化の最終工程である</p>
+    </header>
+
+    <div class="prose">
+      <h3>チャンク ── 記憶の通貨単位</h3>
+
+      <p>1956年、心理学者ジョージ・ミラーは「マジカルナンバー7±2」という論文で、人間が短期記憶に保持できる項目数はおよそ7個前後にすぎないと示した。だが重要なのは続きだ。この制限は「項目（チャンク）」の数であって、情報量ではない。「り・ん・ご」は3チャンクだが、「りんご」という単語を知っていれば1チャンクだ。<strong>知識によって複数の要素を一つの塊に圧縮する操作 ── チャンク化 ── が、認知の限界を実質的に拡張する。</strong></p>
+
+      <p>1973年、チェイスとサイモンはチェスの熟達者の研究でこの原理の威力を示した。チェスの達人は、実戦に現れうる盤面なら一目見ただけでほぼ再現できる。だが駒をデタラメに並べた盤面では、再現力は初心者並みに落ちる。達人は駒を一つずつ覚えているのではない。「キャスリングした王の守り」「シシリアン定跡の典型形」といった<em>意味のある構造のまとまり</em> ── チャンク ── で盤面を見ているのだ。デタラメな盤面にはチャンクが存在しないから、優位が消える。</p>
+
+      <p>これは第1〜3章の議論と直結している。チャンクとは、頻出する構造に与えられた圧縮表現であり、熟達とは<em>その領域の構造の語彙</em>を蓄積することなのだ。将棋の棋士が「形が悪い」と一言で言うとき、その一言には数百の負け筋が圧縮されている。</p>
+
+      <h3>名前が思考の部品を作る</h3>
+
+      <p>チャンク化を意識的に行う技術が<strong>名付け</strong>だ。名前の効能は、単なるラベル以上のものである。構造に名前が付くと、三つのことが起きる。</p>
+
+      <p><strong>第一に、運べるようになる。</strong>「技術的負債」という言葉を考えてみよう。ウォード・カニンガムがこの比喩を作る前から、「急いで書いた雑なコードが後で開発速度を落とす」現象自体は存在していた。だが名前がなかったため、エンジニアは毎回その場で長い説明を組み立てるしかなく、経営層との会話にはほぼ載らなかった。「負債」という金融の構造を借りた（第4章のアナロジーだ）名前が付いた瞬間、この現象は会議の議題になり、「返済計画」を立てる対象になった。<em>名前は、構造を個人の頭から組織の共有財産に変える。</em></p>
+
+      <p><strong>第二に、見えるようになる。</strong>語彙は視力である。「サンクコスト」という言葉を知る前と後では、自分の意思決定の見え方が変わる。デザインの世界で「ゲシュタルトの近接の原理」を学んだ人は、チラシの余白の意味が見えるようになる。名前は検索のフック（第4章）であると同時に、知覚のフィルタでもある。</p>
+
+      <p><strong>第三に、組み合わせられるようになる。</strong>名前を持った概念は、より大きな思考の部品になる。「フィードバックループ」と「遅延」という二つの名前を持っていれば、「遅延のあるフィードバックループは振動する ── だからシャワーの温度調節は行き過ぎを繰り返すし、採用の増減も景気に対して行き過ぎる」という合成命題が組める。プログラミングで関数に名前を付けて再利用するのと、まったく同じ構造だ。</p>
+
+      <div class="sidenote">
+        ソフトウェア工学の古典『デザインパターン』（GoF, 1994）の最大の貢献は、23個のパターンの中身よりも、頻出する設計構造に「Observer」「Factory」といった<em>名前を与えた</em>ことだとよく言われる。名前ができたことで、設計議論が「ここはObserverで」と一語で進むようになった。語彙の整備はチームの思考速度を直接上げる。
+      </div>
+
+      <h3>自分の経験に名前を付ける</h3>
+
+      <p>既製の概念を学ぶだけでなく、<strong>自分の経験から取り出した構造に自分で名前を付ける</strong>こと ── これが名付けの技術の本丸だ。たとえば、あなたが「関係者が多い案件で、誰も反対しないのに何も決まらない」という状況を三度経験したとする。これに「全員賛成・全員他人事」のような自分なりの名前を付けて記録しておく。すると四度目の遭遇時、その状況は初見の混乱ではなく「ああ、<em>あのパターン</em>だ」という既知の敵になり、前回の対処（決定権を一人に明示的に渡す）が即座に検索される。</p>
+
+      <p>名前を付けるという行為は、符号化（第4章ステップ①）を強制する。名前を考えるためには「この状況の本質は何か」を問わざるを得ず、その問いが抽象化を駆動するからだ。優れた実務家が持つ「引き出しの多さ」の正体は、こうして名付けられ、整理された構造のレパートリーである。</p>
+
+      <div class="key-concept">
+        <strong>名付けの三効能</strong><br>
+        ① 運搬 ── 構造が一語で伝達・議論可能になり、組織の共有財産になる<br>
+        ② 知覚 ── 名前を持つパターンは、次回から「見える」ようになる<br>
+        ③ 合成 ── 名前を持つ概念同士は組み合わせて、より大きな思考を組める<br>
+        既製の語彙を学ぶこと＋自分の経験に自分で名付けること、の両輪で進める
+      </div>
+
+      <h3>名付けの危険 ── 知った気になる病</h3>
+
+      <p>ただし名前には固有の病がある。<strong>名前を知っていることと、構造を使えることの混同</strong>だ。「それ、確証バイアスだよね」とラベルを貼って思考を終了する。「うちの問題はサイロ化だ」と診断して満足する。名前は理解の完成ではなく、理解の<em>入口</em>にすぎない。ファインマンは「鳥の名前をいくら知っていても、鳥について何も知らないことはありうる」と父から学んだ逸話を繰り返し語った。</p>
+
+      <p>検査法は第2章の二方向テストだ。その名前の指す構造を、固有名詞なしで説明できるか（上り）。自分の文脈の具体例を3つ挙げられるか（下り）。これに通らない名前は、まだあなたの部品ではない ── 借り物の飾りだ。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure VI ── Chunking as Compression</span>
+        <h4 class="figure__title">名付けによる圧縮 ── 詳細の束が、一語の部品になる</h4>
+        <svg class="figure__svg" viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg">
+          <!-- Raw details -->
+          <text x="150" y="36" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="600">生の詳細（7±2の壁に阻まれる）</text>
+          <rect x="55" y="56" width="190" height="26" rx="2" fill="#f5f1ea" stroke="#d6cfc1"/>
+          <text x="150" y="73" text-anchor="middle" font-size="9" fill="#6b6359">急いで書いた雑な実装が残る</text>
+          <rect x="55" y="90" width="190" height="26" rx="2" fill="#f5f1ea" stroke="#d6cfc1"/>
+          <text x="150" y="107" text-anchor="middle" font-size="9" fill="#6b6359">後の変更コストが増え続ける</text>
+          <rect x="55" y="124" width="190" height="26" rx="2" fill="#f5f1ea" stroke="#d6cfc1"/>
+          <text x="150" y="141" text-anchor="middle" font-size="9" fill="#6b6359">放置すると複利的に悪化する</text>
+          <rect x="55" y="158" width="190" height="26" rx="2" fill="#f5f1ea" stroke="#d6cfc1"/>
+          <text x="150" y="175" text-anchor="middle" font-size="9" fill="#6b6359">計画的に返済（改修）できる</text>
+          <rect x="55" y="192" width="190" height="26" rx="2" fill="#f5f1ea" stroke="#d6cfc1"/>
+          <text x="150" y="209" text-anchor="middle" font-size="9" fill="#6b6359">借りる判断が合理的な時もある</text>
+
+          <!-- Compression arrow -->
+          <line x1="260" y1="137" x2="330" y2="137" stroke="#8b6914" stroke-width="2"/>
+          <polygon points="340,137 326,130 326,144" fill="#8b6914"/>
+          <text x="300" y="120" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">名付け</text>
+          <text x="300" y="158" text-anchor="middle" font-size="9" fill="#6b6359">（圧縮）</text>
+
+          <!-- Named chunk -->
+          <rect x="350" y="106" width="170" height="62" rx="2" fill="#1c1917"/>
+          <text x="435" y="132" text-anchor="middle" font-size="13" fill="#faf7f2" font-weight="600">「技術的負債」</text>
+          <text x="435" y="152" text-anchor="middle" font-size="9" fill="#d6cfc1">＝ 1チャンク</text>
+
+          <!-- Three effects -->
+          <line x1="525" y1="120" x2="585" y2="78" stroke="#6b6359" stroke-width="1"/>
+          <line x1="525" y1="137" x2="585" y2="137" stroke="#6b6359" stroke-width="1"/>
+          <line x1="525" y1="154" x2="585" y2="196" stroke="#6b6359" stroke-width="1"/>
+
+          <rect x="590" y="56" width="170" height="44" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="675" y="74" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">運搬</text>
+          <text x="675" y="90" text-anchor="middle" font-size="9" fill="#6b6359">会議の議題に載る</text>
+
+          <rect x="590" y="115" width="170" height="44" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="675" y="133" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">知覚</text>
+          <text x="675" y="149" text-anchor="middle" font-size="9" fill="#6b6359">次から「見える」ようになる</text>
+
+          <rect x="590" y="174" width="170" height="44" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="675" y="192" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">合成</text>
+          <text x="675" y="208" text-anchor="middle" font-size="9" fill="#6b6359">他の概念と組み合わせられる</text>
+
+          <!-- Warning -->
+          <rect x="55" y="256" width="705" height="50" rx="2" fill="#faf7f2" stroke="#a01c1c" stroke-width="1"/>
+          <text x="408" y="277" text-anchor="middle" font-size="10" fill="#a01c1c" font-weight="600">注意：名前を知っている ≠ 構造を使える</text>
+          <text x="408" y="294" text-anchor="middle" font-size="9" fill="#6b6359">検査法 ── 固有名詞なしで説明できるか（上り）／自分の文脈の具体例を3つ挙げられるか（下り）</text>
+        </svg>
+        <p class="figure__caption">名付けは抽象化の最終工程。詳細の束が1チャンクに圧縮されることで、短期記憶の壁を越えて運搬・知覚・合成が可能になる。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第6章のまとめ</h4>
+      <ul>
+        <li>チャンク化＝頻出構造の圧縮表現。熟達とはその領域の「構造の語彙」の蓄積である</li>
+        <li>名前の三効能：運べる（共有財産化）、見える（知覚のフィルタ）、組める（思考の部品化）</li>
+        <li>既製概念の学習に加えて、自分の経験のパターンに自分で名前を付けて蓄積する</li>
+        <li>名前を知っていることと使えることは別。二方向テストで借り物の飾りを検出する</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch5">前章：モデル化</a>
+      <a class="chapter-nav__next" href="#ch7">次章：抽象化の失敗学 ──&thinsp;一般化が壊れる四つの形</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第7章
+     ============================================ -->
+<section class="chapter" id="ch7">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VII</span>
+      <h2 class="chapter__title">抽象化の失敗学 ── 一般化が壊れる四つの形</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">強力な道具は、強力に間違える。抽象化の事故にはパターンがある</p>
+    </header>
+
+    <div class="prose">
+      <p>ここまで抽象化の威力を語ってきたが、本章では刃の裏側を直視する。抽象化の事故は無秩序に起きるのではない。大きく四つの型に分類できる。型を知っていれば、自分の推論と他人の主張の両方を検査できる。</p>
+
+      <h3>失敗1 ── 早すぎる一般化（サンプルの罠）</h3>
+
+      <p>もっとも頻発する事故は、<strong>少なすぎる事例からの法則化</strong>だ。「あの会社は朝会を廃止して生産性が上がった。だから朝会は悪だ」── n=1からの跳躍である。第2章で「上りには最低2つの事例」と述べた理由がここにある。事例が一つでは、観察された特徴のどれが結果の原因で、どれがその会社の偶然なのか、区別する手段が原理的に存在しない。</p>
+
+      <p>この罠の凶悪な変種が<strong>生存者バイアス</strong>だ。第二次大戦中、米軍は帰還した爆撃機の被弾分布を調べ、被弾の多い箇所を装甲強化しようとした。統計学者エイブラハム・ウォルドは正反対を進言する ── 強化すべきは帰還機が被弾して<em>いない</em>箇所だ。そこを撃たれた機体は、帰還できずデータから消えているのだから。成功者のインタビュー、ベストセラーの成功法則、長寿企業の習慣 ── 私たちが目にする事例集は、ほぼ常に「帰還機」だけでできている。<em>見えている事例から上る前に、「見えなくなった事例はどこにいるか」を問うこと。</em></p>
+
+      <div class="sidenote">
+        早すぎる一般化は、個人の内面では「一度の失敗からの過剰学習」として現れる。一度の登壇の失敗から「自分は人前に向いていない」という法則を作ってしまう。n=1からの自己理論は、他人について作れば偏見と呼ばれ、自分について作れば思い込みと呼ばれる。構造は同じだ。
+      </div>
+
+      <h3>失敗2 ── 表面アナロジー（構造ではなく見た目を借りる）</h3>
+
+      <p>第3章の区別 ── 属性の類似と構造の類似 ── を踏み外すと、この事故が起きる。「スティーブ・ジョブズは黒タートルを着て直感で決めた。だから私も」── 借りているのは成功の構造ではなく衣装だ。「シリコンバレーではオフィスにバーがある」式の模倣、成功企業の<em>結果として生じた特徴</em>（豪華なオフィス、有名人の起用）を<em>原因</em>と取り違えた移植は、ほぼすべてこの型である。</p>
+
+      <p>検査法は写像の明示化（第4章ステップ③）だ。対応表を実際に書く。「あちらで効いた因果の鎖は何か。その鎖の各環は、こちらの文脈にも存在するか」。鎖の環が一つでも欠けていれば、借用は成立しない。歴史のアナロジー（「今は1929年と同じだ」）が論争を呼ぶのは、まさにこの写像の破れの大きさが人によって違って見えるからであり、対応表を書くことが議論を生産的にする。</p>
+
+      <h3>失敗3 ── 漏れる抽象（下のレイヤーは消えていない）</h3>
+
+      <p>ソフトウェア技術者ジョエル・スポルスキーは2002年、「<strong>漏れのある抽象の法則</strong>（The Law of Leaky Abstractions）」を提唱した ── 「自明でない抽象は、すべて、程度の差はあれ漏れる」。プログラマはネットワークの詳細を抽象化したライブラリを使うが、ネットワークが不調になった瞬間、隠されていたはずの下層の詳細が「漏れて」きて、下層を理解していない者は対処できなくなる。</p>
+
+      <p>この法則は工学の外でも成立する。組織図という抽象は「漏れる」── 実際の意思決定は非公式な人間関係の層で動いており、組織図しか見ない管理者は機能不全に対処できない。財務諸表という抽象も「漏れる」── 数字の背後の事業実態を知らない投資家は、会計方針の変更一つで騙される。<strong>抽象の上で暮らすことは効率的だが、いざという時に一段下へ降りられない者は、抽象の主人ではなく囚人である。</strong>便利な抽象を使うときは、「これは何を隠しているのか」を一度は確認しておくこと。</p>
+
+      <h3>失敗4 ── 抽象の空中戦（地面に降りられない議論）</h3>
+
+      <p>最後の型は、抽象の高みに登ったまま降りてこない病だ。「DXを推進すべきだ」「顧客視点が重要だ」「イノベーティブな組織文化を作ろう」── どれも反対しようのない正しさを持ち、だからこそ何も決めていない。抽象度の高い言葉は適用範囲が広い分、内容が薄い（第1章のトレードオフ）。<em>全員が賛成できる言葉は、誰の行動も変えない言葉である。</em></p>
+
+      <p>空中戦の検出器は単純だ ── 「たとえば？」と問うてみる。具体例が即座に出てこない主張は、本人の中でもまだ思考が完了していない。ビッグワード（戦略、本質、価値、シナジー）が三つ以上連続したら警報を鳴らす。そして自分が書く文章では、抽象的な主張一つにつき具体例を一つ添える規律を持つ。第2章の往復運動は、この病の予防接種でもある。</p>
+
+      <div class="key-concept">
+        <strong>四つの失敗と検査の問い</strong><br>
+        ① 早すぎる一般化 → 「事例はいくつあるか？　消えた事例（非帰還機）はどこか？」<br>
+        ② 表面アナロジー → 「対応表を書いたか？　因果の鎖の環は全部こちらにもあるか？」<br>
+        ③ 漏れる抽象 → 「この抽象は何を隠しているか？　一段下に降りられるか？」<br>
+        ④ 抽象の空中戦 → 「たとえば？　明日の行動で言うと？」
+      </div>
+
+      <h3>失敗を恐れて具体に引きこもらないために</h3>
+
+      <p>四つの失敗を並べると、抽象化そのものが危険な行為に見えてくるかもしれない。だが結論を間違えてはいけない。これらの失敗の対処法は、抽象化をやめることではなく、<strong>抽象化に検証を組み込むこと</strong>だ。一般化は仮説として持ち、反例を探し、適用条件を言語化し、降りる練習を続ける。科学が信頼できるのは間違えないからではなく、間違いを検出して修正する手続きを制度化したからだ。個人の抽象化も同じ設計でよい。大胆に上り、慎重に検証する ── この二拍子が、評論家でも臆病者でもない思考の足取りになる。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure VII ── Four Failure Modes</span>
+        <h4 class="figure__title">抽象化の四大事故 ── どの工程で壊れるか</h4>
+        <svg class="figure__svg" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+          <!-- Quadrant layout -->
+          <!-- Q1: hasty generalization -->
+          <rect x="50" y="40" width="340" height="130" rx="2" fill="#f5f1ea" stroke="#a01c1c" stroke-width="1"/>
+          <text x="70" y="68" font-size="12" fill="#a01c1c" font-weight="600">① 早すぎる一般化</text>
+          <text x="70" y="88" font-size="9" fill="#6b6359">壊れる工程：上り（事例 → 原理）</text>
+          <text x="70" y="108" font-size="10" fill="#1c1917">n=1から法則を作る。生存者バイアス。</text>
+          <text x="70" y="124" font-size="10" fill="#1c1917">見えない事例（非帰還機）を忘れる。</text>
+          <text x="70" y="152" font-size="9" fill="#8b6914" font-weight="600">検査：「消えた事例はどこにいるか？」</text>
+
+          <!-- Q2: surface analogy -->
+          <rect x="410" y="40" width="340" height="130" rx="2" fill="#f5f1ea" stroke="#a01c1c" stroke-width="1"/>
+          <text x="430" y="68" font-size="12" fill="#a01c1c" font-weight="600">② 表面アナロジー</text>
+          <text x="430" y="88" font-size="9" fill="#6b6359">壊れる工程：写像（構造でなく属性を借りる）</text>
+          <text x="430" y="108" font-size="10" fill="#1c1917">結果として生じた特徴を原因と取り違えて</text>
+          <text x="430" y="124" font-size="10" fill="#1c1917">移植する。衣装だけ借りる。</text>
+          <text x="430" y="152" font-size="9" fill="#8b6914" font-weight="600">検査：「因果の鎖の対応表を書いたか？」</text>
+
+          <!-- Q3: leaky abstraction -->
+          <rect x="50" y="190" width="340" height="130" rx="2" fill="#f5f1ea" stroke="#a01c1c" stroke-width="1"/>
+          <text x="70" y="218" font-size="12" fill="#a01c1c" font-weight="600">③ 漏れる抽象</text>
+          <text x="70" y="238" font-size="9" fill="#6b6359">壊れる工程：運用（下層が漏れ出す）</text>
+          <text x="70" y="258" font-size="10" fill="#1c1917">抽象が隠した詳細は消えていない。異常時に</text>
+          <text x="70" y="274" font-size="10" fill="#1c1917">一段下へ降りられない者は対処不能になる。</text>
+          <text x="70" y="302" font-size="9" fill="#8b6914" font-weight="600">検査：「この抽象は何を隠しているか？」</text>
+
+          <!-- Q4: abstract dogfight -->
+          <rect x="410" y="190" width="340" height="130" rx="2" fill="#f5f1ea" stroke="#a01c1c" stroke-width="1"/>
+          <text x="430" y="218" font-size="12" fill="#a01c1c" font-weight="600">④ 抽象の空中戦</text>
+          <text x="430" y="238" font-size="9" fill="#6b6359">壊れる工程：下り（具体に着地しない）</text>
+          <text x="430" y="258" font-size="10" fill="#1c1917">全員が賛成できるビッグワードは、誰の行動</text>
+          <text x="430" y="274" font-size="10" fill="#1c1917">も変えない。思考が完了していない兆候。</text>
+          <text x="430" y="302" font-size="9" fill="#8b6914" font-weight="600">検査：「たとえば？　明日の行動で言うと？」</text>
+        </svg>
+        <p class="figure__caption">四つの事故はそれぞれ別の工程で起きる。対処は抽象化をやめることではなく、各工程に検査の問いを組み込むこと。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第7章のまとめ</h4>
+      <ul>
+        <li>早すぎる一般化：n=1からの法則化と生存者バイアス。「消えた事例」を必ず問う</li>
+        <li>表面アナロジー：構造でなく見た目の借用。因果の鎖の対応表で検査する</li>
+        <li>漏れる抽象：隠された下層は消えていない。一段下に降りる能力を保持する</li>
+        <li>抽象の空中戦：着地しないビッグワード。「たとえば？」が検出器になる</li>
+        <li>対処は抽象化の放棄ではなく検証の組み込み。大胆に上り、慎重に確かめる</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch6">前章：名付けと圧縮</a>
+      <a class="chapter-nav__next" href="#ch8">次章：転移の技術 ──&thinsp;学びを別の領域へ運ぶ</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第8章
+     ============================================ -->
+<section class="chapter" id="ch8">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER VIII</span>
+      <h2 class="chapter__title">転移の技術 ── 学びを別の領域へ運ぶ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">転移は自動では起きない。しかし、起こし方は分かっている</p>
+    </header>
+
+    <div class="prose">
+      <h3>形式陶冶の失敗 ── 転移をめぐる百年の教訓</h3>
+
+      <p>「ラテン語や幾何学を学べば、論理的思考力そのものが鍛えられ、あらゆる分野に波及する」── 19世紀の教育を支配したこの考えを<em>形式陶冶説</em>と呼ぶ。20世紀初頭、心理学者エドワード・ソーンダイクは一連の実験でこれをほぼ否定した。ある課題の訓練は、<em>共通要素を持つ課題</em>にしか転移しない。記憶術の訓練は記憶力一般を高めず、訓練した種類の記憶だけを高める。</p>
+
+      <p>その後百年の研究が描き出した転移の風景は、楽観と悲観のあいだにある。学んだ文脈と似た状況への転移（<strong>近転移</strong>）は比較的起きやすい。学んだ文脈から遠い状況への転移（<strong>遠転移</strong>）── 本書がここまで論じてきた、領域をまたぐ応用 ── は、<em>自然には、めったに起きない</em>。第4章の放射線問題（直前に読んでも70%が気づかない）はその証拠だ。</p>
+
+      <p>しかし朗報がある。遠転移は自然には起きないが、<strong>特定の学び方をすると、発生率を大きく引き上げられる</strong>のだ。その方法は、本書がここまで論じてきた操作の組み合わせとして、きれいに整理できる。</p>
+
+      <h3>転移を起こす学び方 ── 四つのテコ</h3>
+
+      <p><strong>テコ1：比較 ── 事例は必ず二つ以上で学ぶ。</strong>ジックとホリオークの追加実験（1983）が決定的な事実を示している。要塞物語を<em>一つ</em>読んだ群より、構造の同じ物語を<em>二つ</em>読んで「共通点は何か」を考えさせられた群のほうが、放射線問題への転移率が大幅に高かった。二つの事例を比較するとき、人は表面の違い（軍隊と消防士）を捨てて共通構造（分散投下と合流）を取り出さざるを得ない ── つまり比較が抽象化を<em>強制する</em>のだ。何かを学んだら、「もう一つの事例」を探すこと。これだけで知識の携帯性が変わる。</p>
+
+      <p><strong>テコ2：自己説明 ── 「なぜ」を自分に問う。</strong>解法や事例をなぞるだけの学習者と、「なぜこの一手なのか」「この条件がなかったらどうなるか」を自分に説明しながら学ぶ学習者では、後者の転移成績が一貫して高い。自己説明は、表面の手順の下にある原理 ── まさに転移する部分 ── への注意を強制するからだ。</p>
+
+      <p><strong>テコ3：原理の言語化 ── 解いたら、解法に名前を付ける。</strong>問題を解いて終わりにせず、「いま使った原理は何か」を一文で書き出す（第6章の名付け）。「端から埋めると後で詰む。制約の強いところから決める」── この一文があるかないかが、次の異なる文脈での検索可能性（第4章ステップ②）を決める。</p>
+
+      <p><strong>テコ4：交互練習（インターリービング）── 文脈を混ぜて学ぶ。</strong>同じ型の問題を連続で解く（ブロック練習）と、その場の成績は上がるが、「どの型をいつ使うか」の判断が訓練されない。型を混ぜて練習すると、その場の成績は下がるのに、後日の転移成績は上がる。学習科学では「望ましい困難」と呼ばれる現象だ。実務に引きつければ、<em>あえて異質な仕事・異質な読書を混ぜる</em>ことが、構造の判別力を育てる。</p>
+
+      <div class="key-concept">
+        <strong>転移の四つのテコ</strong><br>
+        ① 比較 ── 事例は二つ以上並べる。比較が抽象化を強制する<br>
+        ② 自己説明 ── 「なぜ」を自分に問いながら学ぶ<br>
+        ③ 原理の言語化 ── 解いたら使った原理に一文の名前を付ける<br>
+        ④ 交互練習 ── 文脈を混ぜる。その場の効率を捨てて判別力を買う
+      </div>
+
+      <h3>専門性の罠と、越境の価値</h3>
+
+      <p>転移の科学は、専門家について不都合な事実も明らかにしている。専門知識は深まるほど、その領域の文脈と結びついて<em>カプセル化</em>し、領域外へ持ち出しにくくなる傾向があるのだ。自分の業界の常識が他業界でも常識だと思い込む。自分の専門の道具で すべての問題を切ろうとする（マンガーのハンマー）。深さが、ある種の不自由さを連れてくる。</p>
+
+      <p>デイビッド・エプスタインは『RANGE』で、現代のように変化が速く「意地悪な」環境では、複数領域を経験したジェネラリストが、早期に専門特化した人をしばしば凌駕することを示した。これは本書の言葉で正確に言い直せる。<strong>複数領域の経験は、強制的な交互練習（テコ4）であり、構造の語彙を複数の素材で検証する機会だからだ。</strong>一つの構造を二つの業界で見た人は、その構造を「業界の常識」ではなく「転用可能な原理」として保持できる。</p>
+
+      <div class="sidenote">
+        遠転移の体現者をもう一人。レオナルド・ダ・ヴィンチのノートには、水の渦と巻き毛と空気の流れが並べてスケッチされている。彼は解剖学・水力学・絵画を別の学問とは考えず、「渦」「波」「分岐」という構造の現れとして横断的に観察した。ノートが領域別ではなく〈構造別〉に編まれていること ── それ自体が転移を起こす知的習慣の見本である。
+      </div>
+
+      <h3>深さか広さか、ではない</h3>
+
+      <p>誤解を避けたい。本書の主張は「広く浅くあれ」ではない。抽象化の往復運動（第2章）を思い出してほしい。深い専門は、上質な具体の供給源として不可欠だ。地に足のついた一次経験を持たない人の抽象は、借り物の空中戦（第7章失敗4）になる。理想形は、<strong>深く掘った縦穴を最低一つ持ち、そこから取り出した構造を、横へ運ぶ往復の習慣を持つ</strong>こと。T型人材という古い言葉を本書流に言い直せば、「縦棒で構造を採掘し、横棒で転用検証する人」である。深さは素材を、広さは検証の場を提供する。どちらも転移の部品なのだ。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure VIII ── The Transfer Spectrum</span>
+        <h4 class="figure__title">転移の距離 ── 遠くへ運ぶには、テコがいる</h4>
+        <svg class="figure__svg" viewBox="0 0 800 330" xmlns="http://www.w3.org/2000/svg">
+          <!-- Spectrum bar -->
+          <defs>
+            <linearGradient id="transferGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#1c1917"/>
+              <stop offset="1" stop-color="#a01c1c"/>
+            </linearGradient>
+          </defs>
+          <rect x="80" y="100" width="640" height="10" rx="5" fill="url(#transferGrad)"/>
+
+          <!-- Stops -->
+          <circle cx="120" cy="105" r="7" fill="#1c1917"/>
+          <text x="120" y="80" text-anchor="middle" font-size="11" fill="#1c1917" font-weight="600">同一文脈</text>
+          <text x="120" y="136" text-anchor="middle" font-size="9" fill="#6b6359">練習した問題が</text>
+          <text x="120" y="150" text-anchor="middle" font-size="9" fill="#6b6359">そのまま出る</text>
+
+          <circle cx="300" cy="105" r="7" fill="#3f3a35"/>
+          <text x="300" y="80" text-anchor="middle" font-size="11" fill="#1c1917" font-weight="600">近転移</text>
+          <text x="300" y="136" text-anchor="middle" font-size="9" fill="#6b6359">似た状況・同じ領域</text>
+          <text x="300" y="150" text-anchor="middle" font-size="9" fill="#6b6359">（比較的起きやすい）</text>
+
+          <circle cx="520" cy="105" r="7" fill="#8b6914"/>
+          <text x="520" y="80" text-anchor="middle" font-size="11" fill="#8b6914" font-weight="600">中転移</text>
+          <text x="520" y="136" text-anchor="middle" font-size="9" fill="#6b6359">隣接領域・別業界</text>
+          <text x="520" y="150" text-anchor="middle" font-size="9" fill="#6b6359">（テコがあれば起きる）</text>
+
+          <circle cx="690" cy="105" r="7" fill="#a01c1c"/>
+          <text x="690" y="80" text-anchor="middle" font-size="11" fill="#a01c1c" font-weight="600">遠転移</text>
+          <text x="690" y="136" text-anchor="middle" font-size="9" fill="#6b6359">領域を完全にまたぐ</text>
+          <text x="690" y="150" text-anchor="middle" font-size="9" fill="#6b6359">（自然にはほぼ起きない）</text>
+
+          <!-- Levers box -->
+          <rect x="80" y="190" width="640" height="116" rx="2" fill="#f5f1ea" stroke="#d6cfc1" stroke-width="1"/>
+          <text x="400" y="216" text-anchor="middle" font-size="12" fill="#1c1917" font-weight="600">遠転移を起こす四つのテコ</text>
+
+          <rect x="104" y="232" width="136" height="56" rx="2" fill="#1c1917"/>
+          <text x="172" y="256" text-anchor="middle" font-size="10" fill="#faf7f2" font-weight="600">① 比較</text>
+          <text x="172" y="274" text-anchor="middle" font-size="8.5" fill="#d6cfc1">事例を二つ以上並べる</text>
+
+          <rect x="256" y="232" width="136" height="56" rx="2" fill="#1c1917"/>
+          <text x="324" y="256" text-anchor="middle" font-size="10" fill="#faf7f2" font-weight="600">② 自己説明</text>
+          <text x="324" y="274" text-anchor="middle" font-size="8.5" fill="#d6cfc1">「なぜ」を自分に問う</text>
+
+          <rect x="408" y="232" width="136" height="56" rx="2" fill="#1c1917"/>
+          <text x="476" y="256" text-anchor="middle" font-size="10" fill="#faf7f2" font-weight="600">③ 原理の言語化</text>
+          <text x="476" y="274" text-anchor="middle" font-size="8.5" fill="#d6cfc1">使った原理に名前を付ける</text>
+
+          <rect x="560" y="232" width="136" height="56" rx="2" fill="#1c1917"/>
+          <text x="628" y="256" text-anchor="middle" font-size="10" fill="#faf7f2" font-weight="600">④ 交互練習</text>
+          <text x="628" y="274" text-anchor="middle" font-size="8.5" fill="#d6cfc1">文脈を混ぜて判別力を養う</text>
+        </svg>
+        <p class="figure__caption">転移は距離が遠いほど自然発生しにくい。四つのテコは、いずれも「表面を捨て構造に注意を向けること」を学習プロセスに強制する仕掛けである。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第8章のまとめ</h4>
+      <ul>
+        <li>遠転移は自然には起きない ── 形式陶冶説の失敗から放射線問題まで、証拠は一貫している</li>
+        <li>しかし比較・自己説明・原理の言語化・交互練習の四テコで発生率は引き上げられる</li>
+        <li>専門知識はカプセル化する。越境経験は強制的な交互練習として判別力を育てる</li>
+        <li>深さか広さかの二択ではない。深い縦穴から構造を採掘し、横へ運んで検証する</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch7">前章：抽象化の失敗学</a>
+      <a class="chapter-nav__next" href="#ch9">次章：抽象化の鍛錬 ──&thinsp;日常でできる訓練プログラム</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     第9章
+     ============================================ -->
+<section class="chapter" id="ch9">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">CHAPTER IX</span>
+      <h2 class="chapter__title">抽象化の鍛錬 ── 日常でできる訓練プログラム</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">抽象化は筋肉である。特別な機会ではなく、日常の反復が鍛える</p>
+    </header>
+
+    <div class="prose">
+      <p>最終章では、ここまでの理論を日常の訓練メニューに落とす（本書自身の「下り」である）。どれも道具は不要で、今日から始められる。重要なのは強度ではなく頻度だ ── 抽象化は意識的に反復するうちに、知覚の癖として自動化していく。</p>
+
+      <h3 class="h3--practice">訓練1 ── 「なぜ」で上り、「たとえば」で下りる</h3>
+
+      <p>最も基本の筋トレは、第2章の往復運動の意識的反復だ。何かうまくいったとき・失敗したとき、「なぜ？」を最低三回重ねて原因の構造まで掘る。トヨタの「なぜを五回」は品質管理の手法として知られるが、本質は抽象化訓練である ── 「機械が止まった→ヒューズが切れた→軸受の潤滑不足→ポンプの摩耗→濾過器がない」と掘った先に、「個別の故障」ではなく「予防の仕組みの欠落」という構造が現れる。</p>
+
+      <p>逆方向には、自分が抽象的な言葉を使った瞬間に「たとえば？」と自問する。「もっと顧客に寄り添うべきだ」と言いたくなったら、即座に「たとえば、来週の何の行動が変わる？」と続ける。この自動追撃を癖にすると、空中戦（第7章失敗4）が体質的にできなくなる。</p>
+
+      <h3 class="h3--practice">訓練2 ── 「これは何の事例か」ゲーム</h3>
+
+      <p>ニュース、社内の出来事、店先の行列、子どもの喧嘩 ── 何かを観察するたびに、<strong>「これは、より一般的に言うと何の事例か？」</strong>と一段上のカテゴリを言ってみる。コンビニの新商品は「飽和市場での微差別化」の事例。SNSの炎上は「文脈の崩壊（ある文脈向けの発言が別の文脈に流出する）」の事例。渋滞は「個々の合理的行動が全体の不利益を生む」事例 ── そう言えた瞬間、それは漁業資源の乱獲とも、会議で全員が保身的に振る舞う現象とも接続される。</p>
+
+      <p>このゲームの効能は、第4章で見た符号化の改善にある。経験を構造のラベル付きで記憶する習慣ができると、将来の検索可能性が事前に仕込まれる。一日三回、通勤や昼食の間にやるだけで、世界が「事例の宝庫」に変わる。</p>
+
+      <h3 class="h3--practice">訓練3 ── たとえ話を作る（受け手を変えて三回）</h3>
+
+      <p>誰かに何かを説明する機会は、すべて訓練台になる。説明したい内容を、<strong>相手の領域の素材でたとえる</strong>練習だ。データベースのインデックスを、料理人には「仕込み」、経理担当者には「帳簿の索引」、子どもには「図書館の蔵書カード」でたとえる。よいたとえを作るには、①対象の構造を抽出し、②相手の世界で同じ構造を持つ素材を検索し、③写像する ── つまり第3・4章の操作一式を毎回実行することになる。</p>
+
+      <p>うまいたとえが出ない時は、自分がまだ構造を掴めていないシグナルだ（ファインマンテスト）。たとえが「漏れる」場所（対応しない部分）を自覚的に言えるなら、さらに上級だ ── 「インデックスは仕込みと違って腐らないけど、更新のたびに維持コストがかかる点は違う」。</p>
+
+      <h3 class="h3--practice">訓練4 ── 週に一度の「抽象化ノート」</h3>
+
+      <p>週末に十五分、今週の出来事から一つを選び、三行で書く。</p>
+
+      <ul>
+        <li><strong>一行目（具体）：</strong>何が起きたか。固有名詞と数字で</li>
+        <li><strong>二行目（構造）：</strong>固有名詞を消すと、何と何のどういう関係だったか。可能なら自分の名前を付ける</li>
+        <li><strong>三行目（転用）：</strong>同じ構造は、来週のどこに現れそうか。どう使うか</li>
+      </ul>
+
+      <p>この三行は、本書の全工程 ── 観察、抽象化、名付け、転移仮説 ── の最小実行単位だ。一年続ければ五十個の「自分の原理」が貯まる。借り物のフレームワーク五十個より、自分の経験から採掘した五十個のほうが、検索も信頼もできる。マンガーの格子（第5章）の自家版を建てるのだ。</p>
+
+      <h3 class="h3--practice">訓練5 ── 異分野の本を「自分の仕事の本」として読む</h3>
+
+      <p>月に一冊、自分の仕事と無関係な本 ── 生態学、軍事史、料理、建築、スポーツ科学 ── を、<strong>「これは自分の仕事について書かれた本だ」という強制的な構えで</strong>読む。生態学の「ニッチ」は事業ポジショニングの、軍事史の「兵站」はプロジェクトのリソース計画の、料理の「ミザンプラス（段取り）」は朝の仕事設計の教科書として読める。</p>
+
+      <p>これは第8章のテコ（比較と交互練習）を読書に組み込む方法だ。同業の本は近転移しか提供しないが、異分野の本は毎ページが遠転移の素振りになる。読みながら「うちの業界で言えば何か？」と余白にメモする ── そのメモの数が、その読書の転移収率である。</p>
+
+      <div class="key-concept">
+        <strong>訓練プログラム一覧（すべて道具不要）</strong><br>
+        毎日 ── 「なぜ」×3で上る／「たとえば」で下りる／「これは何の事例か」ゲーム<br>
+        機会ごと ── 説明はたとえ話で。相手の領域の素材で写像する<br>
+        毎週 ── 抽象化ノート三行（具体→構造→転用先）<br>
+        毎月 ── 異分野の本を「自分の仕事の本」として一冊読む
+      </div>
+
+      <h3 class="h3--thought">上達の手応えはどこに現れるか</h3>
+
+      <p>この訓練の成果は、テストの点のような形では現れない。現れるのは、次のような変化だ。初めての状況で「初めて」という感じが減り、「あのパターンの変種だ」と見える頻度が増える。異業種の人との会話が「違う世界の話」ではなく「同じ構造の別事例」として面白くなる。会議で議論の高度のずれが見え、合わせられるようになる。読書のメモが、要約ではなく転用アイデアで埋まるようになる。</p>
+
+      <p>そして最終的には、知識の増え方そのものが変わる。一つの経験が一つの教訓で終わらず、構造として保存され、別の文脈で複利的に再利用される。<strong>「一を聞いて十を知る」とは、十倍速く学ぶことではなく、一つの学びを十カ所で使える形に加工する技術だった</strong> ── プロローグの問いに、本書はこう答えて閉じることになる。</p>
+    </div>
+
+    <figure class="figure">
+      <div class="figure__inner">
+        <span class="figure__label">Figure IX ── The Training Cycle</span>
+        <h4 class="figure__title">鍛錬のサイクル ── 経験を複利化する六工程</h4>
+        <svg class="figure__svg" viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+          <!-- Circular cycle of 6 steps -->
+          <!-- center -->
+          <circle cx="400" cy="190" r="58" fill="#1c1917"/>
+          <text x="400" y="184" text-anchor="middle" font-size="12" fill="#faf7f2" font-weight="600">経験の</text>
+          <text x="400" y="202" text-anchor="middle" font-size="12" fill="#faf7f2" font-weight="600">複利化</text>
+
+          <!-- Step nodes -->
+          <!-- 1: top -->
+          <rect x="330" y="22" width="140" height="48" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="400" y="42" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">① 観察</text>
+          <text x="400" y="58" text-anchor="middle" font-size="8.5" fill="#6b6359">出来事を固有名詞と数字で見る</text>
+
+          <!-- 2: upper right -->
+          <rect x="580" y="90" width="160" height="48" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="660" y="110" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">② 上り（なぜ×3）</text>
+          <text x="660" y="126" text-anchor="middle" font-size="8.5" fill="#6b6359">関係だけ残るまで掘る</text>
+
+          <!-- 3: lower right -->
+          <rect x="580" y="240" width="160" height="48" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="660" y="260" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">③ 名付け</text>
+          <text x="660" y="276" text-anchor="middle" font-size="8.5" fill="#6b6359">自分の言葉で構造に命名する</text>
+
+          <!-- 4: bottom -->
+          <rect x="330" y="310" width="140" height="48" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="400" y="330" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">④ 転用仮説</text>
+          <text x="400" y="346" text-anchor="middle" font-size="8.5" fill="#6b6359">「来週のどこで使えるか」</text>
+
+          <!-- 5: lower left -->
+          <rect x="60" y="240" width="160" height="48" rx="2" fill="#f5f1ea" stroke="#8b6914" stroke-width="1"/>
+          <text x="140" y="260" text-anchor="middle" font-size="10" fill="#8b6914" font-weight="600">⑤ 下り（適用）</text>
+          <text x="140" y="276" text-anchor="middle" font-size="8.5" fill="#6b6359">固有名詞と数字に戻して実行</text>
+
+          <!-- 6: upper left -->
+          <rect x="60" y="90" width="160" height="48" rx="2" fill="#f5f1ea" stroke="#a01c1c" stroke-width="1"/>
+          <text x="140" y="110" text-anchor="middle" font-size="10" fill="#a01c1c" font-weight="600">⑥ 検証・更新</text>
+          <text x="140" y="126" text-anchor="middle" font-size="8.5" fill="#6b6359">外れた地点で原理を修正する</text>
+
+          <!-- Cycle arrows -->
+          <path d="M 475 56 Q 590 60 632 86" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="636,89 622,86 628,76" fill="#6b6359"/>
+          <path d="M 665 142 Q 672 190 665 236" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="664,240 658,227 670,228" fill="#6b6359"/>
+          <path d="M 632 292 Q 590 320 475 334" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="470,334 482,327 483,339" fill="#6b6359"/>
+          <path d="M 325 334 Q 210 320 168 292" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="164,289 178,291 171,301" fill="#6b6359"/>
+          <path d="M 135 236 Q 128 190 135 142" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="136,138 142,151 130,150" fill="#6b6359"/>
+          <path d="M 168 86 Q 210 60 325 56" fill="none" stroke="#6b6359" stroke-width="1.2"/>
+          <polygon points="330,56 318,63 317,51" fill="#6b6359"/>
+        </svg>
+        <p class="figure__caption">週次の抽象化ノートは①〜④を、日常の実践は⑤〜⑥を回す。一周ごとに「自分の原理」が一つ貯まり、原理は次の周回の観察を鋭くする。</p>
+      </div>
+    </figure>
+
+    <div class="summary">
+      <h4>第9章のまとめ</h4>
+      <ul>
+        <li>毎日の往復筋トレ：「なぜ」×3で上り、「たとえば」で下りる癖を付ける</li>
+        <li>「これは何の事例か」ゲームで、経験を構造ラベル付きで符号化する</li>
+        <li>たとえ話作りは構造抽出・検索・写像の総合演習。週次ノートで自分の原理を蓄積する</li>
+        <li>異分野の本を「自分の仕事の本」として読み、遠転移の素振りを日常化する</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch8">前章：転移の技術</a>
+      <a class="chapter-nav__next" href="#epilogue">エピローグ ──&thinsp;具体と抽象を自由に行き来する人へ</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     エピローグ
+     ============================================ -->
+<section class="chapter" id="epilogue">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">EPILOGUE</span>
+      <h2 class="chapter__title">具体と抽象を自由に行き来する人へ</h2>
+      <div class="chapter__rule"></div>
+      <p class="chapter__intro">抽象化は冷たい知的操作に見えて、その正体は、世界と他者への関心の形である</p>
+    </header>
+
+    <div class="prose">
+      <p>九つの章を通じて、本書は一つの技術を分解してきた。抽象化とは目的に照らして捨てる操作であること（第1章）。価値は高さではなく往復にあること（第2章）。写し取るべきは属性ではなく関係であること（第3章）。応用のボトルネックは知識の所有ではなく検索であること（第4章）。モデルは間違っているからこそ使えること（第5章）。名前のない構造は運べないこと（第6章）。一般化は四つの型で壊れること（第7章）。転移は自然には起きないが、起こし方は分かっていること（第8章）。そして、そのすべてが日常の小さな反復で鍛えられること（第9章）。</p>
+
+      <p>これらを貫く一本の糸を、最後にもう一度だけ抽象化しておきたい。<strong>抽象化の技術とは、一回しか起きないことを、何度でも使える形に加工する技術である。</strong>経験は一回しか起きない。出会う人も、読む本も、失敗も成功も、厳密にはすべて一回きりだ。その一回性のなかから、繰り返す部分 ── 構造 ── を取り出して保存する者だけが、有限の経験から無限に学び続けられる。</p>
+
+      <div class="sidenote sidenote--quote">
+        "The intellect has a single advance: from particulars to generals."（知性の前進はただ一つ、個別から一般へ、である）<br>
+        ── 古典的格言（アリストテレス『分析論後書』の伝統より）
+      </div>
+
+      <p>そして、この技術は知的生産の道具にとどまらない。たとえ話を作る訓練（第9章）が示すように、抽象化は<em>他者の世界に橋を架ける技術</em>でもある。相手の文脈で同じ構造を探すという操作は、相手の世界を知ろうとする関心なしには実行できない。異分野から学ぶ姿勢は、自分の領域の外にも知恵があるという敬意の表明だ。人物モデルを仮説として保持する規律（第5章）は、他者を断定から守る公正さの実践である。具体と抽象を行き来する人は、必然的に、自分と違うものから学べる人になる。</p>
+
+      <p>AIがあらゆる具体的知識を即座に差し出す時代に、人間に残る仕事は何かという問いが繰り返されている。本書の答えはこうだ。状況を一段上で言い直して問いを設計すること。遠い領域から構造を借りてくる跳躍を企てること。借りた構造がこの文脈で成立するかを、現場の手触りで検証すること。── つまり、はしごの上り下りそのものだ。AIは優れた検索者であり計算者だが、<em>何を問うべきかは、問いの形に世界を切り取る抽象化から生まれる</em>。この技術を持つ人にとって、AIは強力な相棒になる。持たない人にとっては、正しそうな答えを量産する霧になる。</p>
+
+      <p>最後に、本書の使い方を一つ提案したい。本書を読み終えたいま、第9章の訓練を始める前に、一度だけ次の問いに答えてみてほしい。</p>
+
+      <ul>
+        <li>この一ヶ月で、あなたが経験した最も印象的な出来事は何か（具体）</li>
+        <li>固有名詞を消すと、それは何と何の、どういう関係の話だったか（構造）</li>
+        <li>その構造に、あなたなら何と名前を付けるか（名付け）</li>
+        <li>同じ構造は、来月のどこに現れそうか。現れたら、どうするか（転用）</li>
+      </ul>
+
+      <p>四つに答えられたなら、あなたはもう本書の全工程を一周したことになる。あとは周回を重ねるだけだ。一を聞いて十を知る人は、特別な頭脳の持ち主ではなかった。一を、十カ所で使える形に加工する習慣の持ち主だった。その習慣は、今日のあなたの一回目から始まる。</p>
+
+      <p>具体の地面に足をつけ、抽象の空へ何度でも登り、また降りてくること。その往復の自由こそが、本書があなたに手渡したかったすべてである。</p>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#ch9">前章：抽象化の鍛錬</a>
+      <a class="chapter-nav__next" href="#bibliography">参考文献</a>
+    </nav>
+  </div>
+</section>
+
+<!-- ============================================
+     参考文献
+     ============================================ -->
+<section class="chapter" id="bibliography">
+  <div class="chapter__inner">
+    <header class="chapter__header">
+      <span class="chapter__number">BIBLIOGRAPHY</span>
+      <h2 class="chapter__title">参考文献一覧</h2>
+      <div class="chapter__rule"></div>
+    </header>
+
+    <div class="bibliography">
+      <h4>具体と抽象・思考法</h4>
+      <ul>
+        <li>細谷功『具体と抽象 ── 世界が変わって見える知性のしくみ』── dZERO, 2014年</li>
+        <li>細谷功『メタ思考トレーニング ── 発想力が飛躍的にアップする34問』── PHPビジネス新書, 2016年</li>
+        <li>S.I.ハヤカワ（著）、大久保忠利（訳）『思考と行動における言語』── 岩波書店, 1985年</li>
+        <li>ジョージ・ポリア（著）、柿内賢信（訳）『いかにして問題をとくか』── 丸善, 1954年</li>
+        <li>安宅和人『イシューからはじめよ ── 知的生産の「シンプルな本質」』── 英治出版, 2010年</li>
+      </ul>
+
+      <h4>アナロジーと構造写像（認知科学）</h4>
+      <ul>
+        <li>Dedre Gentner「Structure-Mapping: A Theoretical Framework for Analogy」── Cognitive Science 7, 1983年</li>
+        <li>Mary L. Gick &amp; Keith J. Holyoak「Analogical Problem Solving」── Cognitive Psychology 12, 1980年</li>
+        <li>Mary L. Gick &amp; Keith J. Holyoak「Schema Induction and Analogical Transfer」── Cognitive Psychology 15, 1983年</li>
+        <li>Douglas Hofstadter &amp; Emmanuel Sander「Surfaces and Essences: Analogy as the Fuel and Fire of Thinking」── Basic Books, 2013年</li>
+        <li>Karl Duncker「On Problem-Solving」── Psychological Monographs 58, 1945年</li>
+      </ul>
+
+      <h4>チャンキング・熟達・転移（学習科学）</h4>
+      <ul>
+        <li>George A. Miller「The Magical Number Seven, Plus or Minus Two」── Psychological Review 63, 1956年</li>
+        <li>William G. Chase &amp; Herbert A. Simon「Perception in Chess」── Cognitive Psychology 4, 1973年</li>
+        <li>Susan M. Barnett &amp; Stephen J. Ceci「When and Where Do We Apply What We Learn? A Taxonomy for Far Transfer」── Psychological Bulletin 128, 2002年</li>
+        <li>デイビッド・エプスタイン（著）、東方雅美（訳）『RANGE ── 知識の「幅」が最強の武器になる』── 日経BP, 2020年</li>
+        <li>ピーター・ブラウン他（著）、依田卓巳（訳）『使える脳の鍛え方 ── 成功する学習の科学』── NTT出版, 2016年</li>
+      </ul>
+
+      <h4>モデル思考・システム思考</h4>
+      <ul>
+        <li>ドネラ・H・メドウズ（著）、枝廣淳子（訳）『世界はシステムで動く』── 英治出版, 2015年</li>
+        <li>Peter Bevelin「Seeking Wisdom: From Darwin to Munger」── PCA Publications, 2007年</li>
+        <li>Charles T. Munger「Poor Charlie's Almanack」── Walsworth Publishing, 2005年</li>
+        <li>George E. P. Box「Science and Statistics」── Journal of the American Statistical Association 71, 1976年</li>
+        <li>Alfred Korzybski「Science and Sanity」── Institute of General Semantics, 1933年</li>
+        <li>スコット・E・ペイジ（著）、椿広計他（訳）『多モデル思考』── 森北出版, 2020年</li>
+      </ul>
+
+      <h4>抽象化の failure modes・ソフトウェア工学</h4>
+      <ul>
+        <li>Joel Spolsky「The Law of Leaky Abstractions」── joelonsoftware.com, 2002年</li>
+        <li>Erich Gamma他『オブジェクト指向における再利用のためのデザインパターン』── ソフトバンククリエイティブ, 1999年</li>
+        <li>ダニエル・カーネマン（著）、村井章子（訳）『ファスト&amp;スロー』── 早川書房, 2014年</li>
+        <li>ジョーダン・エレンバーグ（著）、松浦俊輔（訳）『データを正しく見るための数学的思考』── 日経BP, 2015年（ウォルドの爆撃機の逸話を含む）</li>
+      </ul>
+    </div>
+
+    <nav class="chapter-nav">
+      <a class="chapter-nav__prev" href="#epilogue">エピローグ</a>
+      <span></span>
+    </nav>
+  </div>
+</section>
+
+<script src="./textbook.js" defer></script>
+</body>
+</html>
